@@ -67,7 +67,7 @@ export const FileList = () => {
     const filePath = dirPath
       ? `${dirPath}/${fileName}?action=open`
       : `${fileName}?action=open`;
-    const url = `http://localhost:80/files/${dirPath}/${filePath}`;
+    const url = `http://localhost:80/files/${filePath}`;
 
     try {
       window.open(url, "_blank");
@@ -80,7 +80,7 @@ export const FileList = () => {
     const filePath = dirPath
       ? `${dirPath}/${fileName}?action=download`
       : `${fileName}?action=download`;
-    const url = `http://localhost:80/files/${dirPath}/${filePath}`;
+    const url = `http://localhost:80/files/${filePath}`;
     const a = document.createElement("a");
     a.href = url;
     a.download = fileName;
@@ -93,7 +93,7 @@ export const FileList = () => {
     const filePath = dirPath
       ? `${dirPath}/${oldFilename}`
       : `${oldFilename}`;
-    const url = `http://localhost:80/files/${dirPath}/${filePath}`;
+    const url = `http://localhost:80/files/${filePath}`;
 
     try {
       console.log(url);
@@ -116,7 +116,7 @@ export const FileList = () => {
     const filepath = dirPath
       ? `${dirPath}/${oldFilename}`
       : oldFilename;
-    const url = `http://localhost:80/files/${dirPath}/${filepath}`;
+    const url = `http://localhost:80/files/${filepath}`;
     // //making request
     try {
       const response = await fetch(url, {

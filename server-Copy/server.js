@@ -174,12 +174,20 @@ app.delete("/files/{*splat}", async (req, res) => {
 
 app.patch("/files/{*splat}", async (req, res) => {
   try {
-    const oldName = path.join(_dirname, "storage", req.params.filename); // use params
-    const newFileName = path.join(_dirname, "storage", req.body.fileName); // use body
+    const FullPathArray = req.params.splat;
+    console.log(FullPathArray);
+    const FiletoPath = FullPathArray.join("/");
+    console.log(FiletoPath);
+
+    console.log(req.body.fileName);
+
+    const oldName = path.join(_dirname, "storage", FiletoPath); // use params
+    console.log(oldName);
+
+    const newFileName = path.join(_dirname, "storage", req?.body?.fileName); // use body
 
     await fs.rename(oldName, newFileName);
 
-    console.log(`Renamed ${req.params.filename} -> ${req.body.fileName}`);
     res.status(200).json({ message: "File renamed successfully" });
   } catch (err) {
     console.error("Rename error:", err);
