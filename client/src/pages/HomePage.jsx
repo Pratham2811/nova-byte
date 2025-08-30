@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { UploadForm } from "@/components/UploadForm";
-import { FileList } from "@/components/FileList";
+import { FileList } from "@/components/DirectoryView";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";

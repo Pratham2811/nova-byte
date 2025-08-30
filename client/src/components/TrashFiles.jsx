@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { CornerUpLeft } from "lucide-react"; // new restore icon
 import { ConfirmPopup } from "./ComfirmUi";
 
+
 const TrashFiles = () => {
   const [trashFiles, setTrashFiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +31,7 @@ const TrashFiles = () => {
   }, []);
 
   const handleRestore = async (filename) => {
-    const url = `http://localhost:80/restore-file/${filename}`;
+    const url = `http://localhost:80/files/restore-file/${filename}`;
     try {
       const response = await fetch(url, { method: "PATCH" });
       if (!response.ok) throw new Error(`Error restoring file`);

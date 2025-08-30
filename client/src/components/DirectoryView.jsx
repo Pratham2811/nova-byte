@@ -12,20 +12,26 @@ import {
 import { useShowPopup } from "@/hooks/useShowPopup";
 import { RenameFile } from "@/components/RenameFile";
 import { ConfirmPopup } from "./ComfirmUi";
+import { useNavigate, useParams } from "react-router-dom";
 export const FileList = () => {
   const [fileList, setFileList] = useState([]);
-  const [currentPath, setCurrentPath] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { showPopup, popupMessage, show } = useShowPopup();
   const [oldFilename, setOldFilename] = useState(null);
   const [showRenameComp, setShowRenameComp] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const {"*":dirPath}=useParams()
+  console.log(dirPath);
+ 
+  const navigate=useNavigate()
+  
   const fetchFiles = async () => {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch(`http://localhost:80/files/${currentPath}`);
+      const response = await fetch(`http://localhost:80/directory/${dirPath}`);
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
 
       const data = await response.json();
@@ -33,19 +39,6 @@ export const FileList = () => {
     } catch (err) {
       console.error("Error fetching files:", err);
       setError(err.message);
-      // Fallback for demonstration
-      setFileList([
-        { name: "images", type: "folder", id: "1" },
-        {
-          name: "Lecture 4 Machine Learning (Stanford).mp4",
-          type: "video",
-          id: "2",
-        },
-        { name: "Node.js Curriculum.pdf", type: "pdf", id: "3" },
-        { name: "numbers.txt", type: "text", id: "4" },
-        { name: "My_Vacation_Photos", type: "folder", id: "5" },
-        { name: "financial_report_2024.xlsx", type: "excel", id: "6" },
-      ]);
     } finally {
       setLoading(false);
     }
@@ -53,30 +46,28 @@ export const FileList = () => {
 
   useEffect(() => {
     fetchFiles();
-  }, []);
+  }, [dirPath]);
 
   const handleFolderClick = async (folderName) => {
-   const newPath = currentPath ? `${currentPath}/${folderName}` : folderName;
-setCurrentPath(newPath);
-const url = `http://localhost:80/folder/${newPath}`;
-const response = await fetch(url);
+// ✅ push new route
 
-   const data= await response.json()
-    console.log(data);
+    const newPath = dirPath ? `${dirPath}/${folderName}` : folderName;
+    navigate(`/${newPath}`);
+
     
   };
 
   const handleGoBack = () => {
-    const pathArray = currentPath.split("/");
+    const pathArray = dirPath.split("/");
     pathArray.pop();
-    setCurrentPath(pathArray.join("/"));
+   
   };
 
   const handleOpenFile = async (fileName) => {
-    const filePath = currentPath
-      ? `${currentPath}/${fileName}?action=open`
+    const filePath = dirPath
+      ? `${dirPath}/${fileName}?action=open`
       : `${fileName}?action=open`;
-    const url = `http://localhost:80/${filePath}`;
+    const url = `http://localhost:80/files/${dirPath}/${filePath}`;
 
     try {
       window.open(url, "_blank");
@@ -86,10 +77,10 @@ const response = await fetch(url);
   };
 
   const handleDownloadFile = (fileName) => {
-    const filePath = currentPath
-      ? `${currentPath}/${fileName}?action=download`
+    const filePath = dirPath
+      ? `${dirPath}/${fileName}?action=download`
       : `${fileName}?action=download`;
-    const url = `http://localhost:80/${filePath}`;
+    const url = `http://localhost:80/files/${dirPath}/${filePath}`;
     const a = document.createElement("a");
     a.href = url;
     a.download = fileName;
@@ -99,10 +90,10 @@ const response = await fetch(url);
   };
 
   const handleDeleteFile = async (oldFilename) => {
-    const filePath = currentPath
-      ? `${currentPath}/${oldFilename}`
+    const filePath = dirPath
+      ? `${dirPath}/${oldFilename}`
       : `${oldFilename}`;
-    const url = `http://localhost:80/${filePath}`;
+    const url = `http://localhost:80/files/${dirPath}/${filePath}`;
 
     try {
       console.log(url);
@@ -122,10 +113,10 @@ const response = await fetch(url);
   };
   const handleFileSave = async (fileName) => {
     console.log("Filename from rename componenet", fileName);
-    const filepath = currentPath
-      ? `${currentPath}/${oldFilename}`
+    const filepath = dirPath
+      ? `${dirPath}/${oldFilename}`
       : oldFilename;
-    const url = `http://localhost:80/${filepath}`;
+    const url = `http://localhost:80/files/${dirPath}/${filepath}`;
     // //making request
     try {
       const response = await fetch(url, {
@@ -155,9 +146,9 @@ const response = await fetch(url);
         <div className="flex items-center gap-2 text-gray-400 text-sm">
           <span>Path:</span>
           <span className="font-medium text-gray-300">
-            /{currentPath || "Root"}
+            /{dirPath || "Root"}
           </span>
-          {currentPath && (
+          {dirPath && (
             <button
               onClick={handleGoBack}
               className="px-2 py-1 text-xs rounded-full bg-gray-700 hover:bg-gray-600 transition-colors duration-200"

@@ -6,28 +6,103 @@ const port = 80;
 import { readdir } from "fs/promises";
 import fs from "fs/promises";
 import path, { dirname, join } from "path";
-import { fileURLToPath } from "url";
-
+import { fileURLToPath, pathToFileURL } from "url";
+import cors from "cors";
 const app = express();
 
 //parsing request
 app.use(express.json());
+app.use(cors());
+
 const _filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(_filename);
+
 //enabling cors
-app.use((req, res, next) => {
-  res.set({
-    "access-control-allow-origin": "*",
-    "access-control-allow-Methods": "*",
-    "access-control-allow-Headers": "*",
-  });
-  next();
-});
+// app.use((req, res, next) => {
+//   res.set({
+//     "access-control-allow-origin": "*",
+//     "access-control-allow-Methods": "*",
+//     "access-control-allow-Headers": "*",
+//   });
+//   next();
+// });
 
 app.use("/", (error, req, res, next) => {
   console.log("Error has:", error);
 });
 
+app.post("/upload", (req, res, next) => {
+  const filename = req?.headers?.filename;
+  console.log(`./storage/${filename}`);
+
+  const writeStream = createWriteStream(`./storage/${filename}`);
+  req.on("data", (chunk) => {
+    writeStream.write(chunk);
+  });
+  console.log("post request");
+  req.on("end", () => {
+    console.log("Ended writing file ");
+    res.end("File uplaoded sucessfully");
+  });
+});
+
+//serving directory content
+app.get("/directory", async (req, res, next) => {
+  try {
+    // const {filename}=req.params;
+    // console.log(filename);
+
+    console.log("request for root diurectory");
+
+    const directoryPath = `./storage`;
+    const fileList = await readdir(directoryPath);
+    console.log(fileList);
+    const fileListWithMetaData = await Promise.all(
+      fileList.map(async (file) => {
+        const filePpath = path.join(directoryPath, file);
+        const fileStat = await fs.stat(filePpath);
+        return {
+          name: file,
+          type: fileStat.isDirectory() ? "folder" : "file",
+          size: fileStat.size,
+        };
+      })
+    );
+    // console.log(fileListWithMetaData);
+    res.json(fileListWithMetaData);
+  } catch (error) {
+    console.log("server Error", error);
+  }
+});
+
+// Nested directories (any depth)
+app.get("/directory/{*splat}", async (req, res) => {
+  try {
+    const filename = req.params.splat;
+    const direPath = filename.join("/");
+    console.log(direPath);
+
+    const directoryPath = path.join(_dirname, "storage", direPath);
+    const fileList = await fs.readdir(directoryPath);
+
+    const fileListWithMetaData = await Promise.all(
+      fileList.map(async (file) => {
+        const filePath = path.join(directoryPath, file);
+        const fileStat = await fs.stat(filePath);
+        return {
+          name: file,
+          type: fileStat.isDirectory() ? "folder" : "file",
+          size: fileStat.size,
+        };
+      })
+    );
+
+    res.json(fileListWithMetaData);
+  } catch (error) {
+    console.error("server Error", error);
+    res.status(500).json({ message: "Error reading nested directory" });
+  }
+});
 //serviing trash folder
 app.get("/trash", async (req, res, next) => {
   try {
@@ -54,31 +129,34 @@ app.get("/trash", async (req, res, next) => {
 });
 
 //serving file
-
-app.get("/:filename", (req, res) => {
+app.get("/files/{*splat}", (req, res) => {
   const url = decodeURIComponent(req.url);
-  console.log(url);
-  const filename = req.params.filename;
+  const FullPathArray = req.params.splat;
+  console.log(FullPathArray);
+  const FiletoPath = FullPathArray.join("/");
 
-  const filePath = path.join(_dirname, "storage", filename);
-  console.log(filePath);
-  console.log(req.query.action);
+  const filePath = path.join(_dirname, "storage", FiletoPath);
+
   res.setHeader("content-Disposition", "inline");
   if (req.query.action === "download") {
     res.setHeader("content-Disposition", "attachment");
     console.log("sending file");
     res.sendFile(filePath);
   }
-
   res.sendFile(filePath);
 });
-//move file to trash
-app.delete("/:filename", async (req, res) => {
-  const { filename } = req.params;
-  const sourcePath = path.join(_dirname, "storage", filename); // old folder
-  const destPath = path.join(_dirname, "trash", filename);
 
-  const filePath = path.join(_dirname, "storage", filename);
+//move file to trash
+app.delete("/files/{*splat}", async (req, res) => {
+  const FullPathArray = req.params.splat;
+  const PathtoFile = FullPathArray.join("/");
+  console.log(PathtoFile);
+  const size = FullPathArray.length;
+  const filename = FullPathArray[size - 1];
+  console.log(filename);
+
+  const sourcePath = path.join(_dirname, "storage", PathtoFile); // old folder
+  const destPath = path.join(_dirname, "trash", filename);
 
   try {
     await fs.rename(sourcePath, destPath);
@@ -94,22 +172,7 @@ app.delete("/:filename", async (req, res) => {
   }
 });
 
-app.post("/upload", (req, res, next) => {
-  const filename = req?.headers?.filename;
-  console.log(`./storage/${filename}`);
-
-  const writeStream = createWriteStream(`./storage/${filename}`);
-  req.on("data", (chunk) => {
-    writeStream.write(chunk);
-  });
-  console.log("post request");
-  req.on("end", () => {
-    console.log("Ended writing file ");
-    res.end("File uplaoded sucessfully");
-  });
-
-});
-app.patch("/:filename", async (req, res) => {
+app.patch("/files/{*splat}", async (req, res) => {
   try {
     const oldName = path.join(_dirname, "storage", req.params.filename); // use params
     const newFileName = path.join(_dirname, "storage", req.body.fileName); // use body
@@ -125,7 +188,7 @@ app.patch("/:filename", async (req, res) => {
 });
 
 //restoring
-app.patch("/restore-file/:filename", async (req, res, next) => {
+app.patch("/files/restore-file/{*splat}", async (req, res, next) => {
   console.log("request came");
   const { filename } = req.params;
 
@@ -137,57 +200,6 @@ app.patch("/restore-file/:filename", async (req, res, next) => {
     res.send("file restored sucessfully");
   } catch (err) {
     res.status(500).send("Error Restoring file due to wrong path");
-  }
-});
-
-//serving directory content
-app.get("/", async (req, res, next) => {
-  try {
-    const directoryPath = `./storage/${req.url || ""}`;
-    const fileList = await readdir(directoryPath);
-    console.log(fileList);
-    const fileListWithMetaData = await Promise.all(
-      fileList.map(async (file) => {
-        const filePpath = path.join(directoryPath, file);
-        const fileStat = await fs.stat(filePpath);
-        return {
-          name: file,
-          type: fileStat.isDirectory() ? "folder" : "file",
-          size: fileStat.size,
-        };
-      })
-    );
-    // console.log(fileListWithMetaData);
-    res.json(fileListWithMetaData);
-  } catch (error) {
-    console.log("server Error", error);
-  }
-});
-app.get("/folder/:foldername", async (req, res, next) => {
-  try {
-    console.log("request url", req.url);
-
-    
-    const directoryPath = `./storage/${req.url || ""}`;
-    console.log(directoryPath);
-    
-    const fileList = await readdir(directoryPath);
-    console.log(fileList);
-    const fileListWithMetaData = await Promise.all(
-      fileList.map(async (file) => {
-        const filePpath = path.join(directoryPath, file);
-        const fileStat = await fs.stat(filePpath);
-        return {
-          name: file,
-          type: fileStat.isDirectory() ? "folder" : "file",
-          size: fileStat.size,
-        };
-      })
-    );
-    // console.log(fileListWithMetaData);
-    res.json(fileListWithMetaData);
-  } catch (error) {
-    console.log("server Error", error);
   }
 });
 
