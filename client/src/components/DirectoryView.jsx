@@ -116,7 +116,7 @@ export const FileList = () => {
     const filepath = dirPath
       ? `${dirPath}/${oldFilename}`
       : oldFilename;
-    const url = `http://localhost:80/files/${filepath}`;
+    const url = `http://localhost:80/files/rename/${filepath}`;
     // //making request
     try {
       const response = await fetch(url, {

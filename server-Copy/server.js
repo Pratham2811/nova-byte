@@ -27,9 +27,11 @@ const _dirname = dirname(_filename);
 //   next();
 // });
 
-app.use("/", (error, req, res, next) => {
-  console.log("Error has:", error);
+app.use((err, req, res, next) => {
+  console.error("Error:", err.stack);
+  res.status(500).json({ error: "Internal Server Error" });
 });
+
 
 app.post("/upload", (req, res, next) => {
   const filename = req?.headers?.filename;
@@ -172,19 +174,27 @@ app.delete("/files/{*splat}", async (req, res) => {
   }
 });
 
-app.patch("/files/{*splat}", async (req, res) => {
+app.patch("/files/rename/{*splat}", async (req, res) => {
   try {
     const FullPathArray = req.params.splat;
-    console.log(FullPathArray);
-    const FiletoPath = FullPathArray.join("/");
-    console.log(FiletoPath);
 
-    console.log(req.body.fileName);
+    const FiletoPath = FullPathArray.join("/");
 
     const oldName = path.join(_dirname, "storage", FiletoPath); // use params
-    console.log(oldName);
+    console.log("Old File path: ", oldName);
+    const size = FullPathArray.length;
+    const NewPath = FullPathArray?.slice(0, size - 1);
+    const WholeNewPath = NewPath?.join("/");
+    console.log(WholeNewPath);
 
-    const newFileName = path.join(_dirname, "storage", req?.body?.fileName); // use body
+    const newFileName = path.join(
+      _dirname,
+      "storage",
+
+      WholeNewPath,
+      req.body.fileName
+    ); // use body
+    console.log("New File Wholw Path:", newFileName);
 
     await fs.rename(oldName, newFileName);
 
@@ -198,17 +208,19 @@ app.patch("/files/{*splat}", async (req, res) => {
 //restoring
 app.patch("/files/restore-file/{*splat}", async (req, res, next) => {
   console.log("request came");
-  const { filename } = req.params;
+console.log(req.params.splat);
+  res.send("file restored sucessfully");
 
-  const sourcePath = `./trash/${filename}`;
-  const destPath = `./storage/${filename}`;
-  console.log(sourcePath);
-  try {
-    await rename(sourcePath, destPath);
-    res.send("file restored sucessfully");
-  } catch (err) {
-    res.status(500).send("Error Restoring file due to wrong path");
-  }
+
+  // const sourcePath = `./trash/${filename}`;
+  // const destPath = `./storage/${filename}`;
+  // console.log(sourcePath);
+  // try {
+  //   await rename(sourcePath, destPath);
+  //   res.send("file restored sucessfully");
+  // } catch (err) {
+  //   res.status(500).send("Error Restoring file due to wrong path");
+  // }
 });
 
 app.listen(port, () => {
