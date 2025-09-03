@@ -13,6 +13,7 @@ import { useShowPopup } from "@/hooks/useShowPopup";
 import { RenameFile } from "@/components/RenameFile";
 import { ConfirmPopup } from "./ComfirmUi";
 import { useNavigate, useParams } from "react-router-dom";
+import CreateFolder from "./CreateFolder";
 export const FileList = () => {
   const [fileList, setFileList] = useState([]);
 
@@ -142,6 +143,9 @@ export const FileList = () => {
           <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-400">
             File Explorer
           </h2>
+        </div>
+        <div>
+          <CreateFolder directoryPath={dirPath}/>
         </div>
         <div className="flex items-center gap-2 text-gray-400 text-sm">
           <span>Path:</span>

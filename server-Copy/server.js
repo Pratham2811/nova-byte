@@ -223,6 +223,17 @@ console.log(req.params.splat);
   // }
 });
 
+//creating directory
+
+app.post("/create-directory",(req,res,next)=>{
+  const directorArray=req.body.name
+  const directoryPath=directorArray.join("/")
+  const Finaldirpath=path.join(_dirname,"storage",Finaldirpath)
+  console.log();
+  
+  console.log(req.body);
+  
+})
 app.listen(port, () => {
   console.log(`server is listening on ${port}`);
 });

@@ -98,7 +98,7 @@ export const HomePage = () => {
               <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
             </svg>
 
-            <span className="font-semibold">Files</span>
+            <span className="font-semibold"></span>
           </button>
           <button
             className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
@@ -129,7 +129,7 @@ export const HomePage = () => {
               <polyline points="17 8 12 3 7 8" />
               <line x1="12" x2="12" y1="3" y2="15" />
             </svg>
-            <span className="font-semibold">Uplaod</span>
+            <span className="font-semibold"></span>
           </button>
           <button
             className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
@@ -160,7 +160,7 @@ export const HomePage = () => {
               <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
               <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
             </svg>
-            <span className="font-semibold">Trash</span>
+            <span className="font-semibold"></span>
           </button>
         </nav>
       </aside>
