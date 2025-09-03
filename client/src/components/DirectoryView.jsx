@@ -145,7 +145,7 @@ export const FileList = () => {
           </h2>
         </div>
         <div>
-          <CreateFolder directoryPath={dirPath}/>
+          <CreateFolder directoryPath={dirPath} fetchFiles={fetchFiles}/>
         </div>
         <div className="flex items-center gap-2 text-gray-400 text-sm">
           <span>Path:</span>

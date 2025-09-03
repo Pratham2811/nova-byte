@@ -225,13 +225,23 @@ console.log(req.params.splat);
 
 //creating directory
 
-app.post("/create-directory",(req,res,next)=>{
+app.post("/create-directory",async (req,res,next)=>{
   const directorArray=req.body.name
-  const directoryPath=directorArray.join("/")
-  const Finaldirpath=path.join(_dirname,"storage",Finaldirpath)
-  console.log();
+  console.log(directorArray);
   
-  console.log(req.body);
+  
+  const Finaldirpath=path.join(_dirname,"storage",directorArray)
+  console.log("Final Path:",Finaldirpath);
+  
+  
+  try{
+    await fs.mkdir(Finaldirpath,{recursive:true})
+    res.status(200).send("File Created sucessFully")
+  }catch(err){
+     console.log("Error Creating directory",err);
+     res.status(500).send(err.message);
+     
+  }
   
 })
 app.listen(port, () => {

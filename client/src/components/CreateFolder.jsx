@@ -1,16 +1,13 @@
 import React, { useState } from "react";
 
-const CreateFolder = ({ directoryPath }) => {
+const CreateFolder = ({ directoryPath ,fetchFiles}) => {
   const [folderName, setFolderName] = useState("");
   const [showPopup, setShowPopup] = useState(false);
-  const [message, setMessage] = useState("");
+
 console.log("directoryu path: ",directoryPath);
 
   const handleDirectory = async () => {
-    if (!folderName.trim()) {
-      setMessage("⚠️ Folder name cannot be empty");
-      return;
-    }
+  
 
     try {
       const response = await fetch("http://localhost:80/create-directory", {
@@ -21,13 +18,15 @@ console.log("directoryu path: ",directoryPath);
 
       if (!response.ok) throw new Error("Error creating directory");
 
-      const data = await response.json();
-      setMessage(`✅ ${data.message}`);
+      const data = await response.text();
+      console.log(data);
+      
       setFolderName("");
       setShowPopup(false);
+      fetchFiles();
     } catch (err) {
       console.error(err);
-      setMessage("❌ Failed to create directory");
+     
     }
   };
 
@@ -84,10 +83,7 @@ console.log("directoryu path: ",directoryPath);
         </div>
       )}
 
-      {/* Status Message */}
-      {message && (
-        <p className="mt-4 text-sm text-white">{message}</p>
-      )}
+    
     </div>
   );
 };
