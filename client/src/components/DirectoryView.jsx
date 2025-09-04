@@ -196,13 +196,36 @@ export const FileList = () => {
             </div>
 
             <div className="flex flex-wrap gap-12">
-              {item.type === "folder" ? (
-                <button
+              {item.type === "folder" ? (<div className="flex flex-wrap gap-12"> 
+
+                        <button
                   onClick={() => handleFolderClick(item.name)}
                   className="flex items-center gap-1 bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors duration-200"
                 >
                   <ExternalLink size={14} /> Open
                 </button>
+                <button
+                    onClick={() => {
+                      setShowDeletePopup(true);
+                      setOldFilename(item.name);
+                    }}
+                    className="p-2 rounded-full border border-transparent hover:border-red-400 transition-colors duration-200 cursor-pointer"
+                  >
+                    <Trash size={20} className="text-red-400" />
+                  </button>
+                   <button
+                    onClick={() => {
+                      setShowRenameComp(true);
+                      setOldFilename(item.name);
+                    }}
+                    className="p-2 rounded-full border border-transparent hover:border-gray-400 transition-colors duration-200 cursor-pointer"
+                  >
+                    <Edit size={20} className="text-gray-400" />
+                  </button>
+
+              </div>
+              
+                
               ) : (
                 <>
                   <button
