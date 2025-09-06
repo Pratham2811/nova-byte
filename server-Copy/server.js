@@ -14,24 +14,32 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const _filename = fileURLToPath(import.meta.url);
-const _dirname = dirname(_filename);
+const absolutePathStorage = import.meta.dirname + "/storage/";
+const absolutePathTrash=import.meta.dirname+"/trash/"
+const PathJoiner = (req) => {
+  // console.log(req.params.any);
 
-//enabling cors
-// app.use((req, res, next) => {
-//   res.set({
-//     "access-control-allow-origin": "*",
-//     "access-control-allow-Methods": "*",
-//     "access-control-allow-Headers": "*",
-//   });
-//   next();
-// });
+  const fixedpath = path.join(
+    "/",
+    req.params.any ? req.params.any.join("/") : ""
+  );
 
+  return path.join(absolutePathStorage + fixedpath);
+};
+const PathJoinertrash = (req) => {
+  // console.log(req.params.any);
+
+  const fixedpath = path.join(
+    "/",
+    req.params.any ? req.params.any.join("/") : ""
+  );
+
+  return path.join(absolutePathTrash + fixedpath);
+};
 app.use((err, req, res, next) => {
   console.error("Error:", err.stack);
   res.status(500).json({ error: "Internal Server Error" });
 });
-
 
 app.post("/upload", (req, res, next) => {
   const filename = req?.headers?.filename;
@@ -48,48 +56,15 @@ app.post("/upload", (req, res, next) => {
   });
 });
 
-//serving directory content
-app.get("/directory", async (req, res, next) => {
+app.get("/directory/{*any}", async (req, res) => {
   try {
-    // const {filename}=req.params;
-    // console.log(filename);
+    const Finalpath = PathJoiner(req);
 
-    console.log("request for root diurectory");
-
-    const directoryPath = `./storage`;
-    const fileList = await readdir(directoryPath);
-    console.log(fileList);
-    const fileListWithMetaData = await Promise.all(
-      fileList.map(async (file) => {
-        const filePpath = path.join(directoryPath, file);
-        const fileStat = await fs.stat(filePpath);
-        return {
-          name: file,
-          type: fileStat.isDirectory() ? "folder" : "file",
-          size: fileStat.size,
-        };
-      })
-    );
-    // console.log(fileListWithMetaData);
-    res.json(fileListWithMetaData);
-  } catch (error) {
-    console.log("server Error", error);
-  }
-});
-
-// Nested directories (any depth)
-app.get("/directory/{*splat}", async (req, res) => {
-  try {
-    const filename = req.params.splat;
-    const direPath = filename.join("/");
-    console.log(direPath);
-
-    const directoryPath = path.join(_dirname, "storage", direPath);
-    const fileList = await fs.readdir(directoryPath);
+    const fileList = await fs.readdir(Finalpath);
 
     const fileListWithMetaData = await Promise.all(
       fileList.map(async (file) => {
-        const filePath = path.join(directoryPath, file);
+        const filePath = path.join(Finalpath, file);
         const fileStat = await fs.stat(filePath);
         return {
           name: file,
@@ -110,7 +85,7 @@ app.get("/trash", async (req, res, next) => {
   try {
     const directoryPath = "trash";
     const fileList = await readdir("trash");
-    console.log(fileList);
+ 
     const fileListWithMetaData = await Promise.all(
       fileList.map(async (file) => {
         const filePpath = path.join(directoryPath, file);
@@ -131,34 +106,29 @@ app.get("/trash", async (req, res, next) => {
 });
 
 //serving file
-app.get("/files/{*splat}", (req, res) => {
-  const url = decodeURIComponent(req.url);
-  const FullPathArray = req.params.splat;
-  console.log(FullPathArray);
-  const FiletoPath = FullPathArray.join("/");
-
-  const filePath = path.join(_dirname, "storage", FiletoPath);
+app.get("/files/{*any}", (req, res) => {
+  const FilePath = PathJoiner(req);
 
   res.setHeader("content-Disposition", "inline");
   if (req.query.action === "download") {
     res.setHeader("content-Disposition", "attachment");
     console.log("sending file");
-    res.sendFile(filePath);
+    res.sendFile(FilePath);
   }
-  res.sendFile(filePath);
+  res.sendFile(FilePath);
 });
 
 //move file to trash
-app.delete("/files/{*splat}", async (req, res) => {
-  const FullPathArray = req.params.splat;
-  const PathtoFile = FullPathArray.join("/");
-  console.log(PathtoFile);
-  const size = FullPathArray.length;
-  const filename = FullPathArray[size - 1];
-  console.log(filename);
+app.delete("/files/{*any}", async (req, res) => {
+  const FilePath = PathJoiner(req);
+  console.log("Path where request come: ", FilePath);
 
-  const sourcePath = path.join(_dirname, "storage", PathtoFile); // old folder
-  const destPath = path.join(_dirname, "trash", filename);
+  const filename = path.basename(FilePath);
+  console.log("filename: ", filename);
+
+  const sourcePath = FilePath; // old folder
+  const destPath = path.join("trash", filename);
+  console.log("destination Path: ", destPath);
 
   try {
     await fs.rename(sourcePath, destPath);
@@ -170,80 +140,65 @@ app.delete("/files/{*splat}", async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({ message: "File Not Found" });
-    console.log("Not file found to delete");
+    console.log("Not file found to delete", err.message);
   }
 });
 
-app.patch("/files/rename/{*splat}", async (req, res) => {
+app.patch("/files/rename/{*any}", async (req, res) => {
+  const FilePath = PathJoiner(req);
+  console.log("File path from pathjoiner", FilePath);
+  const { oldFilename, newFilename } = req?.body;
+
+  const sourcePath = FilePath + oldFilename;
+  const destinationpath = FilePath + newFilename;
+
   try {
-    const FullPathArray = req.params.splat;
-
-    const FiletoPath = FullPathArray.join("/");
-
-    const oldName = path.join(_dirname, "storage", FiletoPath); // use params
-    console.log("Old File path: ", oldName);
-    const size = FullPathArray.length;
-    const NewPath = FullPathArray?.slice(0, size - 1);
-    const WholeNewPath = NewPath?.join("/");
-    console.log(WholeNewPath);
-
-    const newFileName = path.join(
-      _dirname,
-      "storage",
-
-      WholeNewPath,
-      req.body.fileName
-    ); // use body
-    console.log("New File Wholw Path:", newFileName);
-
-    await fs.rename(oldName, newFileName);
-
+    await fs.rename(sourcePath, destinationpath);
     res.status(200).json({ message: "File renamed successfully" });
   } catch (err) {
     console.error("Rename error:", err);
-    res.status(400).json({ message: "File not found or rename failed" });
+    res.status(400).j;
+    son({ message: "File not found or rename failed" });
   }
 });
 
 //restoring
-app.patch("/files/restore-file/{*splat}", async (req, res, next) => {
-  console.log("request came");
-console.log(req.params.splat);
-  res.send("file restored sucessfully");
+app.patch("/files/restore-file/{*any}", async (req, res, next) => {
+ const SourcePath=PathJoinertrash(req);
+ const Destinationpath=PathJoiner(req);
+ console.log(SourcePath);
+  console.log(Destinationpath);
+   try{
+    await rename(SourcePath,Destinationpath);
+    res.status(200).send("File restored to storage Sucessfully")
+   }catch(err){
+    res.status(400).send("Error while restroing file")
+    console.log("error while restoring file: ",err.message);
+    
+    
+   }
+ 
 
-
-  // const sourcePath = `./trash/${filename}`;
-  // const destPath = `./storage/${filename}`;
-  // console.log(sourcePath);
-  // try {
-  //   await rename(sourcePath, destPath);
-  //   res.send("file restored sucessfully");
-  // } catch (err) {
-  //   res.status(500).send("Error Restoring file due to wrong path");
-  // }
+ 
 });
 
 //creating directory
 
-app.post("/create-directory",async (req,res,next)=>{
-  const directorArray=req.body.name
+app.post("/create-directory", async (req, res, next) => {
+  const directorArray = req.body.name;
   console.log(directorArray);
-  
-  
-  const Finaldirpath=path.join(_dirname,"storage",directorArray)
-  console.log("Final Path:",Finaldirpath);
-  
-  
-  try{
-    await fs.mkdir(Finaldirpath,{recursive:true})
-    res.status(200).send("File Created sucessFully")
-  }catch(err){
-     console.log("Error Creating directory",err);
-     res.status(500).send(err.message);
-     
+
+  const Finaldirpath = path.join(_dirname, "storage", directorArray);
+  console.log("Final Path:", Finaldirpath);
+
+  try {
+    await fs.mkdir(Finaldirpath, { recursive: true });
+    res.status(200).send("File Created sucessFully");
+  } catch (err) {
+    console.log("Error Creating directory", err);
+    res.status(500).send(err.message);
   }
-  
-})
+});
 app.listen(port, () => {
   console.log(`server is listening on ${port}`);
 });

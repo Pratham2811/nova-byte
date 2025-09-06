@@ -23,7 +23,8 @@ export const FileList = () => {
   const [oldFilename, setOldFilename] = useState(null);
   const [showRenameComp, setShowRenameComp] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
-  const {"*":dirPath}=useParams()
+
+  let {"*":dirPath}=useParams()
   console.log(dirPath);
  
   const navigate=useNavigate()
@@ -59,8 +60,8 @@ export const FileList = () => {
   };
 
   const handleGoBack = () => {
-    const pathArray = dirPath.split("/");
-    pathArray.pop();
+    
+ 
    
   };
 
@@ -112,12 +113,14 @@ export const FileList = () => {
       console.error("Error deleting file:", err);
     }
   };
-  const handleFileSave = async (fileName) => {
-    console.log("Filename from rename componenet", fileName);
-    const filepath = dirPath
-      ? `${dirPath}/${oldFilename}`
-      : oldFilename;
-    const url = `http://localhost:80/files/rename/${filepath}`;
+  const handleFileSave = async (newFilename) => {
+    console.log("Filename from rename componenet", newFilename);
+    const filePath = dirPath
+      ? `${dirPath}/`
+      : "";
+      console.log("File path from Filesave",filePath);
+      
+    const url = `http://localhost:80/files/rename/${filePath}`;
     // //making request
     try {
       const response = await fetch(url, {
@@ -125,7 +128,7 @@ export const FileList = () => {
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify({ fileName }),
+        body: JSON.stringify({ oldFilename,newFilename }),
       });
       if (!response.ok) throw new Error(`Error${response.statusText}`);
       const data = await response.text();
