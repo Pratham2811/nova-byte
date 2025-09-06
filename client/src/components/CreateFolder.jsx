@@ -4,7 +4,7 @@ const CreateFolder = ({ directoryPath, fetchFiles }) => {
   const [folderName, setFolderName] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [message, setMessage] = useState("");
-  console.log("directoryu path: ", directoryPath);
+
 
   const handleDirectory = async () => {
     if (!folderName.trim()){

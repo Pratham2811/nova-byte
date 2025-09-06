@@ -3,8 +3,7 @@ import React, { useState } from "react";
 
 export const RenameFile = ({ fileName,onClose,OnRenameConfirm }) => {
   const [newFileName, setNewFileName] = useState(fileName);
- console.log(fileName);
- console.log(onClose);
+
 
  
  

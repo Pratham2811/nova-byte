@@ -118,7 +118,7 @@ export const FileList = () => {
     const filePath = dirPath
       ? `${dirPath}/`
       : "";
-      console.log("File path from Filesave",filePath);
+    
       
     const url = `http://localhost:80/files/rename/${filePath}`;
     // //making request
