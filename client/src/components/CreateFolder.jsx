@@ -13,10 +13,10 @@ const CreateFolder = ({ directoryPath, fetchFiles }) => {
     } 
 
     try {
-      const response = await fetch("http://localhost:80/create-directory", {
+      const response = await fetch("http://localhost:80/directory/create-directory", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: directoryPath + "/" + folderName.trim() }),
+        body: JSON.stringify({ Path: directoryPath,Foldername: folderName.trim() }),
       });
 
       if (!response.ok) throw new Error("Error creating directory");

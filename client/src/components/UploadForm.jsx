@@ -49,7 +49,7 @@ export const UploadForm = () => {
         });
       }, 150);
 
-      const response = await fetch("http://localhost:80/upload", {
+      const response = await fetch("http://localhost:80/files/upload", {
         method: "POST",
         body: formData,
         headers: {

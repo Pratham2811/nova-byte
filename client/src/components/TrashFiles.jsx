@@ -31,9 +31,16 @@ const TrashFiles = () => {
   }, []);
 
   const handleRestore = async (filename) => {
-    const url = `http://localhost:80/files/restore-file/${filename}`;
+    const url = `http://localhost:80/trash/restore-file/`;
     try {
-      const response = await fetch(url, { method: "PATCH" });
+      const response = await fetch(url, { 
+        method: "PATCH" ,
+        headers:{
+          "Content-Type": "application/json"
+        },
+        body:JSON.stringify({FilenametoRestore:filename})
+
+      });
       if (!response.ok) throw new Error(`Error restoring file`);
       await response.text();
       setShowConfirm(false);
