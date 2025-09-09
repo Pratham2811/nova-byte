@@ -25,9 +25,12 @@ const PathJoiner = (req) => {
 
 router.post("/upload", (req, res, next) => {
   const filename = req?.headers?.filename;
-  console.log(`./storage/${filename}`);
+  const path=req.headers.path
+  const abosolutepath=PathJoiner(req);
+ const FilePath=path.join(abosolutepath,path,filename);
+console.log(FilePath);
 
-  const writeStream = createWriteStream(`./storage/${filename}`);
+  const writeStream = createWriteStream(FilePath);
   req.on("data", (chunk) => {
     writeStream.write(chunk);
   });

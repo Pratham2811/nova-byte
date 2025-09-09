@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { UploadForm } from "@/components/UploadForm";
+
 import { FileList } from "@/components/DirectoryView";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -33,8 +33,7 @@ export const HomePage = () => {
 
   const renderContent = () => {
     switch (activePage) {
-      case "upload":
-        return <UploadForm />;
+    
       case "files":
         return <FileList />;
       case "trash":
@@ -100,37 +99,7 @@ export const HomePage = () => {
 
             <span className="font-semibold"></span>
           </button>
-          <button
-            className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
-              activePage === "upload"
-                ? "bg-gradient-to-r from-green-500 to-teal-600 shadow-lg scale-105"
-                : "hover:bg-gray-800/50"
-            }`}
-            onClick={() => {
-              setActivePage("upload");
-              if (isMobile) {
-                setIsSidebarOpen(false);
-              }
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-upload"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" x2="12" y1="3" y2="15" />
-            </svg>
-            <span className="font-semibold"></span>
-          </button>
+         
           <button
             className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
               activePage === "trash"

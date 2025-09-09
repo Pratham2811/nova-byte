@@ -18,7 +18,7 @@ app.use("/directory",directoryroutes);
 
 
 //files route
-app.use("/files",filesroute);
+app.use("/file",filesroute);
 
 
 

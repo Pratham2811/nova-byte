@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, File as FileIcon, CheckCircle, XCircle } from "lucide-react";
 import { MdCancel } from "react-icons/md";
-export const UploadForm = () => {
+export const UploadForm = ({path}) => {
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
   const [progress, setProgress] = useState(0);
@@ -49,11 +49,12 @@ export const UploadForm = () => {
         });
       }, 150);
 
-      const response = await fetch("http://localhost:80/files/upload", {
+      const response = await fetch("http://localhost:80/file/upload", {
         method: "POST",
         body: formData,
         headers: {
           filename: uploadFile.name,
+          path:path,
         },
       });
 
