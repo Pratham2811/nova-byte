@@ -15,7 +15,7 @@ import { ConfirmPopup } from "./ComfirmUi";
 import { useNavigate, useParams } from "react-router-dom";
 import CreateFolder from "./CreateFolder";
 import { UploadForm } from "./UploadForm";
-
+import { IoIosArrowBack } from "react-icons/io";
 export const FileList = () => {
   const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -138,12 +138,12 @@ export const FileList = () => {
           {dirPath && (
             <button
               onClick={handleGoBack}
-              className="px-3 py-1 text-xs rounded-md bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors duration-200"
+              className="px-3 py-1 text-xs rounded-md bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors duration-200 cursor-pointer"
             >
-              Back
+              <IoIosArrowBack /> 
             </button>
           )}
-          <span className="font-medium text-gray-300 whitespace-nowrap">
+          <span className="font-medium text-gray-300 whitespace-nowrap" >
             /{dirPath || "Root"}
           </span>
         </div>

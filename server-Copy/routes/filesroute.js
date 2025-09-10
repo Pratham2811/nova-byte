@@ -1,14 +1,16 @@
 import express from "express";
 import { rename } from "fs/promises";
 import fs from "fs/promises";
-import path from "path";
+import path from "node:path";
 import { createWriteStream } from "fs";
 import { STORAGE_PATH } from "../path.js";
-
-
+import crypto from "node:crypto"
+import { TempStoragePath } from "../path.js";
 
 
 const router=express.Router();
+
+console.log(TempStoragePath);
 
 const PathJoiner = (req) => {
   // console.log(req.params.any);
@@ -18,16 +20,24 @@ const PathJoiner = (req) => {
     req.params.any ? req.params.any.join("/") : ""
   );
 
-  return path.join(STORAGE_PATH + fixedpath);
+  return path.join(TempStoragePath + fixedpath);
 };
 
 
 
 router.post("/upload", (req, res, next) => {
   const filename = req?.headers?.filename;
-  const path=req.headers.path
+  const FolderPath=req?.headers?.path
+  console.log(FolderPath);
+  
+  const id=crypto.randomUUID();
+  console.log(id);
+  const extention=path.extname(filename);
+  const FullFilename=`${id}${extention}`
+  console.log();
+  
   const abosolutepath=PathJoiner(req);
- const FilePath=path.join(abosolutepath,path,filename);
+ const FilePath=path.join(abosolutepath,FullFilename)
 console.log(FilePath);
 
   const writeStream = createWriteStream(FilePath);
