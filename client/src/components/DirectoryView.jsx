@@ -138,7 +138,7 @@ export const FileList = () => {
           {dirPath && (
             <button
               onClick={handleGoBack}
-              className="px-3 py-1 text-xs rounded-md bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors duration-200 cursor-pointer"
+              className="px-3 py-1 text-xl rounded-md bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors duration-200 cursor-pointer"
             >
               <IoIosArrowBack /> 
             </button>

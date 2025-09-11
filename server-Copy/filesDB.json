@@ -1,24 +1,32 @@
-[{
-    "id":10,
-    "name":"'test.png",
-    "parentDir":321,
-    "size":4353
-
-},
-{
-    "id":11,
-    "name":"'test.png",
-    "parentDir":321,
-    "size":4353
-    
-},
-{
-    "id":12,
-    "name":"'test.png",
-    "parentDir":321,
-    "size":4353
-    
-}
-
-
+[
+  {
+    "id": "99556eba-30da-4724-901e-3505adfe191d",
+    "extension": ".pdf",
+    "name": "Aavishkar 2k25 Registration (Responses).pdf"
+  },
+  {
+    "id": "0bc0c258-b7a7-433d-972b-66ec6d20fc1e",
+    "extension": ".pdf",
+    "name": "NumberSystems.pdf"
+  },
+  {
+    "id": "765cabc0-99b5-46c5-940c-77729dea027a",
+    "extension": ".pdf",
+    "name": "Math (3).pdf"
+  },
+  {
+    "id": "cdf3454a-8c22-45d2-92df-1ba082203888",
+    "extension": ".exe",
+    "name": "friend.exe"
+  },
+  {
+    "id": "7893e9e5-6ad6-49d2-83f6-945b3eefc109",
+    "extension": ".xlsx",
+    "name": "FY26 Pool Campus - Pune- Selected for Interview (1).xlsx"
+  },
+  {
+    "id": "21a33bf9-7c47-4348-b8cb-45d49b8b012e",
+    "extension": ".pdf",
+    "name": "CoverLetter.pdf"
+  }
 ]
