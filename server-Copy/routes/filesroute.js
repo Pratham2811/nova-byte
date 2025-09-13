@@ -7,7 +7,7 @@ import { STORAGE_PATH } from "../path.js";
 import crypto from "node:crypto"
 import { TempStoragePath } from "../path.js";
 import filesData from "../filesDB.json" with { type: 'json' }
-import { assert } from "node:console";
+import { assert, log } from "node:console";
 import { writeFile } from "node:fs/promises";
 
 
@@ -74,7 +74,7 @@ console.log(FilePath);
 //serving file
 router.get("/:id", (req, res) => {
   const FilePath = PathJoinerTemp(req);
-  console.log("Hiii");
+  console.log("Hiii fuckfnrjifj");
   
   const {id}=req.params;
   console.log(id);
@@ -86,6 +86,7 @@ router.get("/:id", (req, res) => {
     
     
   })
+
 
   
   const filename=`${id}${fileData.extension}`
@@ -141,22 +142,29 @@ router.patch("/rename/:id", async (req, res) => {
   console.log("File path from pathjoiner", FilePath);
   const { oldFilename, newFilename } = req?.body;
 console.log(newFilename,oldFilename);
-console.log("All files in DB:", filesData.map(f => f.id));
-console.log("Looking for id:", id);
-  const fileData = filesData.find((file) => file.id === id);
-  console.log(fileData);
+
+  try{
+  const fileData=filesData.find((file)=>{
+    return file.id === id
+  })
+
+  if(!fileData){
+    return res.status(400).json({message:"File not found "})
+  }
+
+  fileData.name=newFilename;
+await writeFile("./filesDB.json", JSON.stringify(filesData, null, 2));
+
+  res.status(200).json({message:"File renamed sucessfully"})
+  
+ 
 
 
 
-  // const sourcePath = FilePath + oldFilename;
-  // const destinationpath = FilePath + newFilename;
 
 
 
-  try {
-    // await fs.rename(sourcePath, destinationpath);
-    res.status(200).json({ message: "File renamed successfully" });
-  } catch (err) {
+ } catch (err) {
     console.error("Rename error:", err);
     res.status(400).j;
     son({ message: "File not found or rename failed" });
