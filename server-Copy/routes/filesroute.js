@@ -47,7 +47,7 @@ router.post("/upload",  (req, res, next) => {
   console.log(id);
   const extension=path.extname(filename);
   const FullFilename=`${id}${extension}`
-  console.log();
+  console.log(FullFilename);
   
   const abosolutepath=PathJoinerTemp(req);
  const FilePath=path.join(abosolutepath,FullFilename)
@@ -61,6 +61,8 @@ console.log(FilePath);
         id,
         extension,
         name:filename,
+        deleted:false,
+
         
       })
    await writeFile("./filesDB.json",JSON.stringify(filesData));
@@ -107,22 +109,17 @@ router.get("/:id", (req, res) => {
 
 
 //move file to trash
-router.delete("/{*any}", async (req, res) => {
-  const FilePath = PathJoiner(req);
-  console.log("Path where request come: ", FilePath);
-
+router.delete("/:id", async (req, res) => {
+  const FilePath = PathJoinerTemp(req);
+  console.log("Hiii");
+  console.log(FilePath);
+  const {id}=req.params;
   const filename = path.basename(FilePath);
-  console.log("filename: ", filename);
-
-  const sourcePath = FilePath; // old folder
-  const destPath = path.join("trash", filename);
-  console.log("destination Path: ", destPath);
-
+ 
   try {
-    await fs.rename(sourcePath, destPath);
-
-    console.log("file moved to trash sucessfully");
-
+const fileData=filesData.find((file)=>file.id==id)
+  fileData.deleted=true;
+   await writeFile("./filesDB.json",JSON.stringify(filesData));
     res.json({
       message: "File deleted sucessfully",
     });
@@ -134,40 +131,22 @@ router.delete("/{*any}", async (req, res) => {
 
 
 router.patch("/rename/:id", async (req, res) => {
-  console.log("rEQUEST IS COMING");
   const {id}=req.params;
-  console.log(id);
-  
   const FilePath = PathJoinerTemp(req);
-  console.log("File path from pathjoiner", FilePath);
   const { oldFilename, newFilename } = req?.body;
-console.log(newFilename,oldFilename);
-
   try{
   const fileData=filesData.find((file)=>{
     return file.id === id
   })
-
   if(!fileData){
     return res.status(400).json({message:"File not found "})
   }
-
   fileData.name=newFilename;
 await writeFile("./filesDB.json", JSON.stringify(filesData, null, 2));
-
   res.status(200).json({message:"File renamed sucessfully"})
-  
- 
-
-
-
-
-
-
  } catch (err) {
     console.error("Rename error:", err);
-    res.status(400).j;
-    son({ message: "File not found or rename failed" });
+    res.status(400).json({ message: "File not found or rename failed" });
   }
 });
 

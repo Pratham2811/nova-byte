@@ -1,6 +1,9 @@
 import React from "react";
 
 export const ConfirmPopup = ({ filename, onConfirm, onCancel ,headTitle,action}) => {
+
+  console.log(filename);
+  
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       {/* Background Overlay with Blur */}
@@ -19,7 +22,7 @@ export const ConfirmPopup = ({ filename, onConfirm, onCancel ,headTitle,action})
         <p className="text-md text-gray-700 dark:text-gray-500 mb-6">
           Are you sure you want to restore:{" "}
           <span className="font-medium text-white dark:text-gray-100 ml-2">
-            {filename}
+            {filename.name}
           </span>
           
         </p>

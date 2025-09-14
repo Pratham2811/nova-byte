@@ -65,10 +65,10 @@ export const FileList = () => {
     navigate(`/${newPath}`);
   };
 
-  const handleOpenFile = async (fileName) => {
+  const handleOpenFile = async (file) => {
     const filePath = dirPath
-      ? `${dirPath}/${fileName}?action=open`
-      : `${fileName}?action=open`;
+      ? `${dirPath}/${file.id}?action=open`
+      : `${file.id}?action=open`;
     const url = `http://localhost:80/file/${filePath}`;
 
     try {
@@ -78,38 +78,39 @@ export const FileList = () => {
     }
   };
 
-  const handleDownloadFile = (fileName) => {
+  const handleDownloadFile = (file) => {
     const filePath = dirPath
-      ? `${dirPath}/${fileName}?action=download`
-      : `${fileName}?action=download`;
+      ? `${dirPath}/${file.id}?action=download`
+      : `${file.id}?action=download`;
     const url = `http://localhost:80/file/${filePath}`;
     const a = document.createElement("a");
     a.href = url;
-    a.download = fileName;
+    a.download = file.id;
     document.body.appendChild(a);
     a.click();
     a.remove();
   };
 
-  const handleDeleteFile = async (oldFilename) => {
-    const filePath = dirPath ? `${dirPath}/${oldFilename}` : `${oldFilename}`;
+  const handleDeleteFile = async (file) => {
+    const filePath = dirPath ? `${dirPath}/${file.id}` : `${file.id}`;
     const url = `http://localhost:80/file/${filePath}`;
-
+   console.log(file.id);
+   
     try {
       const res = await fetch(url, { method: "DELETE" });
       if (!res.ok) throw new Error(`Error: ${res.statusText}`);
       const data = await res.json();
       setShowDeletePopup(false);
-      show(`${oldFilename} ${data?.message} ✅`);
+      show(`${file.name} ${data?.message} ✅`);
       fetchFiles();
     } catch (err) {
       console.error("Error deleting file:", err);
     }
   };
 
-  const handleFileSave = async (newFilename) => {
+  const handleFileSave = async (newFilename,fileObject) => {
     const filePath = dirPath ? `${dirPath}/` : "";
-    const url = `http://localhost:80/file/rename/${filePath}`;
+    const url = `http://localhost:80/file/rename/`;
     try {
       const response = await fetch(url, {
         method: "PATCH",
@@ -201,7 +202,7 @@ export const FileList = () => {
                   <button
                     onClick={() => {
                       setShowDeletePopup(true);
-                      setOldFilename(item.name);
+                      setOldFilename(item);
                     }}
                     className="p-2 rounded-full border border-transparent hover:border-red-400 transition-colors duration-200 cursor-pointer"
                   >
@@ -220,13 +221,13 @@ export const FileList = () => {
               ) : (
                 <>
                   <button
-                    onClick={() => handleOpenFile(item.name)}
+                    onClick={() => handleOpenFile(item)}
                     className="p-2 rounded-full border border-transparent hover:border-blue-400 transition-colors duration-200  cursor-pointer"
                   >
                     <ExternalLink size={20} className="text-blue-400" />
                   </button>
                   <button
-                    onClick={() => handleDownloadFile(item.name)}
+                    onClick={() => handleDownloadFile(item)}
                     className="p-2 rounded-full border border-transparent hover:border-teal-400 transition-colors duration-200 cursor-pointer "
                   >
                     <Download size={20} className="text-teal-400" />
@@ -234,7 +235,7 @@ export const FileList = () => {
                   <button
                     onClick={() => {
                       setShowDeletePopup(true);
-                      setOldFilename(item.name);
+                      setOldFilename(item);
                     }}
                     className="p-2 rounded-full border border-transparent hover:border-red-400 transition-colors duration-200 cursor-pointer"
                   >
@@ -243,7 +244,7 @@ export const FileList = () => {
                   <button
                     onClick={() => {
                       setShowRenameComp(true);
-                      setOldFilename(item.name);
+                      setOldFilename(item);
                     }}
                     className="p-2 rounded-full border border-transparent hover:border-gray-400 transition-colors duration-200 cursor-pointer"
                   >

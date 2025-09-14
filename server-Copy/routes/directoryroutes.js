@@ -4,6 +4,7 @@ import { readdir } from "fs/promises";
 import fs from "fs/promises";
 import path from "path";
 import { STORAGE_PATH } from "../path.js";
+import filesData from "../filesDB.json" with {type:'json'}
 
   
 const router=express.Router()
@@ -27,27 +28,31 @@ const router=express.Router()
  }; 
 
 
+console.log(filesData);
 
 router.get("/{*any}", async (req, res) => {
 
     
   try {
-    const Finalpath = PathJoiner(req);
+    // const Finalpath = PathJoiner(req);
 
-    const fileList = await fs.readdir(Finalpath);
+    // const fileList = await fs.readdir(Finalpath);
 
-    const fileListWithMetaData = await Promise.all(
-      fileList.map(async (file) => {
-        const filePath = path.join(Finalpath, file);
-        const fileStat = await fs.stat(filePath);
-        return {
-          name: file,
-          type: fileStat.isDirectory() ? "folder" : "file",
-          size: fileStat.size,
-        };
-      })
-    );
+    // const fileListWithMetaData = await Promise.all(
+    //   fileList.map(async (file) => {
+    //     const filePath = path.join(Finalpath, file);
+    //     const fileStat = await fs.stat(filePath);
+    //     return {
+    //       name: file,
+    //       type: fileStat.isDirectory() ? "folder" : "file",
+    //       size: fileStat.size,
+    //     };
+    //   })
+    // );
 
+    const fileListWithMetaData=filesData.filter((file)=>file.deleted==false)
+  console.log(fileListWithMetaData);
+  
     res.json(fileListWithMetaData);
   } catch (error) {
     console.error("server Error", error);

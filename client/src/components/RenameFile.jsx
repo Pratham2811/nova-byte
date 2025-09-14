@@ -5,6 +5,7 @@ export const RenameFile = ({ fileName,onClose,OnRenameConfirm }) => {
   const [newFileName, setNewFileName] = useState(fileName);
 
 
+
  
  
   return (
@@ -31,7 +32,7 @@ export const RenameFile = ({ fileName,onClose,OnRenameConfirm }) => {
           <button
          
         
-onClick={() => OnRenameConfirm(newFileName)}
+onClick={() => OnRenameConfirm(newFileName,fileName)}
             className="px-3 py-1 text-sm rounded-md bg-blue-600 hover:bg-blue-500 text-white"
           >
             Save

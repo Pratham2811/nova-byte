@@ -1,32 +1,49 @@
 [
   {
-    "id": "99556eba-30da-4724-901e-3505adfe191d",
+    "id": "75930bbe-b5e9-45c9-a449-fe63ee674299",
     "extension": ".pdf",
-    "name": "Aavishkar 2k25 Registration (Responses).pdf"
+    "name": {
+      "id": "75930bbe-b5e9-45c9-a449-fe63ee674299",
+      "extension": ".pdf",
+      "name": "RMT_Marks.pdf",
+      "deleted": false
+    },
+    "deleted": false
   },
   {
-    "id": "0bc0c258-b7a7-433d-972b-66ec6d20fc1e",
+    "id": "74a1cb41-3579-4b17-b89b-0831c8eef6fb",
     "extension": ".pdf",
-    "name": "NumberSystems.pdf"
+    "name": "Maths.pdf",
+    "deleted": false
   },
   {
-    "id": "765cabc0-99b5-46c5-940c-77729dea027a",
+    "id": "63f222c3-5e6f-47b0-8d6c-1920e8d84383",
     "extension": ".pdf",
-    "name": "Math (3).pdf"
+    "name": "numbersystem.pdf",
+    "deleted": false
   },
   {
-    "id": "cdf3454a-8c22-45d2-92df-1ba082203888",
-    "extension": ".exe",
-    "name": "friend.exe"
-  },
-  {
-    "id": "7893e9e5-6ad6-49d2-83f6-945b3eefc109",
-    "extension": ".xlsx",
-    "name": "FY26 Pool Campus - Pune- Selected for Interview (1).xlsx"
-  },
-  {
-    "id": "21a33bf9-7c47-4348-b8cb-45d49b8b012e",
+    "id": "4ce66e4c-c4a5-409d-959a-76c8f5397514",
     "extension": ".pdf",
-    "name": "CoverLetterGoogle.pdf"
+    "name": "Avishkar.pdf",
+    "deleted": false
+  },
+  {
+    "id": "efc16de9-6381-4ec1-a7cd-5ec1133b9369",
+    "extension": ".pptx",
+    "name": "VLSI.pptx",
+    "deleted": false
+  },
+  {
+    "id": "99b32b51-768e-489b-aa9b-a74b2795f658",
+    "extension": ".mp4",
+    "name": "ml.mp4",
+    "deleted": false
+  },
+  {
+    "id": "05a77922-2c18-4064-9b3d-dd404212e3b3",
+    "extension": ".jpeg",
+    "name": "image.jpeg",
+    "deleted": true
   }
 ]

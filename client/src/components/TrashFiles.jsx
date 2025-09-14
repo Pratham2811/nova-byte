@@ -30,15 +30,15 @@ const TrashFiles = () => {
     fetchTrashFiles();
   }, []);
 
-  const handleRestore = async (filename) => {
-    const url = `http://localhost:80/trash/restore-file/`;
+  const handleRestore = async (file) => {
+    const url = `http://localhost:80/trash/restore-file/${file.id}`;
     try {
       const response = await fetch(url, { 
         method: "PATCH" ,
         headers:{
           "Content-Type": "application/json"
         },
-        body:JSON.stringify({FilenametoRestore:filename})
+        body:JSON.stringify({FilenametoRestore:file.name})
 
       });
       if (!response.ok) throw new Error(`Error restoring file`);
@@ -101,7 +101,7 @@ const TrashFiles = () => {
               <button
                 onClick={() => {
                   setShowConfirm(true);
-                  setRestoredFilename(file?.name);
+                  setRestoredFilename(file);
                 }}
                 className="p-2 rounded-full border border-transparent hover:border-green-400
                            hover:bg-gray-700/40 transition-all"
