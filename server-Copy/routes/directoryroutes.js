@@ -5,7 +5,7 @@ import fs from "fs/promises";
 import path from "path";
 import { STORAGE_PATH } from "../path.js";
 import filesData from "../filesDB.json" with {type:'json'}
-
+import directoriesDB from "../directoriesDB.json" with {type:'json'}
   
 const router=express.Router()
 
@@ -28,32 +28,19 @@ const router=express.Router()
  }; 
 
 
-console.log(filesData);
 
-router.get("/{*any}", async (req, res) => {
 
-    
+router.get("/{:id}", async (req, res) => {
+console.log("Hii");
+const directoryData=directoriesDB[0];
+    console.log(directoryData);
+    const files=directoryData.files.map((fileId)=>{
+      console.log(fileId); 
+      return filesData.find((file)=>file.id===fileId)
+    })
+    console.log(directoryData);  
   try {
-    // const Finalpath = PathJoiner(req);
-
-    // const fileList = await fs.readdir(Finalpath);
-
-    // const fileListWithMetaData = await Promise.all(
-    //   fileList.map(async (file) => {
-    //     const filePath = path.join(Finalpath, file);
-    //     const fileStat = await fs.stat(filePath);
-    //     return {
-    //       name: file,
-    //       type: fileStat.isDirectory() ? "folder" : "file",
-    //       size: fileStat.size,
-    //     };
-    //   })
-    // );
-
-    const fileListWithMetaData=filesData.filter((file)=>file.deleted==false)
-  console.log(fileListWithMetaData);
-  
-    res.json(fileListWithMetaData);
+    res.json({...directoryData,files});
   } catch (error) {
     console.error("server Error", error);
     res.status(500).json({ message: "Error reading nested directory" });
