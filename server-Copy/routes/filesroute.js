@@ -8,8 +8,8 @@ import crypto from "node:crypto"
 import { TempStoragePath } from "../path.js";
 import filesData from "../filesDB.json" with { type: 'json' }
 import { assert, log } from "node:console";
-import { writeFile } from "node:fs/promises";
-
+import { rm, writeFile } from "node:fs/promises";
+import directoriesData from "../directoriesDB.json" with { type: 'json' }
 
 
 const router=express.Router();
@@ -110,16 +110,41 @@ router.get("/:id", (req, res) => {
 
 //move file to trash
 router.delete("/:id", async (req, res) => {
-  const FilePath = PathJoinerTemp(req);
-  console.log("Hiii");
-  console.log(FilePath);
+
   const {id}=req.params;
-  const filename = path.basename(FilePath);
- 
+console.log(id);
+
   try {
-const fileData=filesData.find((file)=>file.id==id)
-  fileData.deleted=true;
-   await writeFile("./filesDB.json",JSON.stringify(filesData));
+const fileIndex=filesData.findIndex((file)=>file.id==id)
+console.log(fileIndex);
+
+  const fileData= filesData[fileIndex];
+  console.log(fileData);
+  
+  // await rm(`./storage2/${id}${fileData.extension}`)
+  // filesData.splice(fileIndex,1);
+  console.log("hii");
+  
+  const parentDir= fileData.parentDir
+  console.log("Hiii: ",parentDir);
+  const FolderIndex=directoriesData.findIndex((folder)=>{
+        
+             return  folder.id===parentDir;
+    
+  })
+  console.log(FolderIndex);
+  
+  const FiletoDeleteFromParentDir=dirFileList.find((fileid)=>{
+    return fileid===id;
+  })
+console.log(FiletoDeleteFromParentDir);
+
+  
+  // const folderIndex=directoriesData.files.findIndex((fileId)=>fileId===id)
+console.log(folderId);
+console.log("hii");
+
+  //  await writeFile("./filesDB.json",JSON.stringify(filesData));
     res.json({
       message: "File deleted sucessfully",
     });
