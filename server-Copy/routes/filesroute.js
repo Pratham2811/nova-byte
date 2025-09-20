@@ -116,35 +116,24 @@ console.log(id);
 
   try {
 const fileIndex=filesData.findIndex((file)=>file.id==id)
-console.log(fileIndex);
+
 
   const fileData= filesData[fileIndex];
-  console.log(fileData);
+  
   
   // await rm(`./storage2/${id}${fileData.extension}`)
-  // filesData.splice(fileIndex,1);
-  console.log("hii");
+  filesData.splice(fileIndex,1);
+ 
+  const parentDir=directoriesData.find((folderId)=>folderId.id===fileData.parentDir);
   
-  const parentDir= fileData.parentDir
-  console.log("Hiii: ",parentDir);
-  const FolderIndex=directoriesData.findIndex((folder)=>{
-        
-             return  folder.id===parentDir;
-    
-  })
-  console.log(FolderIndex);
+ 
+  console.log(parentDir.files);
   
-  const FiletoDeleteFromParentDir=dirFileList.find((fileid)=>{
-    return fileid===id;
-  })
-console.log(FiletoDeleteFromParentDir);
-
-  
-  // const folderIndex=directoriesData.files.findIndex((fileId)=>fileId===id)
-console.log(folderId);
-console.log("hii");
-
-  //  await writeFile("./filesDB.json",JSON.stringify(filesData));
+ parentDir.files = parentDir.files.filter((fileId)=>fileId!==id);
+ console.log(parentDir.files);
+       
+       await writeFile("./filesDB.json",JSON.stringify(filesData))
+       await writeFile("./directoriesDB.json",JSON.stringify(directoriesData))
     res.json({
       message: "File deleted sucessfully",
     });

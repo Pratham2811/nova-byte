@@ -1,70 +1,65 @@
 [
   {
-    "id": "75930bbe-b5e9-45c9-a449-fe63ee674299",
-    "extension": ".pdf",
-    "name": "RMT_Marks.pdf",
-    "deleted": false,
-    "parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"
-  },
-  {
     "id": "63f222c3-5e6f-47b0-8d6c-1920e8d84383",
     "extension": ".pdf",
     "name": "numbersystem.pdf",
     "deleted": false,
-    "parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"
+    "parentDir": "e4c0b250-4674-4e9a-957e-961c5c8c2a13"
   },
   {
     "id": "4ce66e4c-c4a5-409d-959a-76c8f5397514",
     "extension": ".pdf",
     "name": "Avishkar.pdf",
     "deleted": false,
-    "parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
   },
   {
     "id": "efc16de9-6381-4ec1-a7cd-5ec1133b9369",
     "extension": ".pptx",
     "name": "VLSI.pptx",
     "deleted": false,
-    "parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"
+    "parentDir": "e4c0b250-4674-4e9a-957e-961c5c8c2a13"
   },
   {
     "id": "05a77922-2c18-4064-9b3d-dd404212e3b3",
     "extension": ".jpeg",
     "name": "image.jpeg",
     "deleted": true,
-    "parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
   },
   {
     "id": "514e5e79-2547-44ce-83fa-9eec5be4403f",
     "extension": ".pdf",
     "name": "emerson.pdf",
     "deleted": false,
-    "parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
   },
   {
     "id": "5fcf6654-01b5-4903-8aa6-0c434b895dad",
     "extension": ".jpeg",
     "name": "Someimage.jpeg",
     "deleted": false,
-    "parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
   },
   {
     "id": "9b84b9f4-3048-49c3-a9f0-dcd854d755f3",
     "extension": ".jpeg",
     "name": "rtos2.pdf",
     "deleted": false,
-    "parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
   },
   {
     "id": "ced1a084-f582-4da7-8921-416dfaa5110e",
     "extension": ".jpeg",
     "name": "rtos1.pdf",
-    "deleted": false
+    "deleted": false,
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
   },
   {
     "id": "b4fe5221-057c-410e-8c7c-7caf09045b2a",
     "extension": ".pdf",
     "name": "Handwritten Notes.pdf",
-    "deleted": false
+    "deleted": false,
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
   }
 ]

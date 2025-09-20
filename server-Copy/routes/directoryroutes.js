@@ -35,7 +35,7 @@ console.log("Hii");
 const directoryData=directoriesDB[0];
     console.log(directoryData);
     const files=directoryData.files.map((fileId)=>{
-      console.log(fileId); 
+       
       return filesData.find((file)=>file.id===fileId)
     })
     console.log(directoryData);  
