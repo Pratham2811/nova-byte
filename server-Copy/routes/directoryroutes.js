@@ -32,15 +32,33 @@ const router=express.Router()
 
 router.get("/{:id}", async (req, res) => {
 console.log("Hii");
+const {id}=req.params
+console.log(id);
+  try {
+if(id){
+  const directoryData=directoriesDB.find((folder)=>folder.id==id);
+    const files=directoryData.files.map((fileId)=>{
+       
+      return filesData.find((file)=>file.id===fileId)
+     
+    })  
+console.log(directoryData);
+ res.json({...directoryData,files});
+
+}else{
 const directoryData=directoriesDB[0];
     console.log(directoryData);
     const files=directoryData.files.map((fileId)=>{
        
       return filesData.find((file)=>file.id===fileId)
+     
     })
-    console.log(directoryData);  
-  try {
-    res.json({...directoryData,files});
+      res.json({...directoryData,files});
+}
+
+  
+
+   
   } catch (error) {
     console.error("server Error", error);
     res.status(500).json({ message: "Error reading nested directory" });
