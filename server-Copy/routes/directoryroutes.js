@@ -9,13 +9,6 @@ import directoriesDB from "../directoriesDB.json" with {type:'json'}
   
 const router=express.Router()
 
-
-
-
-
-
-
- 
  const PathJoiner = (req) => {
    // console.log(req.params.any);
  
@@ -61,7 +54,7 @@ const directoryData=directoriesDB[0];
    
   } catch (error) {
     console.error("server Error", error);
-    res.status(500).json({ message: "Error reading nested directory" });
+    res.status(500).json({ message: "Error reading nested Folders" });
   }
 });
 
