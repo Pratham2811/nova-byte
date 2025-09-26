@@ -38,7 +38,7 @@ const PathJoinerTemp = (req) => {
 };
 
 
-router.post("/upload",  (req, res, next) => {
+router.post("/upload",  (req, res, next) => {  
   const filename = req?.headers?.filename;
 
  const parentDirId=req?.headers?.parentdirid || directoriesData[0].id;
@@ -70,7 +70,7 @@ console.log(FilePath);
       })
     
    await writeFile("./filesDB.json",JSON.stringify(filesData));
-
+   
     console.log("Ended writing file ");
     res.end("File uplaoded sucessfully");
 
@@ -82,8 +82,8 @@ console.log(FilePath);
       return folderId.id==parentDirId;
     })
     console.log(pushInDirectory);
-    pushInDirectory.files=pushInDirectory.files.push(Ui)
-    
+    pushInDirectory.files.push(id)
+       await writeFile("./directoriesDB.json",JSON.stringify(directoriesData));
   });
 });
 

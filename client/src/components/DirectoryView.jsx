@@ -36,7 +36,11 @@ export const FileList = () => {
       const response = await fetch(`http://localhost:80/directory/${dirPath}`);
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
       const data = await response.json();
+      console.log("Hiii");
+      
       setFileList(data);
+      console.log(data);
+      
     } catch (err) {
       console.error("Error fetching files:", err);
       setError(err.message);
@@ -167,12 +171,12 @@ export const FileList = () => {
           Error: Could not fetch files.
         </div>
       )}
-      {!loading && fileList.length === 0 && (
+      {!loading && fileList.files.length === 0 && (
         <div className="text-center text-gray-400 py-10">No files found.</div>
       )}
 
       <div className="space-y-3">
-        {fileList.map((item, index) => (
+        {fileList.files.map((item, index) => (
           <div
             key={index}
             className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 transition-all duration-200 hover:scale-[1.01] hover:bg-gray-700/50"

@@ -3,21 +3,18 @@
     "id": "99b32b51-768e-489b-aa9b-a74b2795f658",
     "name": "root",
     "parentDir": null,
-    "files": [
-      "05a77922-2c18-4064-9b3d-dd404212e3b3",
-      "4ce66e4c-c4a5-409d-959a-76c8f5397514"
-    ],
-    "directories": ["lawda"]
+    "files": ["4ce66e4c-c4a5-409d-959a-76c8f5397514"],
+    "directories": [
+     " e4c0b250-4674-4e9a-957e-961c5c8c2a13"
+   ]
   },
   {
     "id": "e4c0b250-4674-4e9a-957e-961c5c8c2a13",
     "name": "root",
     "parentDir": null,
     "files": [
-     
-      "efc16de9-6381-4ec1-a7cd-5ec1133b9369",
-   
-      "63f222c3-5e6f-47b0-8d6c-1920e8d84383"
+      "adce4b95-cb42-4618-9e55-fb6c3324cf91",
+      "2cff970a-5830-4051-99a9-43761f689031"
     ],
     "directories": []
   }
