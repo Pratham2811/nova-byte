@@ -36,6 +36,11 @@ if(id){
       return filesData.find((file)=>file.id===fileId)
      
     })  
+    const directories=directoryData.directories.map((folderInfo)=>{
+      return directoriesDB.find((folderId)=>folderId.id===id)
+    })
+    console.log("directories data:",directories);
+    
 console.log(directoryData);
  res.json({...directoryData,files});
 
