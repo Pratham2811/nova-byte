@@ -6,6 +6,7 @@ import path from "path";
 import { STORAGE_PATH } from "../path.js";
 import filesData from "../filesDB.json" with {type:'json'}
 import directoriesDB from "../directoriesDB.json" with {type:'json'}
+import { writeFile } from "fs/promises";
   
 const router=express.Router()
 
@@ -59,14 +60,30 @@ const directoryData=directoriesDB[0];
 });
 
 router.post("/create-directory", async (req, res, next) => {
-  const{Path,Foldername}=req?.body;
-  console.log(Path);
-  const FilePath=path.join(PathJoiner(req),Path,Foldername);
- console.log(FilePath);
+ 
+const{foldername,parentdirId}=req.body
+console.log(parentdirId);
+
  
 
   try {
-    await fs.mkdir(FilePath, { recursive: true });
+    const directoriesData=directoriesDB;
+    console.log(directoriesData);
+    const id=crypto.randomUUID();
+    console.log(id);
+    
+    directoriesData.push({
+      id:id,
+      name:foldername,
+      parentDir:parentdirId,
+      files:[],
+      directories:[]
+
+    })
+    const parentDirectory=directoriesData.find((directory)=>directory.id===parentdirId)
+    parentDirectory.directories.push(parentdirId);
+    
+    await writeFile("./directoriesDB.json",JSON.stringify(directoriesData))
     res.status(200).send("File Created sucessFully");
   } catch (err) {
     console.log("Error Creating directory", err);
