@@ -25,45 +25,33 @@ const router=express.Router()
 
 
 router.get("/{:id}", async (req, res) => {
+  const { id } = req.params;
 console.log("Hii");
-const {id}=req.params
-console.log(id);
+
   try {
-if(id){
-  const directoryData=directoriesDB.find((folder)=>folder.id==id);
-    const files=directoryData.files.map((fileId)=>{
-       
-      return filesData.find((file)=>file.id===fileId)
+    const directoryData = id
+      ? directoriesDB.find((folder) => folder.id == id)
+      : directoriesDB[0];
+
+    if (!directoryData) {
+      return res.status(404).json({ message: "Directory not found" });
+    }
+
+    const files = directoryData.files.map((fileId) => {
+      return filesData.find((file) => file.id === fileId);
+    });
      
-    })  
-    const directories=directoryData.directories.map((folderInfo)=>{
-      return directoriesDB.find((folderId)=>folderId.id===id)
-    })
-    console.log("directories data:",directories);
-    
-console.log(directoryData);
- res.json({...directoryData,files});
-
-}else{
-const directoryData=directoriesDB[0];
-    console.log(directoryData);
-    const files=directoryData.files.map((fileId)=>{
-       
-      return filesData.find((file)=>file.id===fileId)
-     
-    })
-      res.json({...directoryData,files});
-}
-
-  
-
-   
+    const directories = directoryData.directories.map((folderId) => {
+      return directoriesDB.find((dir) => dir.id === folderId);
+    });
+ console.log(directories);
+ 
+    res.json({ ...directoryData, files, directories });
   } catch (error) {
-    console.error("server Error", error);
-    res.status(500).json({ message: "Error reading nested Folders" });
+    console.error("Server Error", error);
+    res.status(500).json({ message: "Error reading nested folders" });
   }
 });
-
 router.post("/create-directory", async (req, res, next) => {
  
 const{foldername,parentdirId}=req.body

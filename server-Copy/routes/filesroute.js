@@ -14,20 +14,10 @@ import directoriesData from "../directoriesDB.json" with { type: 'json' }
 
 const router=express.Router();
 
-console.log(TempStoragePath);
 
-const PathJoiner = (req) => {
-  // console.log(req.params.any);
-
-  const fixedpath = path.join(
-    "/",
-    req.params.any ? req.params.any.join("/") : ""
-  );
-
-  return path.join(STORAGE_PATH + fixedpath);
-};
+ 
 const PathJoinerTemp = (req) => {
-  // console.log(req.params.any);
+  
 
   const fixedpath = path.join(
     "/",
@@ -109,16 +99,17 @@ router.get("/:id", (req, res) => {
   const filename=`${id}${fileData.extension}`
 
   const FinalPath=path.join(FilePath,filename)
-  console.log(FinalPath);
   
   
+   res.setHeader("content-Disposition", "inline");
   
-  res.setHeader("content-Disposition", "inline");
+  
   if (req.query.action === "download") {
-    res.setHeader("content-Disposition", "attachment");
+    res.setHeader("content-Disposition", `attachment ;filename=${fileData.name}`);
     console.log("sending file");
     res.sendFile(FinalPath);
   }
+ 
   res.sendFile(FinalPath);
 });
 
@@ -137,7 +128,7 @@ const fileIndex=filesData.findIndex((file)=>file.id==id)
   
   
   // await rm(`./storage2/${id}${fileData.extension}`)
-  filesData.splice(fileIndex,1);
+     fileData.deleted=true;
  
   const parentDir=directoriesData.find((folderId)=>folderId.id===fileData.parentDir);
   
