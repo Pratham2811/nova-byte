@@ -103,7 +103,7 @@ console.log(filesList);
   };
 
   const handleFileSave = async (newFilename) => {
-    const url = `http://localhost:80/file/rename/`;
+    const url = `http://localhost:80/file/rename/${oldFilename.id}`;
     try {
       const response = await fetch(url, {
         method: "PATCH",

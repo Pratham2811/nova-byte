@@ -1,52 +1,17 @@
-import { readdir } from "fs/promises";
-import fs from "fs/promises";
 import path from "path";
 import { TRASH_PATH } from "../path.js";
 import { STORAGE_PATH } from "../path.js";
 import express from "express"
-import { rename ,writeFile} from "fs/promises";
-
 import filesData from "../filesDB.json" with {type:'json'}
+import directoriesData from "../directoriesDB.json" with {type:'json'}
+import { writeFile } from "fs/promises";
 const router= express.Router();
-const PathJoinertrash = (req) => {
-  // console.log(req.params.any);
-
-  const fixedpath = path.join(
-    "/",
-    req.params.any ? req.params.any.join("/") : ""
-  );
-
-  return path.join(TRASH_PATH + fixedpath);
-};
 
 
- 
- const PathJoiner = (req) => {
-   // console.log(req.params.any);
- 
-   const fixedpath = path.join(
-     "/",
-     req.params.any ? req.params.any.join("/") : ""
-   );
- 
-   return path.join(STORAGE_PATH + fixedpath);
- };
+
 router.get("/", async (req, res, next) => {
   try {
-    // const directoryPath = "trash";
-    // const fileList = await readdir("trash");
-
-    // const fileListWithMetaData = await Promise.all(
-    //   fileList.map(async (file) => {
-    //     const filePpath = path.join(directoryPath, file);
-    //     const fileStat = await fs.stat(filePpath);
-    //     return {
-    //       name: file,
-    //       type: fileStat.isDirectory() ? "folder" : "file",
-    //       size: fileStat.size,
-    //     };
-    //   })
-    // );
+     
 const fileListWithMetaData=filesData.filter((file)=>file.deleted==true)
     res.json(fileListWithMetaData);
   } catch (err) {
@@ -57,20 +22,18 @@ const fileListWithMetaData=filesData.filter((file)=>file.deleted==true)
 
 //restoring
 router.patch("/restore-file/:id", async (req, res, next) => {
-  //   console.log(req.body);
-    
-  //  const {FilenametoRestore}=req.body;
-  //   console.log(FilenametoRestore);
-    
-  // const SourcePath = PathJoinertrash(req)+FilenametoRestore;
-  // const Destinationpath = PathJoiner(req)+FilenametoRestore;
-  // console.log(SourcePath);
-  // console.log(Destinationpath);
+ 
 const {id}=req.params;
   const fileData=filesData.find((file)=>file.id==id)
   try {
    fileData.deleted=false;
+   const parentDirectory=directoriesData.find((directory)=>{
+    return directory.id==fileData.parentDir;
+   })
+   parentDirectory.files.push(id);
+   
    await writeFile("./filesDB.json",JSON.stringify(filesData));
+     await writeFile("./directoriesDB.json",JSON.stringify(directoriesData));
     res.status(200).send("File restored to storage Sucessfully");
   } catch (err) {
     res.status(400).send("Error while restroing file");
