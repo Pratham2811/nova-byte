@@ -15,8 +15,8 @@ router.get("/", async (req, res, next) => {
 const fileListWithMetaData=filesData.filter((file)=>file.deleted==true)
     res.json(fileListWithMetaData);
   } catch (err) {
-    console.log("Server error:", err);
-    res.status(500).send("error from server");
+    console.log("Server error:", err);    
+    res.status(500).send("Error at  server");
   }
 });
 
