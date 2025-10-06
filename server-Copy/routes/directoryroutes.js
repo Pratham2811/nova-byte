@@ -54,8 +54,12 @@ console.log("Hii");
 });
 router.post("/create-directory", async (req, res, next) => {
  
-const{foldername,parentdirId}=req.body
-console.log(parentdirId);
+const{foldername}=req.body
+const parentdirId=req.body.parentDirId||"99b32b51-768e-489b-aa9b-a74b2795f658";
+console.log("directoery id:",parentdirId);
+console.log("Folder Name: ",foldername);
+
+
 
  
 
@@ -74,9 +78,11 @@ console.log(parentdirId);
 
     })
     const parentDirectory=directoriesData.find((directory)=>directory.id===parentdirId)
+    
+    
     parentDirectory.directories.push(parentdirId);
     
-    await writeFile("./directoriesDB.json",JSON.stringify(directoriesData))
+    // await writeFile("./directoriesDB.json",JSON.stringify(directoriesData))
     res.status(200).send("File Created sucessFully");
   } catch (err) {
     console.log("Error Creating directory", err);

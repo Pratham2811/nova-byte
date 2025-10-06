@@ -19,6 +19,7 @@ const CreateFolder = ({ directoryPath, fetchFiles }) => {
   const [folderName, setFolderName] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [message, setMessage] = useState("");
+console.log("directory id:",directoryPath);
 
   const handleDirectory = async () => {
     if (!folderName.trim()) {
@@ -30,7 +31,7 @@ const CreateFolder = ({ directoryPath, fetchFiles }) => {
       const response = await fetch("http://localhost:80/directory/create-directory", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ Path: directoryPath, Foldername: folderName.trim() }),
+        body: JSON.stringify({ parentDirId: directoryPath, foldername: folderName.trim() }),
       });
 
       if (!response.ok) throw new Error("Error creating directory");

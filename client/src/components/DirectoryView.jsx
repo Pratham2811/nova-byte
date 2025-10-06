@@ -119,6 +119,7 @@ console.log(filesList);
     setShowRenameComp(false);
   };
 
+
   // Empty state checks
   const isEmpty =
     directoriesList.length === 0 && filesList.length === 0;
