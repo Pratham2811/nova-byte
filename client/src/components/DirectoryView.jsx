@@ -72,13 +72,13 @@ console.log(filesList);
 
   const handleOpenFile = (file) => {
     const filePath = dirPath ? `${dirPath}/${file.id}?action=open` : `${file.id}?action=open`;
-    const url = `http://localhost:80/file/${file.id}`;
+    const url = `http://localhost:80/file/${file.id}?action=open`;
     window.open(url, "_blank");
   };
 
   const handleDownloadFile = (file) => {
     const filePath = dirPath ? `${dirPath}/${file.id}?action=download` : `${file.id}?action=download`;
-    const url = `http://localhost:80/file/${file.id}`;
+    const url = `http://localhost:80/file/${file.id}?action=download`;
     const a = document.createElement("a");
     a.href = url;
     a.download = file.name; // more useful for user

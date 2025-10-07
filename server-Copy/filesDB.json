@@ -1,1 +1,86 @@
-[{"id":"4ce66e4c-c4a5-409d-959a-76c8f5397514","extension":".pdf","name":"Avishkar.pdf","deleted":false,"parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"},{"id":"adce4b95-cb42-4618-9e55-fb6c3324cf91","extension":".pdf","name":"networkSecurity.pdf","deleted":false,"parentDir":"e4c0b250-4674-4e9a-957e-961c5c8c2a13"},{"id":"2cff970a-5830-4051-99a9-43761f689031","extension":".pdf","name":"networkSecurity.pdf","deleted":false,"parentDir":"e4c0b250-4674-4e9a-957e-961c5c8c2a13"},{"id":"2301ff3e-17e8-4570-a77f-337e087ccfc4","extension":".pdf","name":"prathameshdualcv.pdf","deleted":false,"parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"},{"id":"a1b1a241-0246-4d0d-87c5-05f832c4ff66","extension":".pdf","name":"problemStatement.pdf","deleted":false,"parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"},{"id":"c0677105-efa7-4955-b0e8-437376ef8b32","extension":".pdf","name":"Cryptography & Network Security 5th Ed.pdf","deleted":false,"parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"},{"id":"6c1fcfd1-e745-40e5-b558-3954cd0fabc3","extension":".exe","name":"Matrixmultiplication.exe","deleted":true,"parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"},{"id":"a91dfd3e-f579-4848-8707-58688a46261c","extension":".pdf","name":"Student Notice (ABC ID).pdf","deleted":false,"parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658"},{"id":"e0f2f1cf-61da-48fb-8296-56a4ef5d6b52","extension":".pdf","name":"DSA complete Cheatsheet.pdf","deleted":false,"parentDir":"a374de36-49c9-4166-adb9-7c207fc1af6e"},{"id":"ef530389-66cf-41dc-913b-8e3c8b23270c","extension":".pdf","name":"Avishkar.pdf","deleted":false,"parentDir":"4b32b18a-bc01-4b7e-956e-d3c639f06eb4"}]
+[
+  {
+    "id": "4ce66e4c-c4a5-409d-959a-76c8f5397514",
+    "extension": ".pdf",
+    "name": "Avishkar.pdf",
+    "deleted": false,
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
+  },
+  {
+    "id": "adce4b95-cb42-4618-9e55-fb6c3324cf91",
+    "extension": ".pdf",
+    "name": "networkSecurity.pdf",
+    "deleted": false,
+    "parentDir": "e4c0b250-4674-4e9a-957e-961c5c8c2a13"
+  },
+  {
+    "id": "2cff970a-5830-4051-99a9-43761f689031",
+    "extension": ".pdf",
+    "name": "networkSecurity.pdf",
+    "deleted": false,
+    "parentDir": "e4c0b250-4674-4e9a-957e-961c5c8c2a13"
+  },
+  {
+    "id": "2301ff3e-17e8-4570-a77f-337e087ccfc4",
+    "extension": ".pdf",
+    "name": "prathameshdualcv.pdf",
+    "deleted": false,
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
+  },
+  {
+    "id": "a1b1a241-0246-4d0d-87c5-05f832c4ff66",
+    "extension": ".pdf",
+    "name": "problemStatement.pdf",
+    "deleted": false,
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
+  },
+  {
+    "id": "c0677105-efa7-4955-b0e8-437376ef8b32",
+    "extension": ".pdf",
+    "name": "Cryptography & Network Security 5th Ed.pdf",
+    "deleted": false,
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
+  },
+  {
+    "id": "6c1fcfd1-e745-40e5-b558-3954cd0fabc3",
+    "extension": ".exe",
+    "name": "Matrixmultiplication.exe",
+    "deleted": true,
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
+  },
+  {
+    "id": "a91dfd3e-f579-4848-8707-58688a46261c",
+    "extension": ".pdf",
+    "name": "Student Notice (ABC ID).pdf",
+    "deleted": false,
+    "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658"
+  },
+  {
+    "id": "e0f2f1cf-61da-48fb-8296-56a4ef5d6b52",
+    "extension": ".pdf",
+    "name": "DSA complete Cheatsheet.pdf",
+    "deleted": true,
+    "parentDir": "a374de36-49c9-4166-adb9-7c207fc1af6e"
+  },
+  {
+    "id": "ef530389-66cf-41dc-913b-8e3c8b23270c",
+    "extension": ".pdf",
+    "name": "Avishkar.pdf",
+    "deleted": true,
+    "parentDir": "4b32b18a-bc01-4b7e-956e-d3c639f06eb4"
+  },
+  {
+    "id": "39638103-6eaf-4775-bba8-02562692e82f",
+    "extension": ".pdf",
+    "name": "DOC-20250909-WA0000..pdf",
+    "deleted": true,
+    "parentDir": "a374de36-49c9-4166-adb9-7c207fc1af6e"
+  },
+  {
+    "id": "c3d83e1a-b41e-4176-85f3-bd7abcadd1ce",
+    "extension": ".pdf",
+    "name": "SIH_team_ID_pdf",
+    "deleted": false,
+    "parentDir": "4b32b18a-bc01-4b7e-956e-d3c639f06eb4"
+  }
+]
