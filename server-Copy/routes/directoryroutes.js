@@ -80,9 +80,9 @@ console.log("Folder Name: ",foldername);
     const parentDirectory=directoriesData.find((directory)=>directory.id===parentdirId)
     
     
-    parentDirectory.directories.push(parentdirId);
+    parentDirectory.directories.push(id);
     
-    // await writeFile("./directoriesDB.json",JSON.stringify(directoriesData))
+    await writeFile("./directoriesDB.json",JSON.stringify(directoriesData))
     res.status(200).send("File Created sucessFully");
   } catch (err) {
     console.log("Error Creating directory", err);

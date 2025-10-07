@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Upload, File as FileIcon, CheckCircle, XCircle } from "lucide-react";
 import { MdCancel } from "react-icons/md";
 export const UploadForm = ({path}) => {
+  console.log("path from uplaod form:",path);
+  
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
   const [progress, setProgress] = useState(0);
@@ -54,7 +56,7 @@ export const UploadForm = ({path}) => {
         body: formData,
         headers: {
           filename: uploadFile.name,
-          path:path,
+          parentdirid:path,
         },
       });
 
