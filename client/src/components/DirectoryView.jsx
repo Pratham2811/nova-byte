@@ -27,14 +27,17 @@ export const FileList = () => {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
 
-  let { "*": dirPath } = useParams();
+  let {dirid}= useParams();
+
+  console.log("dynamic id:",dirid);
+  
   const navigate = useNavigate();
 
   const fetchFiles = async () => {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch(`http://localhost:80/directory/${dirPath || ""}`);
+      const response = await fetch(`http://localhost:80/directory/${dirid || ""}`);
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
       const data = await response.json();
       setDirectoriesList(data.directories || []);
@@ -52,32 +55,31 @@ export const FileList = () => {
   useEffect(() => {
     fetchFiles();
     // eslint-disable-next-line
-  }, [dirPath]);
+  }, [dirid]);
 console.log(filesList);
       console.log(directoriesList);
   // Go back one directory in path
   const handleGoBack = () => {
-    if (!dirPath) return;
-    const parts = dirPath.split("/");
+    if (!dirid) return;
+    const parts = dirid.split("/");
     parts.pop();
     const newPath = parts.join("/");
     navigate(newPath ? "/" + newPath : "/");
   };
 
-  const handleFolderClick = (folderId) => {
-    // Push new route for folder navigation
-    const newPath = dirPath ? `${dirPath}/${folderId}` : folderId;
-    navigate(`/${folderId}`);
-  };
-
+ const handleFolderClick = (folderId) => {
+  // Properly append folderId to the current path (dirid)
+  const newPath = dirid ? `${dirid}/${folderId}` : folderId;
+  navigate(`/directory/${folderId}`);
+};
   const handleOpenFile = (file) => {
-    const filePath = dirPath ? `${dirPath}/${file.id}?action=open` : `${file.id}?action=open`;
+    const filePath = dirid ? `${dirid}/${file.id}?action=open` : `${file.id}?action=open`;
     const url = `http://localhost:80/file/${file.id}?action=open`;
     window.open(url, "_blank");
   };
 
   const handleDownloadFile = (file) => {
-    const filePath = dirPath ? `${dirPath}/${file.id}?action=download` : `${file.id}?action=download`;
+    const filePath = dirid ? `${dirid}/${file.id}?action=download` : `${file.id}?action=download`;
     const url = `http://localhost:80/file/${file.id}?action=download`;
     const a = document.createElement("a");
     a.href = url;
@@ -88,7 +90,7 @@ console.log(filesList);
   };
 
   const handleDeleteFile = async (file) => {
-    const filePath = dirPath ? `${dirPath}/${file.id}` : `${file.id}`;
+    const filePath = dirid ? `${dirid}/${file.id}` : `${file.id}`;
     const url = `http://localhost:80/file/${file.id}`;
     try {
       const res = await fetch(url, { method: "DELETE" });
@@ -130,7 +132,7 @@ console.log(filesList);
       <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
         {/* Left: Back & Breadcrumb */}
         <div className="flex items-center gap-3">
-          {dirPath && (
+          {dirid && (
             <button
               onClick={handleGoBack}
               className="px-3 py-1 text-xl rounded-md bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors duration-200 cursor-pointer"
@@ -139,12 +141,12 @@ console.log(filesList);
             </button>
           )}
           <span className="font-medium text-gray-300 whitespace-nowrap" >
-            /{dirPath || "Root"}
+            /{dirid || "Root"}
           </span>
         </div>
         {/* Right: Create Folder Button */}
         <div className="flex gap-3">
-          <CreateFolder directoryPath={dirPath} fetchFiles={fetchFiles} />
+          <CreateFolder directoryPath={dirid} fetchFiles={fetchFiles} />
           <button onClick={() => setShowUpload(true)}>
             <Upload />
           </button>
@@ -253,7 +255,7 @@ console.log(filesList);
         />
       )}
       {showUpload && (
-        <UploadForm path={dirPath} onClose={() => setShowUpload(false)} />
+        <UploadForm path={dirid} onClose={() => setShowUpload(false)} />
       )}
     </div>
   );

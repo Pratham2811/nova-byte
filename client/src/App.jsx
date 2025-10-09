@@ -10,7 +10,8 @@ function App() {
   return (<>
 <BrowserRouter>
 <Routes>
-  <Route path="/*" element={<HomePage/>}/>
+  <Route path="/" element={<HomePage/>}/>
+  <Route path="/directory/:dirid" element={<HomePage/>}/>
 </Routes>
 </BrowserRouter>
   </>
