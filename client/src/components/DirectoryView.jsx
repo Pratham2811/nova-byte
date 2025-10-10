@@ -27,10 +27,12 @@ export const FileList = () => {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
 
-  let {dirid}= useParams();
+  // For folder actions
+  const [selectedFolder, setSelectedFolder] = useState(null);
+  const [showFolderRename, setShowFolderRename] = useState(false);
+  const [showFolderDelete, setShowFolderDelete] = useState(false);
 
-  console.log("dynamic id:",dirid);
-  
+  let { dirid } = useParams();
   const navigate = useNavigate();
 
   const fetchFiles = async () => {
@@ -41,10 +43,9 @@ export const FileList = () => {
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
       const data = await response.json();
       setDirectoriesList(data.directories || []);
+      console.log(directoriesList);
+      
       setFilesList(data.files || []);
-      
-      
-      
     } catch (err) {
       setError(err.message);
     } finally {
@@ -56,8 +57,7 @@ export const FileList = () => {
     fetchFiles();
     // eslint-disable-next-line
   }, [dirid]);
-console.log(filesList);
-      console.log(directoriesList);
+
   // Go back one directory in path
   const handleGoBack = () => {
     if (!dirid) return;
@@ -67,30 +67,27 @@ console.log(filesList);
     navigate(newPath ? "/" + newPath : "/");
   };
 
- const handleFolderClick = (folderId) => {
-  // Properly append folderId to the current path (dirid)
-  const newPath = dirid ? `${dirid}/${folderId}` : folderId;
-  navigate(`/directory/${folderId}`);
-};
+  const handleFolderClick = (folderId) => {
+    const newPath = dirid ? `${dirid}/${folderId}` : folderId;
+    navigate(`/directory/${folderId}`);
+  };
+
   const handleOpenFile = (file) => {
-    const filePath = dirid ? `${dirid}/${file.id}?action=open` : `${file.id}?action=open`;
     const url = `http://localhost:80/file/${file.id}?action=open`;
     window.open(url, "_blank");
   };
 
   const handleDownloadFile = (file) => {
-    const filePath = dirid ? `${dirid}/${file.id}?action=download` : `${file.id}?action=download`;
     const url = `http://localhost:80/file/${file.id}?action=download`;
     const a = document.createElement("a");
     a.href = url;
-    a.download = file.name; // more useful for user
+    a.download = file.name;
     document.body.appendChild(a);
     a.click();
     a.remove();
   };
 
   const handleDeleteFile = async (file) => {
-    const filePath = dirid ? `${dirid}/${file.id}` : `${file.id}`;
     const url = `http://localhost:80/file/${file.id}`;
     try {
       const res = await fetch(url, { method: "DELETE" });
@@ -99,8 +96,8 @@ console.log(filesList);
       setShowDeletePopup(false);
       show(`${file.name} ${data?.message} ✅`);
       fetchFiles();
-    } catch (err) {
-      setError("Error deleting file");
+    } catch (error) {
+      setError("Error deleting file:",error);
     }
   };
 
@@ -116,11 +113,46 @@ console.log(filesList);
       await response.text();
       fetchFiles();
     } catch (error) {
-      setError("Error renaming file");
+      setError("Error renaming file:",error);
     }
     setShowRenameComp(false);
   };
 
+  // --- Folder rename logic ---
+  const handleFolderRename = async (newName) => {
+    // API endpoint: /directory/rename/:id (use your actual endpoint)
+    const url = `http://localhost:80/directory/rename/${selectedFolder.id}`;
+    try {
+      const response = await fetch(url, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ oldName: selectedFolder.name, newName }),
+      });
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+      await response.text();
+      fetchFiles();
+      show(`Renamed folder to ${newName} ✅`);
+    } catch (error) {
+      setError("Error renaming folder:",error);
+    }
+    setShowFolderRename(false);
+  };
+
+  // --- Folder delete logic ---
+  const handleDeleteFolder = async (folder) => {
+    // API endpoint: /directory/:id (use your actual endpoint)
+    const url = `http://localhost:80/directory/${folder.id}`;
+    try {
+      const res = await fetch(url, { method: "DELETE" });
+      if (!res.ok) throw new Error(`Error: ${res.statusText}`);
+      const data = await res.json();
+      setShowFolderDelete(false);
+      show(`${folder.name} ${data?.message} ✅`);
+      fetchFiles();
+    } catch (error) {
+      setError("Error deleting folder:",error);
+    }
+  };
 
   // Empty state checks
   const isEmpty =
@@ -137,7 +169,7 @@ console.log(filesList);
               onClick={handleGoBack}
               className="px-3 py-1 text-xl rounded-md bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors duration-200 cursor-pointer"
             >
-              <IoIosArrowBack /> 
+              <IoIosArrowBack />
             </button>
           )}
           <span className="font-medium text-gray-300 whitespace-nowrap" >
@@ -171,12 +203,33 @@ console.log(filesList);
           <div
             key={folder.id}
             className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 transition-all duration-200 hover:scale-[1.01] hover:bg-gray-700/50"
-            onClick={() => handleFolderClick(folder.id)}
             style={{ cursor: "pointer" }}
           >
-            <div className="flex items-center gap-4 mb-3 sm:mb-0">
+            <div className="flex items-center gap-4 mb-3 sm:mb-0"
+              onClick={() => handleFolderClick(folder.id)}
+            >
               <Folder className="text-teal-400 w-6 h-6" />
               <span className="font-semibold text-gray-200">{folder.name}</span>
+            </div>
+            <div className="flex gap-4">
+              <button
+                onClick={() => {
+                  setShowFolderDelete(true);
+                  setSelectedFolder(folder);
+                }}
+                className="p-2 rounded-full border border-transparent hover:border-red-400 transition-colors duration-200 cursor-pointer"
+              >
+                <Trash size={20} className="text-red-400" />
+              </button>
+              <button
+                onClick={() => {
+                  setShowFolderRename(true);
+                  setSelectedFolder(folder);
+                }}
+                className="p-2 rounded-full border border-transparent hover:border-gray-400 transition-colors duration-200 cursor-pointer"
+              >
+                <Edit size={20} className="text-gray-400" />
+              </button>
             </div>
           </div>
         ))}
@@ -194,6 +247,30 @@ console.log(filesList);
               >
                 {file.name}
               </span>
+              <button
+                onClick={() => handleDownloadFile(file)}
+                className="p-2 rounded-full border border-transparent hover:border-teal-400 transition-colors duration-200 cursor-pointer"
+              >
+                <Download size={20} className="text-teal-400" />
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeletePopup(true);
+                  setOldFilename(file);
+                }}
+                className="p-2 rounded-full border border-transparent hover:border-red-400 transition-colors duration-200 cursor-pointer"
+              >
+                <Trash size={20} className="text-red-400" />
+              </button>
+              <button
+                onClick={() => {
+                  setShowRenameComp(true);
+                  setOldFilename(file);
+                }}
+                className="p-2 rounded-full border border-transparent hover:border-gray-400 transition-colors duration-200 cursor-pointer"
+              >
+                <Edit size={20} className="text-gray-400" />
+              </button>
             </div>
             <div className="flex flex-wrap gap-6">
               <button
@@ -251,6 +328,24 @@ console.log(filesList);
           onConfirm={() => handleDeleteFile(oldFilename)}
           filename={oldFilename?.name}
           headTitle="Delete File"
+          action="Delete"
+        />
+      )}
+      {/* --- Folder Rename Popup --- */}
+      {showFolderRename && (
+        <RenameFile
+          onClose={() => setShowFolderRename(false)}
+          OnRenameConfirm={handleFolderRename}
+          fileName={selectedFolder?.name}
+        />
+      )}
+      {/* --- Folder Delete Popup --- */}
+      {showFolderDelete && (
+        <ConfirmPopup
+          onCancel={() => setShowFolderDelete(false)}
+          onConfirm={() => handleDeleteFolder(selectedFolder)}
+          filename={selectedFolder?.name}
+          headTitle="Delete Folder"
           action="Delete"
         />
       )}

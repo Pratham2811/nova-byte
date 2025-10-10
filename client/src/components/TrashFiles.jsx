@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CornerUpLeft } from "lucide-react"; // new restore icon
 import { ConfirmPopup } from "./ComfirmUi";
-
+import { RiDeleteBin5Line } from "react-icons/ri";
 
 const TrashFiles = () => {
   const [trashFiles, setTrashFiles] = useState([]);
@@ -9,7 +9,7 @@ const TrashFiles = () => {
   const [error, setError] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [restoredFilename, setRestoredFilename] = useState(null);
-
+const [showConfirmDelete,setShowConfirmDelete] =useState(false)
   const fetchTrashFiles = async () => {
     try {
       setLoading(true);
@@ -49,6 +49,16 @@ const TrashFiles = () => {
       console.log("Error restoring file:", err);
     }
   };
+  const handlePermanentDelete=async(file)=>{
+           const url=`http://localhost:80/trash/delete-permanent/${file.id}`
+           const response=await fetch(url,{
+            method:"DELETE"
+           })
+           const data=await response.json();
+           console.log(data.message);
+           setShowConfirmDelete(false);
+           fetchTrashFiles();
+  }
 
   if (loading) {
     return <div className="flex justify-center items-center h-full text-gray-400">Loading trash files...</div>;
@@ -109,6 +119,17 @@ const TrashFiles = () => {
               >
                 <CornerUpLeft className="w-6 h-6 text-green-400 cursor-pointer" />
               </button>
+               <button
+                onClick={() => {
+                  setShowConfirmDelete(true);
+                 setRestoredFilename(file);
+                }}
+                className="p-2 rounded-full border border-transparent hover:border-green-400
+                           hover:bg-gray-700/40 transition-all"
+                title="Restore File"
+              >
+               <RiDeleteBin5Line />
+              </button>
             </li>
           ))}
         </ul>
@@ -122,7 +143,17 @@ const TrashFiles = () => {
           headTitle="Restore File"
           action="Restore"
         />
+       
       )}
+       {showConfirmDelete && (
+            <ConfirmPopup
+          filename={restoredFilename}
+          onCancel={() => setShowConfirmDelete(false)}
+          onConfirm={handlePermanentDelete}
+          headTitle="Delete File Permanently"
+          action="Delete"
+        />
+        )}
     </div>
   );
 };

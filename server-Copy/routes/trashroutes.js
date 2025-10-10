@@ -41,5 +41,17 @@ const {id}=req.params;
   }
 });
 
+router.delete("/delete-permanent/:id", async(req,res)=>{
+  const {id}=req.params;
+  const fileIndex=filesData.findIndex((file)=>{
+    return file.id===id;
+  })
+   
+    console.log(fileIndex);
+    filesData.splice(fileIndex,1);
+     await writeFile("./filesDB.json",JSON.stringify(filesData)) 
+    res.status(200).json({message:"File Deleted Sucessfully"});
+    
+})
 
 export default router

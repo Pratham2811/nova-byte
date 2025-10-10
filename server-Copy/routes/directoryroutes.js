@@ -44,7 +44,7 @@ console.log("Hii");
     const directories = directoryData.directories.map((folderId) => {
       return directoriesDB.find((dir) => dir.id === folderId);
     });
- console.log(directories);
+ 
  
     res.json({ ...directoryData, files, directories });
   } catch (error) {
@@ -56,8 +56,7 @@ router.post("/create-directory", async (req, res, next) => {
  
 const{foldername}=req.body
 const parentdirId=req.body.parentDirId||"99b32b51-768e-489b-aa9b-a74b2795f658";
-console.log("directoery id:",parentdirId);
-console.log("Folder Name: ",foldername);
+
 
 
 
@@ -89,4 +88,20 @@ console.log("Folder Name: ",foldername);
     res.status(500).send(err.message);
   }
 });
+router.patch("/rename/:id", async(req,res)=>{
+  const{id}=req.params
+  const newFilename=req.body.newName
+  console.log(newFilename);
+  
+  console.log(id);
+  const directory=directoriesDB.find((folder)=>{
+   return  folder.id===id;
+  })
+  console.log(directory);
+  directory.name=newFilename;
+ await writeFile("./directoriesDB.json",JSON.stringify(directoriesDB))
+  res.send("directory renamed");
+  
+  
+})
 export default router;
