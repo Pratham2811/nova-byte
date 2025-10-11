@@ -26,7 +26,7 @@ const router=express.Router()
 
 router.get("/{:id}", async (req, res) => {
   const { id } = req.params;
-console.log("Hii");
+
 
   try {
     const directoryData = id
@@ -103,5 +103,14 @@ router.patch("/rename/:id", async(req,res)=>{
   res.send("directory renamed");
   
   
+})
+router.delete("/:id",async(req,res)=>{
+     const{id}=req.params;
+     console.log(id);
+    const findDirectory=directoriesDB.find((folder)=>folder.id==id);
+    console.log(findDirectory);
+    findDirectory.deleted=true;
+    await writeFile("./directoriesDB.json",JSON.stringify(directoriesDB))
+     res.json({message:"Folder deleted sucesfully"});
 })
 export default router;

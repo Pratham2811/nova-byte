@@ -5,6 +5,7 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 
 const TrashFiles = () => {
   const [trashFiles, setTrashFiles] = useState([]);
+  const [trashDirectories,setTrashDirectories]=useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -17,7 +18,10 @@ const [showConfirmDelete,setShowConfirmDelete] =useState(false)
       const response = await fetch(url);
       if (!response.ok) throw new Error(`Server responded with status: ${response.status}`);
       const data = await response.json();
-      setTrashFiles(data);
+      console.log(data);
+      
+      setTrashFiles(data.filesList);
+      setTrashDirectories(data.directoriesList)
     } catch (err) {
       console.error("Failed to fetch trash files:", err);
       setError("Failed to load trash files. Please try again later.");
@@ -73,7 +77,7 @@ const [showConfirmDelete,setShowConfirmDelete] =useState(false)
       <h1 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-pink-500">
         Trash Files
       </h1>
-
+       
       {trashFiles.length === 0 ? (
         <p className="text-gray-400">Your trash is empty.</p>
       ) : (

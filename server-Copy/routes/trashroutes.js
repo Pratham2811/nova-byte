@@ -11,9 +11,12 @@ const router= express.Router();
 
 router.get("/", async (req, res, next) => {
   try {
-     
+     const directories=directoriesData.find((folder)=>folder.deleted===true)
 const fileListWithMetaData=filesData.filter((file)=>file.deleted==true)
-    res.json(fileListWithMetaData);
+    res.json({
+      filesList:fileListWithMetaData,
+      directoriesList:directories
+    });
   } catch (err) {
     console.log("Server error:", err);    
     res.status(500).send("Error at  server");
