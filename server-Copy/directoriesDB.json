@@ -21,8 +21,13 @@
     "name": "Singham555",
     "parentDir": "99b32b51-768e-489b-aa9b-a74b2795f658",
     "files": ["2cff970a-5830-4051-99a9-43761f689031"],
-    "directories": ["25d58f9b-53f6-4ab9-b0bf-5b58b801ccd4"],
-    "deleted": false
+    "directories": [
+      "25d58f9b-53f6-4ab9-b0bf-5b58b801ccd4",
+      "aaa1fdc5-0a9f-4bd8-b83f-eed4b31bd493",
+      "6f7d3985-bcfb-4029-b733-c2e119743555",
+      "92732cd4-fc70-4d77-980e-598de3ed2b2f"
+    ],
+    "deleted": true
   },
   {
     "id": "25d58f9b-53f6-4ab9-b0bf-5b58b801ccd4",
@@ -76,23 +81,13 @@
     "name": "Hello",
     "parentDir": "e5ac7cc2-07ac-434f-b294-acc9e1b967fd",
     "files": [],
-    "directories": ["eb0dba2b-fd0b-45dd-80a6-2ab5c304adf3"],
-    "deleted": false
-  },
-  {
-    "id": "eb0dba2b-fd0b-45dd-80a6-2ab5c304adf3",
-    "name": "Byee",
-    "parentDir": "46bf4e51-9f59-48b6-9948-cb12a591d7a0",
-    "files": [],
-    "directories": ["d9f13b4a-902d-4552-8528-060acfe81dc5"],
-    "deleted": false
-  },
-  {
-    "id": "d9f13b4a-902d-4552-8528-060acfe81dc5",
-    "name": "GoodByeLad",
-    "parentDir": "eb0dba2b-fd0b-45dd-80a6-2ab5c304adf3",
-    "files": [],
-    "directories": [],
+    "directories": [
+      "96a5faae-cd4b-4e06-895c-0a8f5240c29e",
+      "b189b173-df0d-420d-a3c1-3d072381de76",
+      "a838c6eb-37aa-4fc9-b9c2-6d4c5522e551",
+      "950e39c3-6913-415e-acc1-4cb4d7bd2ccf",
+      "4ea5ec97-b8cd-4759-bca9-dab75c61ac09"
+    ],
     "deleted": true
   },
   {
@@ -139,5 +134,86 @@
     "files": [],
     "directories": [],
     "deleted": false
+  },
+  {
+    "id": "aaa1fdc5-0a9f-4bd8-b83f-eed4b31bd493",
+    "name": "lingam",
+    "parentDir": "e4c0b250-4674-4e9a-957e-961c5c8c2a13",
+    "files": [],
+    "directories": []
+  },
+  {
+    "id": "6f7d3985-bcfb-4029-b733-c2e119743555",
+    "name": "Yoo man",
+    "parentDir": "e4c0b250-4674-4e9a-957e-961c5c8c2a13",
+    "files": [],
+    "directories": []
+  },
+  {
+    "id": "92732cd4-fc70-4d77-980e-598de3ed2b2f",
+    "name": "Euphoria",
+    "parentDir": "e4c0b250-4674-4e9a-957e-961c5c8c2a13",
+    "files": [],
+    "directories": []
+  },
+  {
+    "id": "96a5faae-cd4b-4e06-895c-0a8f5240c29e",
+    "name": "Hii",
+    "parentDir": "46bf4e51-9f59-48b6-9948-cb12a591d7a0",
+    "files": [],
+    "directories": []
+  },
+  {
+    "id": "b189b173-df0d-420d-a3c1-3d072381de76",
+    "name": "Hello",
+    "parentDir": "46bf4e51-9f59-48b6-9948-cb12a591d7a0",
+    "files": [],
+    "directories": []
+  },
+  {
+    "id": "a838c6eb-37aa-4fc9-b9c2-6d4c5522e551",
+    "name": "Gohome",
+    "parentDir": "46bf4e51-9f59-48b6-9948-cb12a591d7a0",
+    "files": [],
+    "directories": []
+  },
+  {
+    "id": "950e39c3-6913-415e-acc1-4cb4d7bd2ccf",
+    "name": "Comehome",
+    "parentDir": "46bf4e51-9f59-48b6-9948-cb12a591d7a0",
+    "files": [],
+    "directories": []
+  },
+  {
+    "id": "4ea5ec97-b8cd-4759-bca9-dab75c61ac09",
+    "name": "winter is coming",
+    "parentDir": "46bf4e51-9f59-48b6-9948-cb12a591d7a0",
+    "files": [],
+    "directories": [
+      "64c6f678-58ae-4d3b-bea2-2f1f86f07d2e",
+      "257eb49d-6b34-489f-8f43-2d200c8575e5",
+      "46f896ec-a072-4fcd-b17e-9eac9426f061"
+    ]
+  },
+  {
+    "id": "64c6f678-58ae-4d3b-bea2-2f1f86f07d2e",
+    "name": "House tully",
+    "parentDir": "4ea5ec97-b8cd-4759-bca9-dab75c61ac09",
+    "files": [],
+    "directories": []
+  },
+  {
+    "id": "257eb49d-6b34-489f-8f43-2d200c8575e5",
+    "name": "House baratheon",
+    "parentDir": "4ea5ec97-b8cd-4759-bca9-dab75c61ac09",
+    "files": [],
+    "directories": []
+  },
+  {
+    "id": "46f896ec-a072-4fcd-b17e-9eac9426f061",
+    "name": "Bastards",
+    "parentDir": "4ea5ec97-b8cd-4759-bca9-dab75c61ac09",
+    "files": [],
+    "directories": []
   }
 ]

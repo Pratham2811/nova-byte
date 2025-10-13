@@ -34,6 +34,9 @@ export const FileList = () => {
 
   let { dirid } = useParams();
   const navigate = useNavigate();
+console.log(directoriesList);
+console.log(filesList);
+
 
   const fetchFiles = async () => {
     setLoading(true);

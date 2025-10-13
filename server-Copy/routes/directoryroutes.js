@@ -4,10 +4,11 @@ import { readdir } from "fs/promises";
 import fs from "fs/promises";
 import path from "path";
 import { STORAGE_PATH } from "../path.js";
+import { TempStoragePath } from "../path.js";
 import filesData from "../filesDB.json" with {type:'json'}
 import directoriesDB from "../directoriesDB.json" with {type:'json'}
-import { writeFile } from "fs/promises";
-  
+import { writeFile,rm } from "fs/promises";
+
 const router=express.Router()
 
  const PathJoiner = (req) => {
@@ -18,7 +19,7 @@ const router=express.Router()
      req.params.any ? req.params.any.join("/") : ""
    );
  
-   return path.join(STORAGE_PATH + fixedpath);
+   return path.join(TempStoragePath + fixedpath);
  }; 
 
 
@@ -26,6 +27,7 @@ const router=express.Router()
 
 router.get("/{:id}", async (req, res) => {
   const { id } = req.params;
+console.log(id);
 
 
   try {
@@ -44,6 +46,9 @@ router.get("/{:id}", async (req, res) => {
     const directories = directoryData.directories.map((folderId) => {
       return directoriesDB.find((dir) => dir.id === folderId);
     });
+ 
+ console.log(directories);
+ console.log(files);
  
  
     res.json({ ...directoryData, files, directories });
@@ -105,12 +110,75 @@ router.patch("/rename/:id", async(req,res)=>{
   
 })
 router.delete("/:id",async(req,res)=>{
-     const{id}=req.params;
-     console.log(id);
-    const findDirectory=directoriesDB.find((folder)=>folder.id==id);
-    console.log(findDirectory);
-    findDirectory.deleted=true;
-    await writeFile("./directoriesDB.json",JSON.stringify(directoriesDB))
-     res.json({message:"Folder deleted sucesfully"});
+     const { id } = req.params;
+  console.log("Deleting directory:", id);
+
+  try {
+    // Find the directory to delete
+    const directoryIndex = directoriesDB.findIndex((folder) => folder.id == id);
+    if (directoryIndex === -1) {
+      return res.status(404).json({ message: "Directory not found" });
+    }
+
+    const directoryData = directoriesDB[directoryIndex];
+    console.log("directory data:", directoryData);
+
+
+    async function recursive(filesId, directoriesId) {
+ 
+      if (filesId && filesId.length) {
+        for await (const fileId of filesId) {
+          const fileIndex = filesData.findIndex((file) => file.id == fileId);
+          if (fileIndex !== -1) {
+            const fileData = filesData[fileIndex];
+            // Delete file from storage
+            console.log(fileId+fileData.extension);
+            const filePath=path.join(TempStoragePath,fileId+fileData.extension);
+            console.log(filePath);
+            
+            await rm(filePath).catch((err) => {console.log("broyhjer look svdfbfbebrbbefvbfbtrbrbr");
+            });
+            filesData.splice(fileIndex, 1);
+          }
+        }
+      }
+
+   
+      if (directoriesId && directoriesId.length) {
+        for await (const dirId of directoriesId) {
+          const subDirIndex = directoriesDB.findIndex((folder) => folder.id === dirId);
+          if (subDirIndex !== -1) {
+            const subDirData = directoriesDB[subDirIndex];
+            await recursive(subDirData.files, subDirData.directories);
+        
+            directoriesDB.splice(subDirIndex, 1);
+         
+            await rm(`./storage/${dirId}`, { recursive: true, force: true }).catch(() => {});
+          }
+        }
+      }
+    }
+
+
+    await recursive(directoryData.files, directoryData.directories);
+  const parentDir=directoriesDB.find((folder)=>{
+    return folder.id===directoryData.parentDir;
+  })
+  if (parentDir) {
+  parentDir.directories = parentDir.directories.filter(did => did !== id);
+}
+
+    directoriesDB.splice(directoryIndex, 1);
+   
+ 
+    await writeFile("./directoriesDB.json", JSON.stringify(directoriesDB));
+    await writeFile("./filesDB.json", JSON.stringify(filesData));
+
+    res.json({ message: "Folder deleted successfully" });
+      } catch (err) {
+    console.error("Error deleting directory:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+
 })
 export default router;
