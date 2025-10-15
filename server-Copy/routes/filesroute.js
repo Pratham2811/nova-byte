@@ -29,7 +29,8 @@ const PathJoinerTemp = (req) => {
 
 
 router.post("/upload",  (req, res, next) => {  
-  const filename = req?.headers?.filename;
+  try{
+  const filename = req?.headers?.filename||"untitled";
 
  const parentDirId=req?.headers?.parentdirid || directoriesData[0].id;
   console.log("parent DIr:",parentDirId);
@@ -58,31 +59,32 @@ console.log(FilePath);
         
         
       })
-    
-   await writeFile("./filesDB.json",JSON.stringify(filesData));
-   
-    console.log("Ended writing file ");
-    res.end("File uplaoded sucessfully");
-
-
-
     //updatingfolder
 
       const pushInDirectory=directoriesData.find((folderId)=>{
       return folderId.id==parentDirId;
     })
-    console.log(pushInDirectory);
+   
     pushInDirectory.files.push(id)
+        try{
+            await writeFile("./filesDB.json",JSON.stringify(filesData));
        await writeFile("./directoriesDB.json",JSON.stringify(directoriesData));
-  });
+       res.status(201).json({message:"File Uploaded Successfully"})
+        }catch(error){
+          res.status(400).json({message:"Error writing file"});
+        }
+ 
+  });}catch(error){
+    res.status(500).json({message:"Could Not save Files"});
+  }
 });
 
 
 //serving file
 router.get("/:id", (req, res) => {
   const FilePath = PathJoinerTemp(req);
-  console.log("Hiii fuckfnrjifj");
-  
+
+  try{
   const {id}=req.params;
   console.log(id);
   
@@ -95,35 +97,40 @@ router.get("/:id", (req, res) => {
   })
 
 
-  
+  if(!fileData){
+   return  res.status(404).json({message:"File Not Found"})
+  }
   const filename=`${id}${fileData.extension}`
-
   const FinalPath=path.join(FilePath,filename)
-  
-  
    res.setHeader("content-Disposition", "inline");
   
-  
   if (req.query.action === "download") {
-    res.setHeader("content-Disposition", `attachment ;filename=${fileData.name}`);
+    res.set("content-Disposition", `attachment ;filename=${fileData.name}`);
     console.log("sending file");
-    res.sendFile(FinalPath);
+    res.sendFile(FinalPath,(error)=>{
+      if(!res.headersSent && error){
+       return res.status(404).json({error:"File not found"})
+      }
+    
+    });
   }
- 
   res.sendFile(FinalPath);
+}catch(error){
+        res.status(400).json({message:"file Not Found"});
+  }
 });
-
-
 //move file to trash
 router.delete("/:id", async (req, res) => {
 
   const {id}=req.params;
-console.log(id);
+  
 
   try {
 const fileIndex=filesData.findIndex((file)=>file.id==id)
 
-
+if(fileIndex===-1){
+  res.status.json({message:"file does not exist"})
+}
   const fileData= filesData[fileIndex];
   
   
@@ -150,11 +157,16 @@ const fileIndex=filesData.findIndex((file)=>file.id==id)
 });
 
 
-router.patch("/rename/:id", async (req, res) => {
+router.patch("/rename/:id", async (req, res,next) => {
+  
   const {id}=req.params;
   const FilePath = PathJoinerTemp(req);
   const { oldFilename, newFilename } = req?.body;
+  if(!newFilename){
+    return res.status(404).json({message:"Please Enter the file name "})
+  }
   try{
+   
   const fileData=filesData.find((file)=>{
     return file.id === id
   })
@@ -164,9 +176,10 @@ router.patch("/rename/:id", async (req, res) => {
   fileData.name=newFilename;
 await writeFile("./filesDB.json", JSON.stringify(filesData, null, 2));
   res.status(200).json({message:"File renamed sucessfully"})
- } catch (err) {
-    console.error("Rename error:", err);
-    res.status(400).json({ message: "File not found or rename failed" });
+ } catch (error){
+  error.status=510
+    next(error);
+
   }
 });
 

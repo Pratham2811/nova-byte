@@ -51,7 +51,7 @@ console.log(id);
  console.log(files);
  
  
-    res.json({ ...directoryData, files, directories });
+    return res.status(200).json({ ...directoryData, files, directories });
   } catch (error) {
     console.error("Server Error", error);
     res.status(500).json({ message: "Error reading nested folders" });
@@ -59,16 +59,12 @@ console.log(id);
 });
 router.post("/create-directory", async (req, res, next) => {
  
-const{foldername}=req.body
+const{foldername}=req.body||"New Folder";
 const parentdirId=req.body.parentDirId||"99b32b51-768e-489b-aa9b-a74b2795f658";
-
-
-
-
- 
 
   try {
     const directoriesData=directoriesDB;
+    
     console.log(directoriesData);
     const id=crypto.randomUUID();
     console.log(id);
@@ -82,12 +78,12 @@ const parentdirId=req.body.parentDirId||"99b32b51-768e-489b-aa9b-a74b2795f658";
 
     })
     const parentDirectory=directoriesData.find((directory)=>directory.id===parentdirId)
-    
+    if(!parentDirectory) return res.status(404).json({message:"Parent directory does not Exist"})
     
     parentDirectory.directories.push(id);
     
     await writeFile("./directoriesDB.json",JSON.stringify(directoriesData))
-    res.status(200).send("File Created sucessFully");
+   return res.status(200).send("File Created sucessFully");
   } catch (err) {
     console.log("Error Creating directory", err);
     res.status(500).send(err.message);
@@ -96,20 +92,24 @@ const parentdirId=req.body.parentDirId||"99b32b51-768e-489b-aa9b-a74b2795f658";
 router.patch("/rename/:id", async(req,res)=>{
   const{id}=req.params
   const newFilename=req.body.newName
-  console.log(newFilename);
-  
-  console.log(id);
+
+  if(!newFilename)  return res.status(404).json({message:"Enter New Folder name"})
+
   const directory=directoriesDB.find((folder)=>{
    return  folder.id===id;
   })
-  console.log(directory);
+ if(!directory) return res.status(404).json({message:"No directory Founded  "})
   directory.name=newFilename;
+try{
  await writeFile("./directoriesDB.json",JSON.stringify(directoriesDB))
-  res.send("directory renamed");
-  
+  res.status(200).json({message:"Folder renamed succuscessfully"})
+}catch(error){
+  error.status=500;
+  next(error);
+}
   
 })
-router.delete("/:id",async(req,res)=>{
+router.delete("/:id",async(req,res,next)=>{
      const { id } = req.params;
   console.log("Deleting directory:", id);
 
@@ -121,7 +121,7 @@ router.delete("/:id",async(req,res)=>{
     }
 
     const directoryData = directoriesDB[directoryIndex];
-    console.log("directory data:", directoryData);
+  if(!directoryData) return res.status.json({message:"Directory Not found"})
 
 
     async function recursive(filesId, directoriesId) {
@@ -170,11 +170,15 @@ router.delete("/:id",async(req,res)=>{
 
     directoriesDB.splice(directoryIndex, 1);
    
- 
+ try{
     await writeFile("./directoriesDB.json", JSON.stringify(directoriesDB));
     await writeFile("./filesDB.json", JSON.stringify(filesData));
 
-    res.json({ message: "Folder deleted successfully" });
+    res.status(200).json({ message: "Folder deleted successfully" });
+ }catch(error){
+  error.status=500;
+  next(error);
+ }
       } catch (err) {
     console.error("Error deleting directory:", err);
     res.status(500).json({ message: "Internal server error" });

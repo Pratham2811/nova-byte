@@ -4,6 +4,7 @@ import cors from "cors";
 import directoryroutes from "./routes/directoryroutes.js";
 import filesroute from "./routes/filesroute.js";
 import trasroutes from "./routes/trashroutes.js";
+import { error } from "console";
 
 const app = express();
 
@@ -25,7 +26,11 @@ app.use("/file",filesroute);
 //trash
 app.use("/trash",trasroutes);
 
-
+app.use((error,req,res,next)=>{
+  console.log("Error come");
+  res.status(error.status||500).json({message:"Internal server Error"})
+  
+})
 
 app.listen(port, () => {
   console.log(`server is listening on ${port}`);
