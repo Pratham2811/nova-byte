@@ -1,7 +1,7 @@
 import express from "express"
 import directoriesData from "../directoriesDB.json" with {type:"json"}
 import usersData from "../usersDB.json" with {type:"json"}
-
+import {writeFile} from "fs/promises"
 const router=express.Router();
 
 console.log("duedueideidei");
@@ -30,7 +30,8 @@ router.post("/create-user", async(req,res)=>{
  
     })
         
-    await 
+    await writeFile("./directoriesDB.json",JSON.stringify(directoriesData));
+    await writeFile("./usersDB.json",JSON.stringify(usersData));
     res.status(201).json({message:"User created Sucessfully"})
 })
 
