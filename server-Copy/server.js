@@ -5,7 +5,7 @@ import directoryroutes from "./routes/directoryroutes.js";
 import filesroute from "./routes/filesroute.js";
 import trasroutes from "./routes/trashroutes.js";
 import { error } from "console";
-
+import userRoutes from "./routes/userRoutes.js"
 const app = express();
 
 
@@ -15,12 +15,9 @@ app.use(cors());
 
 
 app.use("/directory",directoryroutes);
-
-
-
 //files route
 app.use("/file",filesroute);
-
+app.use("/user",userRoutes)
 
 
 //trash
@@ -28,6 +25,8 @@ app.use("/trash",trasroutes);
 
 app.use((error,req,res,next)=>{
   console.log("Error come");
+  console.log(error);
+  
   res.status(error.status||500).json({message:"Internal server Error"})
   
 })

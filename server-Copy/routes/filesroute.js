@@ -1,16 +1,11 @@
 import express from "express";
-import { rename } from "fs/promises";
-import fs from "fs/promises";
 import path from "node:path";
-import { createWriteStream } from "fs";
-import { STORAGE_PATH } from "../path.js";
 import crypto from "node:crypto"
 import { TempStoragePath } from "../path.js";
 import filesData from "../filesDB.json" with { type: 'json' }
-import { assert, log } from "node:console";
 import { rm, writeFile } from "node:fs/promises";
 import directoriesData from "../directoriesDB.json" with { type: 'json' }
-
+import multer from "multer";
 
 const router=express.Router();
 
@@ -26,55 +21,68 @@ const PathJoinerTemp = (req) => {
 
   return path.join(TempStoragePath + fixedpath);
 };
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './storage2')
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    const id=crypto.randomUUID();
+    const extension=path.extname(file.originalname)
+    file.id=id;
+    cb(null, `${id}${extension}`);
 
+  }
+})
+console.log("Hiii");
 
-router.post("/upload",  (req, res, next) => {  
-  try{
-  const filename = req?.headers?.filename||"untitled";
+const upload = multer({ storage: storage })
 
- const parentDirId=req?.headers?.parentdirid || directoriesData[0].id;
-  console.log("parent DIr:",parentDirId);
-
-    
-  const id=crypto.randomUUID();
-  console.log(id);
-  const extension=path.extname(filename);
-  const FullFilename=`${id}${extension}`
-  console.log(FullFilename);
+router.post("/upload", upload.single("uploadedFile"), async(req, res, next) => {  
+   console.log("Hiii");
+   console.log(req.body);
+   const { id, originalname, filename } = req.file;
+   const extension=path.extname(originalname)
+   console.log(extension);
+   
+     let { parentDirId } = req.body;
+if(parentDirId==="undefined" || parentDirId==="null"|| parentDirId===""){ parentDirId=directoriesData[0].id};
+  console.log(parentDirId);
   
-  const abosolutepath=PathJoinerTemp(req);
- const FilePath=path.join(abosolutepath,FullFilename)
-console.log(FilePath);
-
-  const writeStream = createWriteStream(FilePath);
- req.pipe(writeStream);
-  console.log("post request");
-  req.on("end", async () => {
+  try{
+ 
       filesData.push({
         id,
         extension,
-        name:filename,
+        name:originalname,
         deleted:false,
         parentDir:parentDirId,
         
-        
       })
-    //updatingfolder
+   
 
       const pushInDirectory=directoriesData.find((folderId)=>{
       return folderId.id==parentDirId;
     })
+
+    console.log(pushInDirectory);
+    
+   console.log("Puck Your Slf");
    
     pushInDirectory.files.push(id)
         try{
-            await writeFile("./filesDB.json",JSON.stringify(filesData));
+      await writeFile("./filesDB.json",JSON.stringify(filesData));
        await writeFile("./directoriesDB.json",JSON.stringify(directoriesData));
        res.status(201).json({message:"File Uploaded Successfully"})
         }catch(error){
+          console.log("Katori");
+          
           res.status(400).json({message:"Error writing file"});
         }
  
-  });}catch(error){
+  }catch(error){
+  
+    
     res.status(500).json({message:"Could Not save Files"});
   }
 });
@@ -100,6 +108,8 @@ router.get("/:id", (req, res) => {
   if(!fileData){
    return  res.status(404).json({message:"File Not Found"})
   }
+  console.log(fileData);
+  
   const filename=`${id}${fileData.extension}`
   const FinalPath=path.join(FilePath,filename)
    res.setHeader("content-Disposition", "inline");

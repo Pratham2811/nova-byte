@@ -1,39 +1,45 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+// Assuming FileList and TrashFiles are the content components
 import { FileList } from "@/components/DirectoryView";
-import { Menu } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useEffect } from "react";
 import TrashFiles from "@/components/TrashFiles";
+
+import { Folder, Trash2, Menu, X } from "lucide-react"; // Imported X for close button
+import { cn } from "@/lib/utils"; // Tailwind utility class merger
+
+// Define Theme Colors
+const NEON_CYAN = "cyan-400";
+const NEON_FUCHSIA = "fuchsia-400";
+const NEON_RED = "rose-500";
+const BG_DARK = "bg-gray-950";
+const ACTIVE_GRADIENT = `bg-gradient-to-r from-cyan-500 to-fuchsia-600`;
+const TRASH_GRADIENT = `bg-gradient-to-r from-rose-500 to-red-700`;
+
 export const HomePage = () => {
   const [activePage, setActivePage] = useState("files");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Changed to false by default for mobile
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   // Check screen size to handle sidebar behavior
   useEffect(() => {
     const handleResize = () => {
-      // For screens larger than md (768px), sidebar is always open
+      // Screens larger than md (768px): Desktop view
       if (window.innerWidth >= 768) {
         setIsMobile(false);
-        setIsSidebarOpen(true);
+        setIsSidebarOpen(true); // Sidebar is always open on desktop
       } else {
+        // Screens smaller than md: Mobile view
         setIsMobile(true);
-        setIsSidebarOpen(false);
+        setIsSidebarOpen(false); // Sidebar is closed by default on mobile
       }
     };
 
-    // Initial check on component mount
     handleResize();
-    // Add event listener for window resize
     window.addEventListener("resize", handleResize);
-    // Cleanup function to remove event listener
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const renderContent = () => {
     switch (activePage) {
-    
       case "files":
         return <FileList />;
       case "trash":
@@ -43,20 +49,29 @@ export const HomePage = () => {
     }
   };
 
+  const handleLinkClick = (page) => {
+    setActivePage(page);
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
+  };
+
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-900 text-white font-sans">
-      {/* Mobile sidebar overlay (appears when sidebar is open) */}
+    // Updated background for deepest black
+    <div className={`flex h-screen overflow-hidden ${BG_DARK} text-white font-sans`}>
+      
+      {/* Mobile Sidebar Overlay: Deeper and more blurred */}
       {isMobile && isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+          className="fixed inset-0 bg-black/80 z-40 transition-opacity duration-300"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar: Glassmorphism and Neon Border */}
       <aside
         className={cn(
-          "bg-gray-900/80 backdrop-blur-md border-r border-gray-700 w-64 min-w-[200px] flex-shrink-0",
+          `bg-gray-900/90 backdrop-blur-xl border-r border-${NEON_CYAN}/30 w-64 min-w-[200px] flex-shrink-0 shadow-2xl shadow-${NEON_CYAN}/20`,
           "fixed top-0 left-0 h-full z-50 transform transition-transform duration-300 ease-in-out",
           "md:static md:translate-x-0",
           {
@@ -65,108 +80,75 @@ export const HomePage = () => {
           }
         )}
       >
-        <div className="p-5 text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">
-          My Drive
+        {/* Logo/Title: Neon Gradient */}
+        <div className="p-5 text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400 border-b border-gray-800 tracking-wider">
+          CYBER DRIVE
         </div>
-        <nav className="flex flex-col p-4 space-y-2">
-          <button
-            className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
-              activePage === "files"
-                ? "bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg scale-105"
-                : "hover:bg-gray-800/50"
-            }`}
-            onClick={() => {
-              setActivePage("files");
-              if (isMobile) {
-                setIsSidebarOpen(false);
-              }
-            }}
+        
+        {/* Close Button (Mobile Only) */}
+        {isMobile && (
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="absolute top-4 right-4 p-2 text-gray-300 hover:text-white z-50 transition-colors"
+            aria-label="Close menu"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-folder"
-            >
-              <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
-            </svg>
-
-            <span className="font-semibold"></span>
+            <X size={24} />
           </button>
-         
+        )}
+
+        {/* Navigation */}
+        <nav className="flex flex-col p-4 space-y-3">
+          
+          {/* Files Button (Main Gradient) */}
           <button
-            className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
-              activePage === "trash"
-                ? "bg-gradient-to-r from-red-300 to-red-500 shadow-lg scale-105"
-                : "hover:bg-gray-800/50"
+            className={`flex items-center gap-4 px-4 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md ${
+              activePage === "files"
+                ? `${ACTIVE_GRADIENT} shadow-${NEON_CYAN}/40 scale-[1.03] border border-cyan-400`
+                : "hover:bg-gray-800/80 hover:shadow-lg hover:shadow-gray-700/20 border border-transparent text-gray-300"
             }`}
-            onClick={() => {
-              setActivePage("trash");
-              if (isMobile) {
-                setIsSidebarOpen(false);
-              }
-            }}
+            onClick={() => handleLinkClick("files")}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-trash"
-            >
-              <path d="M3 6h18" />
-              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-            </svg>
-            <span className="font-semibold"></span>
+            <Folder size={22} className={activePage === "files" ? "text-white" : `text-${NEON_CYAN}`} />
+            <span className="tracking-wider">My Files</span>
+          </button>
+          
+          {/* Trash Button (Red Gradient) */}
+          <button
+            className={`flex items-center gap-4 px-4 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md ${
+              activePage === "trash"
+                ? `${TRASH_GRADIENT} shadow-${NEON_RED}/40 scale-[1.03] border border-rose-400`
+                : "hover:bg-gray-800/80 hover:shadow-lg hover:shadow-gray-700/20 border border-transparent text-gray-300"
+            }`}
+            onClick={() => handleLinkClick("trash")}
+          >
+            <Trash2 size={22} className={activePage === "trash" ? "text-white" : `text-${NEON_RED}`} />
+            <span className="tracking-wider">Trash</span>
           </button>
         </nav>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col">
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col md:ml-0 overflow-hidden">
+        
         {/* Top Bar (Mobile only) */}
-        <div className="md:hidden flex items-center p-4 bg-gray-900/70 backdrop-blur-md border-b border-gray-700">
+        <div className="md:hidden flex items-center p-4 bg-gray-900/90 backdrop-blur-xl border-b border-gray-700 shadow-lg z-30">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="text-gray-300 hover:text-white"
+            className={`p-1 text-${NEON_CYAN} hover:text-white transition-colors`}
             aria-label="Open menu"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-menu"
-            >
-              <line x1="4" x2="20" y1="12" y2="12" />
-              <line x1="4" x2="20" y1="6" y2="6" />
-              <line x1="4" x2="20" y1="18" y2="18" />
-            </svg>
+            <Menu size={24} />
           </button>
-          <h1 className="flex-1 text-center text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">
-            My Drive
+          {/* Centered Mobile Title */}
+          <h1 className="flex-1 text-center text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400">
+            CYBER DRIVE
           </h1>
+          {/* Spacer to center title correctly */}
+          <div className="w-6"></div> 
         </div>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-fuchsia-600/50 scrollbar-track-transparent">
           {renderContent()}
         </div>
       </main>

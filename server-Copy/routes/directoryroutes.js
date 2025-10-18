@@ -27,7 +27,7 @@ const router=express.Router()
 
 router.get("/{:id}", async (req, res) => {
   const { id } = req.params;
-console.log(id);
+
 
 
   try {
@@ -47,8 +47,7 @@ console.log(id);
       return directoriesDB.find((dir) => dir.id === folderId);
     });
  
- console.log(directories);
- console.log(files);
+
  
  
     return res.status(200).json({ ...directoryData, files, directories });
@@ -65,9 +64,9 @@ const parentdirId=req.body.parentDirId||"99b32b51-768e-489b-aa9b-a74b2795f658";
   try {
     const directoriesData=directoriesDB;
     
-    console.log(directoriesData);
+
     const id=crypto.randomUUID();
-    console.log(id);
+    
     
     directoriesData.push({
       id:id,
@@ -111,7 +110,7 @@ try{
 })
 router.delete("/:id",async(req,res,next)=>{
      const { id } = req.params;
-  console.log("Deleting directory:", id);
+ 
 
   try {
     // Find the directory to delete
@@ -132,9 +131,9 @@ router.delete("/:id",async(req,res,next)=>{
           if (fileIndex !== -1) {
             const fileData = filesData[fileIndex];
             // Delete file from storage
-            console.log(fileId+fileData.extension);
+           
             const filePath=path.join(TempStoragePath,fileId+fileData.extension);
-            console.log(filePath);
+         
             
             await rm(filePath).catch((err) => {console.log("broyhjer look svdfbfbebrbbefvbfbtrbrbr");
             });
