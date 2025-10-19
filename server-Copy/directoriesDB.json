@@ -1,11 +1,1 @@
-[
-  {
-    "id": "99b32b51-768e-489b-aa9b-a74b2795f658",
-    "name": "root",
-    "parentDir": null,
-    "files": [],
-    "directories": [],
-    "userId":"",
-    "deleted": false
-  }
-]
+[{"id":"99b32b51-768e-489b-aa9b-a74b2795f658","name":"root","parentDir":null,"files":["5468b316-5860-4391-819e-4ac9a1296dab"],"directories":["ae425cef-0004-45b6-a566-4a997f9b54c1"],"userId":"","deleted":false},{"id":"012e1957-ce6f-4c57-8151-99c44017e30c","name":"root-prathameshmadane45@gmail.com","parentDir":null,"files":[],"directories":[],"userId":"2f5a114a-7a7a-47cd-981b-bf60680a3341","deleted":false},{"id":"a55088a1-f065-491c-b345-b31d0319082b","name":"root-prathameshmadane45@gmail.com","parentDir":null,"files":[],"directories":[],"userId":"b9a61a99-04a0-48ea-be12-5c21bbbc247e","deleted":false},{"id":"5226f926-e33b-441b-a9e6-c3dfd3153223","name":"root-prathameshmadane09@gmail.com","parentDir":null,"files":[],"directories":[],"userId":"8525006b-9986-4bc2-8c76-75696f05ff0d","deleted":false},{"id":"aafb4941-a342-4895-bd52-db4e318613c3","name":"root-prathameshmadane18@gmail.com","parentDir":null,"files":[],"directories":[],"userId":"e131a2b0-e8ab-4fd7-bf75-5265843aa204","deleted":false},{"id":"ae425cef-0004-45b6-a566-4a997f9b54c1","name":"Test","parentDir":"99b32b51-768e-489b-aa9b-a74b2795f658","files":[],"directories":[]}]

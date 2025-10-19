@@ -8,10 +8,19 @@ console.log("duedueideidei");
 
 router.post("/create-user", async(req,res)=>{
     const UserId=crypto.randomUUID();
-    const {name,email,password}=req.body.userData;
+    console.log(req.body);
+    
+    const {username,email,password}=req.body;
     const dirId=crypto.randomUUID();
-
-     console.log(name,email,password);
+   if(!username|| !email||!password){
+    console.log("Error in UserData");
+    
+    return res.status(500).res.json({message:"User not created error creating user"})
+   }
+    const RedundantEmail=usersData.find((user)=> user.email===email)
+    if(RedundantEmail){
+        return res.status(409).json({message:"User Already Registered with Same email"})
+    }
      directoriesData.push({
         id:dirId,
         name:`root-${email}`,
@@ -23,16 +32,19 @@ router.post("/create-user", async(req,res)=>{
      })
     usersData.push({
         id:UserId,
-        name,
+        name:username,
         email,
         password,
         rootDirId:dirId
  
     })
         
-    await writeFile("./directoriesDB.json",JSON.stringify(directoriesData));
+   try{ await writeFile("./directoriesDB.json",JSON.stringify(directoriesData));
     await writeFile("./usersDB.json",JSON.stringify(usersData));
     res.status(201).json({message:"User created Sucessfully"})
+   }catch(error){
+    res.status(500).json({message:"Internal server Error"})
+   }
 })
 
 export default router

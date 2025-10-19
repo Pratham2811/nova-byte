@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { User, Mail, Lock, CheckCircle, XCircle, ArrowUpCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const UserRegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -15,7 +16,7 @@ export const UserRegistrationForm = () => {
   const [status, setStatus] = useState("");
   const [statusType, setStatusType] = useState(""); // success | error
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const navigate=useNavigate()
   // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,7 +43,7 @@ export const UserRegistrationForm = () => {
           "Content-Type": "application/json",
         },
         // FIX: Send the formData object directly, which is best practice
-        body: JSON.stringify({UserData:formData}),
+        body: JSON.stringify(formData),
       });
 
       // Attempt to parse response data regardless of success status
@@ -57,9 +58,10 @@ export const UserRegistrationForm = () => {
       if (response.ok) {
         setStatus(`SUCCESS: ${data.message || 'User created successfully.'}`);
         setStatusType("success");
+        navigate('/')
       } else {
         // Server responded with an error status (4xx or 5xx)
-        setStatus(`ERROR: ${data.message || 'Server error occurred.'} (Code: ${response.status})`);
+        setStatus(`${data.message || 'Server error occurred.'} (Code: ${response.status})`);
         setStatusType("error");
       }
     } catch (error) {
