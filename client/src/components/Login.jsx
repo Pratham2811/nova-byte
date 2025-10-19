@@ -1,23 +1,27 @@
 import React, { useState } from "react";
-import { LogIn, User, Lock, Loader2 } from "lucide-react";
+import { LogIn, User, Lock, Loader2, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-// Theme Constants
+// Theme Constants (Keeping your established cyber aesthetic)
 const NEON_CYAN = "cyan-400";
 const NEON_FUCHSIA = "fuchsia-500";
-const MAIN_GRADIENT = "bg-gradient-to-r from-cyan-400 to-fuchsia-400"; // Used in Title
-const BUTTON_GRADIENT = "bg-gradient-to-r from-cyan-500 to-fuchsia-600"; // Used in Button
-const SHADOW_FUCHSIA = "shadow-[0_0_80px_rgba(236,72,153,0.3)]"; // Card Shadow
-const NEON_RED = "rose-400"; // Error Color
+const MAIN_GRADIENT = "bg-gradient-to-r from-cyan-400 to-fuchsia-400";
+const BUTTON_GRADIENT = "bg-gradient-to-r from-cyan-500 to-fuchsia-600";
+const SHADOW_FUCHSIA = "shadow-[0_0_80px_rgba(236,72,153,0.3)]";
+const NEON_RED = "rose-400";
+const NEON_GREEN = "emerald-400";
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const [success, setSuccess] = useState(false); // State for successful login
+  const navigate =useNavigate()
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setSuccess(false);
 
     if (!email || !password) {
       setError("Input stream incomplete. All fields required.");
@@ -26,22 +30,54 @@ export const LoginForm = () => {
 
     setLoading(true);
 
-    // --- Simulated Login Logic ---
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Using HTTP protocol as determined earlier
+    const url = `http://localhost:80/user/login-user`;
+    
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email, password: password }),
+      });
 
-    if (email === "user@cyber.com" && password === "matrix") {
-      // Use console log instead of alert()
-      console.log("Login Successful! Access Granted."); 
-      setError(null);
-    } else {
-      setError("Authentication Failure. Invalid Network ID or Access Key.");
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (e) {
+        // Handle cases where the server sends a non-JSON response (shouldn't happen with your backend, but good practice)
+        data.message = "Server response unreadable or empty.";
+      }
+      
+      if (response.ok) {
+        // HTTP 200: Successful Login
+        console.log("Login Successful! Server Response:", data.message);
+        setSuccess(true);
+        setError(null);
+        
+        // Clear inputs after successful login
+        setEmail('');
+        setPassword('');
+ navigate('/')
+      } else {
+        // HTTP 401 or 404 from backend: Authentication Failure
+        console.error("Authentication Failure. Server Response:", data.message);
+        setError(data.message || "Authentication Failure. Invalid Network ID or Access Key.");
+        setSuccess(false);
+      }
+
+    } catch (networkError) {
+      // Critical network errors (e.g., server offline, CORS block)
+      console.error("Network Error:", networkError);
+      setError("Critical network connection failure. Unable to reach access gate.");
+      setSuccess(false);
     }
     
     setLoading(false);
   };
 
   return (
-    // Background: Deepest black (950) for max contrast, matching register form.
     <div className="relative flex items-center justify-center min-h-screen bg-gray-950 text-white overflow-hidden p-4">
       {/* Background Glows: Stronger Fuchsia and Cyan (Matching Register Form) */}
       <div className="absolute top-0 left-0 w-80 h-80 bg-fuchsia-500/30 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
@@ -77,7 +113,7 @@ export const LoginForm = () => {
               // Matching Input Style
               className={`w-full p-3 pl-12 pr-4 bg-gray-700/70 text-white border border-gray-600/50 rounded-xl 
                           focus:outline-none focus:ring-4 focus:ring-fuchsia-500/50 focus:border-cyan-400 hover:border-fuchsia-400 placeholder-gray-400 transition-all duration-300`}
-              disabled={loading}
+              disabled={loading || success} // Disable input on load or success
               required
             />
           </div>
@@ -93,22 +129,26 @@ export const LoginForm = () => {
               // Matching Input Style
               className={`w-full p-3 pl-12 pr-4 bg-gray-700/70 text-white border border-gray-600/50 rounded-xl 
                           focus:outline-none focus:ring-4 focus:ring-fuchsia-500/50 focus:border-cyan-400 hover:border-fuchsia-400 placeholder-gray-400 transition-all duration-300`}
-              disabled={loading}
+              disabled={loading || success} // Disable input on load or success
               required
             />
           </div>
 
-          {/* Error Message: Matching Register Form Style */}
-          {error && (
-            <div className={`p-4 rounded-xl bg-rose-600/20 border border-rose-500/50 text-${NEON_RED} text-sm text-center font-semibold shadow-[0_0_15px_rgba(244,63,94,0.5)]`}>
-              {error}
+          {/* Status Message Display */}
+          {(error || success) && (
+            <div className={`p-4 rounded-xl text-sm text-center font-semibold 
+              ${error ? `bg-rose-600/20 border border-rose-500/50 text-${NEON_RED} shadow-[0_0_15px_rgba(244,63,94,0.5)]`
+                    : `bg-emerald-600/20 border border-emerald-500/50 text-${NEON_GREEN} shadow-[0_0_15px_rgba(52,211,153,0.5)]`
+              } flex items-center justify-center gap-3`}>
+                {success ? <CheckCircle className="w-5 h-5"/> : null}
+                {error || "Authentication successful. Redirecting..."}
             </div>
           )}
 
           {/* Login Button: Matching Register Form Style */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || success}
             className={`w-full mt-8 ${BUTTON_GRADIENT} text-base sm:text-lg py-3 rounded-xl font-bold uppercase tracking-widest text-white
                         shadow-[0_10px_40px_rgba(0,255,255,0.4)] transition-all duration-300 transform hover:scale-[1.03] hover:shadow-[0_15px_60px_rgba(236,72,153,0.6)] disabled:opacity-50 disabled:cursor-not-allowed`}
           >
@@ -116,6 +156,11 @@ export const LoginForm = () => {
               <span className="flex items-center justify-center gap-2">
                 <Loader2 className="w-5 h-5 animate-spin" />
                 AUTHENTICATING...
+              </span>
+            ) : success ? (
+              <span className="flex items-center justify-center gap-2">
+                <CheckCircle size={20} />
+                ACCESS GRANTED
               </span>
             ) : (
               <span className="flex items-center justify-center gap-2">

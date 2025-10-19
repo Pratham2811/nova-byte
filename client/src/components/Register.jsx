@@ -50,7 +50,7 @@ export const UserRegistrationForm = () => {
       let data = {};
       try {
           data = await response.json();
-      } catch (e) {
+      } catch (error) {
           data.message = `Server error, could not read JSON. Status: ${response.status}`;
       }
       
@@ -58,7 +58,9 @@ export const UserRegistrationForm = () => {
       if (response.ok) {
         setStatus(`SUCCESS: ${data.message || 'User created successfully.'}`);
         setStatusType("success");
-        navigate('/')
+        setTimeout(()=>{
+          navigate('/login')  
+        },2000)
       } else {
         // Server responded with an error status (4xx or 5xx)
         setStatus(`${data.message || 'Server error occurred.'} (Code: ${response.status})`);

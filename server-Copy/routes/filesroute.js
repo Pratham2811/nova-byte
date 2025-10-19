@@ -38,55 +38,56 @@ console.log("Hiii");
 
 const upload = multer({ storage: storage })
 
-router.post("/upload", upload.single("uploadedFile"), async(req, res, next) => {  
-   console.log("Hiii");
-   console.log(req.body);
-   const { id, originalname, filename } = req.file;
-   const extension=path.extname(originalname)
-   console.log(extension);
-   
-     let { parentDirId } = req.body;
-if(parentDirId==="undefined" || parentDirId==="null"|| parentDirId===""){ parentDirId=directoriesData[0].id};
-  console.log(parentDirId);
-  
-  try{
- 
-      filesData.push({
-        id,
-        extension,
-        name:originalname,
-        deleted:false,
-        parentDir:parentDirId,
-        
-      })
-   
+router.post("/upload", upload.array("uploadedFiles"), async (req, res) => {
+try {
+let { parentDirId } = req.body;
+if (!parentDirId || parentDirId === "undefined" || parentDirId === "null") {
+parentDirId = directoriesData[0].id; // Default root folder
+}
 
-      const pushInDirectory=directoriesData.find((folderId)=>{
-      return folderId.id==parentDirId;
-    })
+const uploadedFiles = req.files;
 
-    console.log(pushInDirectory);
-    
-   console.log("Puck Your Slf");
-   
-    pushInDirectory.files.push(id)
-        try{
-      await writeFile("./filesDB.json",JSON.stringify(filesData));
-       await writeFile("./directoriesDB.json",JSON.stringify(directoriesData));
-       res.status(201).json({message:"File Uploaded Successfully"})
-        }catch(error){
-          console.log("Katori");
-          
-          res.status(400).json({message:"Error writing file"});
-        }
+if (!uploadedFiles || uploadedFiles.length === 0) {
+  return res.status(400).json({ message: "No files uploaded" });
+}
+
+const parentDirectory = directoriesData.find((d) => d.id === parentDirId);
+if (!parentDirectory) {
+  return res.status(404).json({ message: "Parent directory not found" });
+}
+
+uploadedFiles.forEach((file) => {
+  const { id, originalname } = file;
+ const extension=path.extname(file.originalname)
+ console.log(extension);
  
-  }catch(error){
-  
-    
-    res.status(500).json({message:"Could Not save Files"});
-  }
+  const fileEntry = {
+    id,
+    name: originalname,
+    extension,
+    deleted: false,
+    parentDir: parentDirId,
+  };
+
+  filesData.push(fileEntry);
+  parentDirectory.files.push(id);
 });
 
+await writeFile("./filesDB.json", JSON.stringify(filesData, null, 2));
+await writeFile("./directoriesDB.json", JSON.stringify(directoriesData, null, 2));
+
+res.status(201).json({
+  message: `${uploadedFiles.length} file(s) uploaded successfully`,
+});
+
+
+
+
+} catch (error) {
+console.error("Upload error:", error);
+res.status(500).json({ message: "Error while uploading files" });
+}
+});
 
 //serving file
 router.get("/:id", (req, res) => {
