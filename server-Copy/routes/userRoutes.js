@@ -49,6 +49,8 @@ router.post("/create-user", async(req,res)=>{
 
 
 router.post("/login-user",(req,res)=>{
+
+
     const{email,password}=req.body;
 
     
@@ -57,7 +59,7 @@ router.post("/login-user",(req,res)=>{
     })
     
     if(!foundUser){
-       
+
         console.log("Login Failed: Email not found.");
         return res.status(404).json({message:"Network ID not recognized. User not found."})
     }
@@ -71,10 +73,10 @@ router.post("/login-user",(req,res)=>{
     
     
     console.log("User Found and Authenticated.");
+    res.cookie()
    
     return res.status(200).json({message:`Access granted for user ${foundUser.name}. Welcome to the Drive.`,
-     userId:foundUser.id,
-     rootDirId:foundUser.rootDirId
+  
     })
 })
 
