@@ -47,5 +47,12 @@
     "email": "shubhammadane6@gmail.com",
     "password": "Shubham@123",
     "rootDirId": "3531fd9f-0923-4e77-884a-629fc318bfc9"
+  },
+  {
+    "id": "1bed462e-ba17-4496-931a-25ed40befb71",
+    "name": "abc",
+    "email": "abc@123",
+    "password": "123",
+    "rootDirId": "2982014a-7398-432d-9ea9-ed34f5aac51e"
   }
 ]

@@ -5,6 +5,7 @@ import { TempStoragePath } from "../path.js";
 import filesData from "../filesDB.json" with { type: 'json' }
 import { rm, writeFile } from "node:fs/promises";
 import directoriesData from "../directoriesDB.json" with { type: 'json' }
+import usersData from "../usersDB.json" with { type: 'json' }
 import multer from "multer";
 
 const router=express.Router();
@@ -39,10 +40,15 @@ console.log("Hiii");
 const upload = multer({ storage: storage })
 
 router.post("/upload", upload.array("uploadedFiles"), async (req, res) => {
+  const{uid}=req.cookies;
+  const user=usersData.find((user)=>user.id===uid);
+
 try {
 let { parentDirId } = req.body;
 if (!parentDirId || parentDirId === "undefined" || parentDirId === "null") {
-parentDirId = directoriesData[0].id; // Default root folder
+  const rootDirectory=directoriesData.find((folder)=>folder.id===req.user.rootDirId)
+  parentDirId=rootDirectory.id;
+
 }
 
 const uploadedFiles = req.files;
@@ -65,6 +71,7 @@ uploadedFiles.forEach((file) => {
     id,
     name: originalname,
     extension,
+    userId:uid,
     deleted: false,
     parentDir: parentDirId,
   };
@@ -92,7 +99,10 @@ res.status(500).json({ message: "Error while uploading files" });
 //serving file
 router.get("/:id", (req, res) => {
   const FilePath = PathJoinerTemp(req);
-
+  const{uid}=req.cookies
+   if(req.user.id!=uid){
+    return res.status(401).json({message:"Unaouthorized access "})
+   }
   try{
   const {id}=req.params;
   console.log(id);
@@ -106,8 +116,12 @@ router.get("/:id", (req, res) => {
   })
 
 
+
   if(!fileData){
    return  res.status(404).json({message:"File Not Found"})
+  }
+  if(fileData.userId!=req.user.id){
+        return res.status(401).json({message:"Unaouthorized access "})
   }
   console.log(fileData);
   
@@ -134,7 +148,8 @@ router.get("/:id", (req, res) => {
 router.delete("/:id", async (req, res) => {
 
   const {id}=req.params;
-  
+  const {uid}=req.cookies
+   
 
   try {
 const fileIndex=filesData.findIndex((file)=>file.id==id)
@@ -144,7 +159,9 @@ if(fileIndex===-1){
 }
   const fileData= filesData[fileIndex];
   
-  
+  if(req.user.id!==fileData.userId){
+         return res.status(401).json({message:"Unaouthorized access "})
+  }
   // await rm(`./storage2/${id}${fileData.extension}`)
      fileData.deleted=true;
  
@@ -184,6 +201,11 @@ router.patch("/rename/:id", async (req, res,next) => {
   if(!fileData){
     return res.status(400).json({message:"File not found "})
   }
+    
+  if(req.user.id!==fileData.userId){
+         return res.status(401).json({message:"Unaouthorized access "})
+  }
+  
   fileData.name=newFilename;
 await writeFile("./filesDB.json", JSON.stringify(filesData, null, 2));
   res.status(200).json({message:"File renamed sucessfully"})

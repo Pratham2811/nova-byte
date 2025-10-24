@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Upload, File as FileIcon, CheckCircle, XCircle } from "lucide-react";
 import { MdCancel } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 const NEON_CYAN = "cyan-400";
 const NEON_FUCHSIA = "fuchsia-400";
@@ -16,7 +17,7 @@ const [uploadFiles, setUploadFiles] = useState([]);
 const [uploadStatus, setUploadStatus] = useState("");
 const [progress, setProgress] = useState(0);
 const [statusType, setStatusType] = useState("");
-
+const navigate=useNavigate()
 const handleChange = (event) => {
 const files = Array.from(event.target.files);
 if (files.length > 0) {
@@ -56,6 +57,7 @@ try {
   const response = await fetch("http://localhost:80/file/upload", {
     method: "POST",
     body: formData,
+    credentials:"include"
   });
 
   clearInterval(progressInterval);
@@ -70,6 +72,11 @@ try {
     setUploadStatus(`Upload failed: ${errorText || response.statusText}`);
     setStatusType("error");
     setProgress(100);
+    if(response.status===401){
+        setTimeout(()=>{
+            navigate("/login")
+        },5000)
+    }
   }
 } catch (err) {
   console.error("Upload error:", err);

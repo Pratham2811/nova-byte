@@ -7,6 +7,7 @@ import { STORAGE_PATH } from "../path.js";
 import { TempStoragePath } from "../path.js";
 import filesData from "../filesDB.json" with {type:'json'}
 import directoriesDB from "../directoriesDB.json" with {type:'json'}
+import usersData from "../usersDB.json" with {type:'json'}
 import { writeFile,rm } from "fs/promises";
 
 const router=express.Router()
@@ -27,28 +28,52 @@ const router=express.Router()
 
 router.get("/{:id}", async (req, res) => {
   const { id } = req.params;
+console.log(id);
+
+const {uid}=req.cookies
 
 
+console.log(req.user.id);
 
+  
+   
   try {
     const directoryData = id
-      ? directoriesDB.find((folder) => folder.id == id)
-      : directoriesDB[0];
+      ? directoriesDB.find((folder) => folder.id ===id)
+      : directoriesDB.find((folder)=>folder.userId===req.user.id)
+const uidData=directoriesDB.find((folder)=>folder.id===req.user.rootDirId)
+
 
     if (!directoryData) {
       return res.status(404).json({ message: "Directory not found" });
     }
 
+    
+    
+if(req.user.id!==directoryData.userId){
+  console.log("Hiiihfirfirifrifriftivgrvbgrjlg;jbng;jn;");
+  
+      return res.status(401).json({message:"Unaouthorized access "})
+}
+
+
     const files = directoryData.files.map((fileId) => {
+      console.log("fileId from file:",fileId);
+      
+      
       return filesData.find((file) => file.id === fileId);
     });
+     console.log(files);
      
     const directories = directoryData.directories.map((folderId) => {
       return directoriesDB.find((dir) => dir.id === folderId);
     });
- 
 
- 
+console.log(directories);
+
+ if(uid!==req.user.id){
+  return res.status(401).json({message:"Unauthorized access"})
+ }
  
     return res.status(200).json({ ...directoryData, files, directories });
   } catch (error) {
@@ -59,12 +84,19 @@ router.get("/{:id}", async (req, res) => {
 router.post("/create-directory", async (req, res, next) => {
  
 const{foldername}=req.body||"New Folder";
-const parentdirId=req.body.parentDirId||"99b32b51-768e-489b-aa9b-a74b2795f658";
-
-  try {
-    const directoriesData=directoriesDB;
+const {uid}=req.cookies
+ const user=usersData.find((user)=>user.id===uid)
+     const directoriesData=directoriesDB;
+const parentdirId=req.body.parentDirId||req.user.rootDirId;
     
+    let parentDirectory=directoriesData.find((directory)=>directory.id===parentdirId)
+ 
+  try {
 
+    
+    if(parentDirectory.userId!==req.user.id){
+          return res.status(401).json({message:"Unaouthorized access "})
+    }
     const id=crypto.randomUUID();
     
     
@@ -72,11 +104,17 @@ const parentdirId=req.body.parentDirId||"99b32b51-768e-489b-aa9b-a74b2795f658";
       id:id,
       name:foldername,
       parentDir:parentdirId,
+      userId:uid,
       files:[],
       directories:[]
 
     })
-    const parentDirectory=directoriesData.find((directory)=>directory.id===parentdirId)
+
+
+    if(!parentDirectory && !parentdirId){
+      parentDirectory=directoriesDB.find((folder)=> folder.id===req.user.rootDirId);
+
+    }
     if(!parentDirectory) return res.status(404).json({message:"Parent directory does not Exist"})
     
     parentDirectory.directories.push(id);
@@ -98,7 +136,11 @@ router.patch("/rename/:id", async(req,res)=>{
    return  folder.id===id;
   })
  if(!directory) return res.status(404).json({message:"No directory Founded  "})
+  if(directory.userId!=req.user.id){
+        return res.status(401).json({message:"Unaouthorized access "})
+  }
   directory.name=newFilename;
+
 try{
  await writeFile("./directoriesDB.json",JSON.stringify(directoriesDB))
   res.status(200).json({message:"Folder renamed succuscessfully"})
@@ -130,7 +172,7 @@ router.delete("/:id",async(req,res,next)=>{
           const fileIndex = filesData.findIndex((file) => file.id == fileId);
           if (fileIndex !== -1) {
             const fileData = filesData[fileIndex];
-            // Delete file from storage
+               // Delete file from storage
            
             const filePath=path.join(TempStoragePath,fileId+fileData.extension);
          
@@ -160,9 +202,15 @@ router.delete("/:id",async(req,res,next)=>{
 
 
     await recursive(directoryData.files, directoryData.directories);
-  const parentDir=directoriesDB.find((folder)=>{
+  let parentDir=directoriesDB.find((folder)=>{
     return folder.id===directoryData.parentDir;
   })
+  if(!parentDir){
+      parentDir=req.user.rootDirId;
+  }
+  if(req.user.id!==parentDir.userId){
+         return res.status(401).json({message:"Unaouthorized access "})
+  }
   if (parentDir) {
   parentDir.directories = parentDir.directories.filter(did => did !== id);
 }

@@ -4,12 +4,11 @@ import usersData from "../usersDB.json" with {type:"json"}
 import {writeFile} from "fs/promises"
 const router=express.Router();
 
-console.log("due-due-i-de-i");
+
 
 router.post("/create-user", async(req,res)=>{
     const UserId=crypto.randomUUID();
-    console.log(req.body);
-    
+   
     const {username,email,password}=req.body;
     const dirId=crypto.randomUUID();
    if(!username|| !email||!password){
@@ -50,7 +49,8 @@ router.post("/create-user", async(req,res)=>{
 
 router.post("/login-user",(req,res)=>{
 
-
+  console.log("hiiii");
+  
     const{email,password}=req.body;
 
     
@@ -71,9 +71,17 @@ router.post("/login-user",(req,res)=>{
         return res.status(401).json({message:"Access Key Invalid. Authentication failed."})
     }
     
+
     
     console.log("User Found and Authenticated.");
-    res.cookie()
+  
+    
+    res.cookie("uid",`${foundUser.id}`,{
+        httpOnly:true,
+        secure:true,
+        sameSite:"none"
+
+    })
    
     return res.status(200).json({message:`Access granted for user ${foundUser.name}. Welcome to the Drive.`,
   

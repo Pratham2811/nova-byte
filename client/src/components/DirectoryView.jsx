@@ -55,12 +55,25 @@ export const FileList = () => {
       // Added a small delay to showcase the loading state
       // await new Promise(resolve => setTimeout(resolve, 500)); 
       
-      const response = await fetch(`http://localhost:80/directory/${dirid || ""}`);
-      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+      const response = await fetch(`http://localhost:80/directory/${dirid || ""}`,{
+        credentials:"include"
+      });
+      if (!response.ok){
+        if(response.status===401){
+           
+          setTimeout(()=>{
+            navigate("/login")
+          },2000)
+        }
+         
+        
+      } 
       const data = await response.json();
       setDirectoriesList(data.directories || []);
       setFilesList(data.files || []);
+    
     } catch (err) {
+      
       setError(err.message);
     } finally {
       setLoading(false);
@@ -82,6 +95,7 @@ export const FileList = () => {
   };
 
   const handleFolderClick = (folderId) => {
+    console.log("Navigating");
     navigate(`/directory/${folderId}`);
   };
 
@@ -104,7 +118,7 @@ export const FileList = () => {
   const handleDeleteFile = async (file) => {
     const url = `http://localhost:80/file/${file.id}`;
     try {
-      const res = await fetch(url, { method: "DELETE" });
+      const res = await fetch(url, { method: "DELETE" ,credentials:"include"});
       if (!res.ok) throw new Error(`Error: ${res.statusText}`);
       const data = await res.json();
       setShowDeletePopup(false);
@@ -123,6 +137,7 @@ export const FileList = () => {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ oldFilename: oldFilename.name, newFilename }),
+        credentials:"include"
       });
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
       await response.text();
@@ -143,6 +158,7 @@ export const FileList = () => {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ oldName: selectedFolder.name, newName }),
+        credentials:"include"
       });
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
       await response.text();
@@ -159,7 +175,7 @@ export const FileList = () => {
   const handleDeleteFolder = async (folder) => {
     const url = `http://localhost:80/directory/${folder.id}`;
     try {
-      const res = await fetch(url, { method: "DELETE" });
+      const res = await fetch(url, { method: "DELETE" ,credentials:"include"});
       if (!res.ok) throw new Error(`Error: ${res.statusText}`);
       const data = await res.json();
       setShowFolderDelete(false);

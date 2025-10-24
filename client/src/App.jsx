@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage';
 import {UserRegistrationForm} from "./components/Register"
 import { BrowserRouter, Routes,Route } from 'react-router-dom';
 import { LoginForm } from './components/Login';
+import { ProfilePage } from './pages/ProfilePage';
 
 function App() {
   
@@ -15,6 +16,7 @@ function App() {
   <Route path='register' element={<UserRegistrationForm/>}/>
   <Route path='login' element={<LoginForm/>}/>
   <Route path="/directory/:dirid" element={<HomePage/>}/>
+  <Route path='/user-profile' element={<ProfilePage/>}/>
 </Routes>
 </BrowserRouter>
   </>

@@ -40,6 +40,7 @@ export const LoginForm = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email: email, password: password }),
+        credentials:"include"
       });
 
       let data = {};
@@ -107,7 +108,7 @@ export const LoginForm = () => {
             <User className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-${NEON_CYAN} z-10`} />
             <input
               type="email"
-              placeholder="NETWORK ID (Email)"
+              placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               // Matching Input Style
@@ -122,8 +123,8 @@ export const LoginForm = () => {
           <div className="relative">
             <Lock className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-${NEON_FUCHSIA} z-10`} />
             <input
-              type="password"
-              placeholder="ACCESS KEY (Password)"
+              type="text"
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               // Matching Input Style

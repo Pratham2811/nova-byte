@@ -6,22 +6,31 @@ import filesroute from "./routes/filesroute.js";
 import trasroutes from "./routes/trashroutes.js";
 import { error } from "console";
 import userRoutes from "./routes/userRoutes.js"
+import cookieParser from "cookie-parser"
+import checkAuth from "./auth.js";
 const app = express();
 
 
 //parsing request
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin:"http://localhost:5173",
+    credentials:true,
 
+  })
 
-app.use("/directory",directoryroutes);
+);
+app.use(cookieParser())
+
+app.use("/directory",checkAuth,directoryroutes);
 //files route
-app.use("/file",filesroute);
+app.use("/file",checkAuth,filesroute);
 app.use("/user",userRoutes)
 
 
 //trash
-app.use("/trash",trasroutes);
+app.use("/trash",checkAuth,trasroutes);
 
 app.use((error,req,res,next)=>{
   console.log("Error come");
