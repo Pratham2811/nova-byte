@@ -146,6 +146,7 @@ router.get("/:id", (req, res) => {
 });
 //move file to trash
 router.delete("/:id", async (req, res) => {
+console.log("Postmanewmdjenfrjnfrjfnrjfnrj");
 
   const {id}=req.params;
   const {uid}=req.cookies

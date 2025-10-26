@@ -2,6 +2,7 @@ import express from "express"
 import directoriesData from "../directoriesDB.json" with {type:"json"}
 import usersData from "../usersDB.json" with {type:"json"}
 import {writeFile} from "fs/promises"
+import checkAuth from "../auth.js";
 const router=express.Router();
 
 
@@ -87,5 +88,18 @@ router.post("/login-user",(req,res)=>{
   
     })
 })
-
+router.post("/logout-user",(req,res)=>{
+    // res.cookie("uid","",{
+    //     maxAge:0,
+    // })
+    res.clearCookie("uid")
+    res.status(204).end();
+})
+router.get("/",checkAuth,(req,res,next)=>{
+  res.status(200).json({
+    username:req.user.name,
+    email:req.user.email
+  })
+   
+})
 export default router

@@ -28,15 +28,7 @@ const router=express.Router()
 
 router.get("/{:id}", async (req, res) => {
   const { id } = req.params;
-console.log(id);
-
-const {uid}=req.cookies
-
-
-console.log(req.user.id);
-
-  
-   
+  const {uid}=req.cookies
   try {
     const directoryData = id
       ? directoriesDB.find((folder) => folder.id ===id)

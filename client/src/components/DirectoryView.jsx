@@ -16,6 +16,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import CreateFolder from "./CreateFolder";
 import { UploadForm } from "./UploadForm";
 import { IoIosArrowBack } from "react-icons/io";
+import { FileViewer } from "../components/FileViewer.jsx"; // adjust path if needed
 
 // Define accent colors for a consistent theme
 const NEON_CYAN = "text-cyan-400";
@@ -36,6 +37,7 @@ export const FileList = () => {
   const [showRenameComp, setShowRenameComp] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   // For folder actions
   const [selectedFolder, setSelectedFolder] = useState(null);
@@ -47,33 +49,30 @@ export const FileList = () => {
   // console.log(directoriesList); // Cleaned up console logs
   // console.log(filesList); // Cleaned up console logs
 
-
   const fetchFiles = async () => {
     setLoading(true);
     setError("");
     try {
       // Added a small delay to showcase the loading state
-      // await new Promise(resolve => setTimeout(resolve, 500)); 
-      
-      const response = await fetch(`http://localhost:80/directory/${dirid || ""}`,{
-        credentials:"include"
-      });
-      if (!response.ok){
-        if(response.status===401){
-           
-          setTimeout(()=>{
-            navigate("/login")
-          },2000)
+      // await new Promise(resolve => setTimeout(resolve, 500));
+
+      const response = await fetch(
+        `http://localhost:80/directory/${dirid || ""}`,
+        {
+          credentials: "include",
         }
-         
-        
-      } 
+      );
+      if (!response.ok) {
+        if (response.status === 401) {
+          setTimeout(() => {
+            navigate("/login");
+          });
+        }
+      }
       const data = await response.json();
       setDirectoriesList(data.directories || []);
       setFilesList(data.files || []);
-    
     } catch (err) {
-      
       setError(err.message);
     } finally {
       setLoading(false);
@@ -101,9 +100,12 @@ export const FileList = () => {
 
   const handleOpenFile = (file) => {
     const url = `http://localhost:80/file/${file.id}?action=open`;
-    window.open(url, "_blank");
-  };
 
+    setSelectedFile(file);
+  };
+  const handleCloseViewer = () => {
+    setSelectedFile(null);
+  };
   const handleDownloadFile = (file) => {
     const url = `http://localhost:80/file/${file.id}?action=download`;
     const a = document.createElement("a");
@@ -118,14 +120,17 @@ export const FileList = () => {
   const handleDeleteFile = async (file) => {
     const url = `http://localhost:80/file/${file.id}`;
     try {
-      const res = await fetch(url, { method: "DELETE" ,credentials:"include"});
+      const res = await fetch(url, {
+        method: "DELETE",
+        credentials: "include",
+      });
       if (!res.ok) throw new Error(`Error: ${res.statusText}`);
       const data = await res.json();
       setShowDeletePopup(false);
-      show(`${file.name} ${data?.message || 'deleted successfully'} ✅`);
+      show(`${file.name} ${data?.message || "deleted successfully"} ✅`);
       fetchFiles();
     } catch (error) {
-      setError("Error deleting file:",error);
+      setError("Error deleting file:", error);
       show(`Failed to delete ${file.name} ❌`);
     }
   };
@@ -137,14 +142,14 @@ export const FileList = () => {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ oldFilename: oldFilename.name, newFilename }),
-        credentials:"include"
+        credentials: "include",
       });
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
       await response.text();
       show(`Renamed file to ${newFilename} ✅`);
       fetchFiles();
     } catch (error) {
-      setError("Error renaming file:",error);
+      setError("Error renaming file:", error);
       show(`Failed to rename file ❌`);
     }
     setShowRenameComp(false);
@@ -158,14 +163,14 @@ export const FileList = () => {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ oldName: selectedFolder.name, newName }),
-        credentials:"include"
+        credentials: "include",
       });
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
       await response.text();
       fetchFiles();
       show(`Renamed folder to ${newName} ✅`);
     } catch (error) {
-      setError("Error renaming folder:",error);
+      setError("Error renaming folder:", error);
       show(`Failed to rename folder ❌`);
     }
     setShowFolderRename(false);
@@ -175,29 +180,31 @@ export const FileList = () => {
   const handleDeleteFolder = async (folder) => {
     const url = `http://localhost:80/directory/${folder.id}`;
     try {
-      const res = await fetch(url, { method: "DELETE" ,credentials:"include"});
+      const res = await fetch(url, {
+        method: "DELETE",
+        credentials: "include",
+      });
       if (!res.ok) throw new Error(`Error: ${res.statusText}`);
       const data = await res.json();
       setShowFolderDelete(false);
-      show(`${folder.name} ${data?.message || 'deleted successfully'} ✅`);
+      show(`${folder.name} ${data?.message || "deleted successfully"} ✅`);
       fetchFiles();
     } catch (error) {
-      setError("Error deleting folder:",error);
+      setError("Error deleting folder:", error);
       show(`Failed to delete folder ❌`);
     }
   };
 
   // Empty state checks
-  const isEmpty =
-    directoriesList.length === 0 && filesList.length === 0;
+  const isEmpty = directoriesList.length === 0 && filesList.length === 0;
 
   return (
     // 1. Vibrant Background and Global Styling
-    <div className={`p-4 sm:p-6 md:p-8 flex-1 flex flex-col ${BG_DARK} text-gray-100 min-h-screen`}>
-      
+    <div
+      className={`p-4 sm:p-6 md:p-8 flex-1 flex flex-col ${BG_DARK} text-gray-100 min-h-screen`}
+    >
       {/* HEADER: Breadcrumb & Actions */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 border-b border-fuchsia-400/30 pb-4">
-        
         {/* Left: Back & Breadcrumb */}
         <div className="flex items-center gap-3 mb-4 sm:mb-0">
           {dirid && (
@@ -213,11 +220,11 @@ export const FileList = () => {
             /{dirid || "Root Directory"}
           </h1>
         </div>
-        
+
         {/* Right: Actions */}
         <div className="flex gap-4 items-center">
           <CreateFolder directoryPath={dirid} fetchFiles={fetchFiles} />
-          <button 
+          <button
             onClick={() => setShowUpload(true)}
             className={`p-2 rounded-full ${NEON_CYAN} ${ITEM_BG} ${BORDER} hover:bg-gray-700/80 transition-all duration-200 shadow-md hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]`}
             aria-label="Upload File"
@@ -242,13 +249,15 @@ export const FileList = () => {
       {!loading && isEmpty && (
         <div className="text-center text-gray-400 py-10 text-lg">
           <Folder size={30} className="mx-auto mb-3" />
-          <p>This folder is empty. Get started by creating a folder or uploading a file!</p>
+          <p>
+            This folder is empty. Get started by creating a folder or uploading
+            a file!
+          </p>
         </div>
       )}
 
       {/* File/Folder List */}
       <div className="space-y-3 flex-1">
-        
         {/* Render Folders First */}
         <div className="space-y-3">
           {directoriesList.map((folder) => (
@@ -256,12 +265,14 @@ export const FileList = () => {
               key={folder.id}
               className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 ${ITEM_BG} backdrop-blur-sm rounded-xl ${BORDER} shadow-lg transition-all duration-300 hover:shadow-[0_0_20px_rgba(74,222,128,0.3)] hover:border-teal-400/50`}
             >
-              <div 
+              <div
                 className="flex items-center gap-4 mb-3 sm:mb-0 cursor-pointer flex-grow"
                 onClick={() => handleFolderClick(folder.id)}
               >
                 <Folder className={`${NEON_TEAL} w-6 h-6 flex-shrink-0`} />
-                <span className="font-semibold text-lg text-gray-200 truncate">{folder.name}</span>
+                <span className="font-semibold text-lg text-gray-200 truncate">
+                  {folder.name}
+                </span>
               </div>
               <div className="flex gap-3 justify-end sm:justify-start">
                 {/* Folder Actions */}
@@ -293,7 +304,7 @@ export const FileList = () => {
             </div>
           ))}
         </div>
-        
+
         {/* Render Files */}
         <div className="space-y-3">
           {filesList.map((file) => (
@@ -399,11 +410,14 @@ export const FileList = () => {
         />
       )}
       {showUpload && (
-        <UploadForm 
-          path={dirid} 
-          onClose={() => setShowUpload(false)} 
+        <UploadForm
+          path={dirid}
+          onClose={() => setShowUpload(false)}
           fetchFiles={fetchFiles} // Added fetchFiles to re-fetch after upload
         />
+      )}
+      {selectedFile && (
+        <FileViewer file={selectedFile} onClose={handleCloseViewer} />
       )}
     </div>
   );
