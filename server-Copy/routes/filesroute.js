@@ -7,6 +7,7 @@ import { rm, writeFile } from "node:fs/promises";
 import directoriesData from "../directoriesDB.json" with { type: 'json' }
 import usersData from "../usersDB.json" with { type: 'json' }
 import multer from "multer";
+import { Idvalidation } from "../validid.js";
 
 const router=express.Router();
 
@@ -35,7 +36,7 @@ const storage = multer.diskStorage({
 
   }
 })
-console.log("Hiii");
+
 
 const upload = multer({ storage: storage })
 
@@ -43,6 +44,7 @@ router.post("/upload", upload.array("uploadedFiles"), async (req, res) => {
   const{uid}=req.cookies;
   const user=usersData.find((user)=>user.id===uid);
 
+ 
 try {
 let { parentDirId } = req.body;
 if (!parentDirId || parentDirId === "undefined" || parentDirId === "null") {
@@ -65,7 +67,7 @@ if (!parentDirectory) {
 uploadedFiles.forEach((file) => {
   const { id, originalname } = file;
  const extension=path.extname(file.originalname)
- console.log(extension);
+
  
   const fileEntry = {
     id,
@@ -98,14 +100,20 @@ res.status(500).json({ message: "Error while uploading files" });
 
 //serving file
 router.get("/:id", (req, res) => {
+ const {id}=req.params;
+// if(! Idvalidation(id)){
+//   return res.status(401).json({message:"File has not valid Id"})
+// }
+
+
   const FilePath = PathJoinerTemp(req);
   const{uid}=req.cookies
    if(req.user.id!=uid){
     return res.status(401).json({message:"Unaouthorized access "})
    }
   try{
-  const {id}=req.params;
-  console.log(id);
+ 
+
   
   const fileData=filesData.find((file)=>{
     
@@ -123,21 +131,16 @@ router.get("/:id", (req, res) => {
   if(fileData.userId!=req.user.id){
         return res.status(401).json({message:"Unaouthorized access "})
   }
-  console.log(fileData);
+  
   
   const filename=`${id}${fileData.extension}`
   const FinalPath=path.join(FilePath,filename)
    res.setHeader("content-Disposition", "inline");
   
   if (req.query.action === "download") {
-    res.set("content-Disposition", `attachment ;filename=${fileData.name}`);
-    console.log("sending file");
-    res.sendFile(FinalPath,(error)=>{
-      if(!res.headersSent && error){
-       return res.status(404).json({error:"File not found"})
-      }
+  
     
-    });
+  return res.download(FinalPath,fileData.name)
   }
   res.sendFile(FinalPath);
 }catch(error){
@@ -146,7 +149,7 @@ router.get("/:id", (req, res) => {
 });
 //move file to trash
 router.delete("/:id", async (req, res) => {
-console.log("Postmanewmdjenfrjnfrjfnrjfnrj");
+
 
   const {id}=req.params;
   const {uid}=req.cookies
@@ -169,10 +172,10 @@ if(fileIndex===-1){
   const parentDir=directoriesData.find((folderId)=>folderId.id===fileData.parentDir);
   
  
-  console.log(parentDir.files);
+ 
   
  parentDir.files = parentDir.files.filter((fileId)=>fileId!==id);
- console.log(parentDir.files);
+
        
        await writeFile("./filesDB.json",JSON.stringify(filesData))
        await writeFile("./directoriesDB.json",JSON.stringify(directoriesData))
@@ -217,6 +220,14 @@ await writeFile("./filesDB.json", JSON.stringify(filesData, null, 2));
   }
 });
 
-
+router.param("id",(req,res,next)=>{
+  const {id}=req.params
+  if(id.length!==36){
+        return res.status(401).json({message:"File has not valid Id"})
+    } 
+ next();
+  
+  
+})
 
 export default router

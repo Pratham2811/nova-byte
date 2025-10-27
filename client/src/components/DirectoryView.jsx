@@ -106,15 +106,12 @@ export const FileList = () => {
   const handleCloseViewer = () => {
     setSelectedFile(null);
   };
-  const handleDownloadFile = (file) => {
+  const handleDownloadFile = async (file) => {
     const url = `http://localhost:80/file/${file.id}?action=download`;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = file.name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    show(`Starting download for ${file.name} 📥`);
+    const response=await fetch (url,{
+      method:"GET",
+      credentials:"include"
+    })
   };
 
   const handleDeleteFile = async (file) => {

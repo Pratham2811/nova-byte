@@ -1,7 +1,10 @@
 import usersData from "./usersDB.json" with {type:"json"}
 
 export default function checkAuth(req,res,next){
+   
+    
     const {uid}=req.cookies;
+     console.log(uid);
     const user=usersData.find((user)=>user.id===uid)
    if(!uid || !user){
     return res.status(401).json({error:"Not logged In / User not Found"})
