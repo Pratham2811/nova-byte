@@ -7,7 +7,8 @@ import { rm, writeFile } from "node:fs/promises";
 import directoriesData from "../directoriesDB.json" with { type: 'json' }
 import usersData from "../usersDB.json" with { type: 'json' }
 import multer from "multer";
-import { Idvalidation } from "../validid.js";
+import { validateIdMiddleware } from "../middlewares/validateIdMiddleware.js";
+
 
 const router=express.Router();
 
@@ -220,14 +221,9 @@ await writeFile("./filesDB.json", JSON.stringify(filesData, null, 2));
   }
 });
 
-router.param("id",(req,res,next)=>{
-  const {id}=req.params
-  if(id.length!==36){
-        return res.status(401).json({message:"File has not valid Id"})
-    } 
- next();
-  
+router.param("id",validateIdMiddleware)
+router.param("/rename/id",validateIdMiddleware,()=>{
+  console.log("rename was running");
   
 })
-
 export default router

@@ -7,7 +7,7 @@ import trasroutes from "./routes/trashroutes.js";
 import { error } from "console";
 import userRoutes from "./routes/userRoutes.js"
 import cookieParser from "cookie-parser"
-import checkAuth from "./auth.js";
+import checkAuth from "./middlewares/authMiddleware.js";
 const app = express();
 
 

@@ -55,13 +55,13 @@ if(req.user.id!==directoryData.userId){
       
       return filesData.find((file) => file.id === fileId);
     });
-     console.log(files);
-     
+ 
+
     const directories = directoryData.directories.map((folderId) => {
       return directoriesDB.find((dir) => dir.id === folderId);
     });
 
-console.log(directories);
+
 
  if(uid!==req.user.id){
   return res.status(401).json({message:"Unauthorized access"})

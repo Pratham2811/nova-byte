@@ -9,7 +9,7 @@ export const useShowPopup = () => {
       const timer = setTimeout(() => {
         setShowPopup(false);
         setPopupMessage("");
-      }, 1000); // Popup disappears after 3 seconds
+      }, 3000); // Popup disappears after 3 seconds
       // Cleanup the timer if the component unmounts or the popup state changes
       return () => clearTimeout(timer);
     }
