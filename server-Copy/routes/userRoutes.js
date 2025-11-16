@@ -7,7 +7,9 @@ const router=express.Router();
 
 
 
+
 router.post("/create-user", async(req,res)=>{
+  
     const UserId=crypto.randomUUID();
    
     const {username,email,password}=req.body;
@@ -95,10 +97,15 @@ router.post("/logout-user",(req,res)=>{
     res.clearCookie("uid")
     res.status(204).end();
 })
-router.get("/",checkAuth,(req,res,next)=>{
+router.get("/",checkAuth,async (req,res,next)=>{
+  const db=req.db
+  const userCollection=db.collection('users')
+  const userData=await userCollection.find({username:req.user.name,email:req.user.email}).toArray();
+  console.log(userData);
+  
   res.status(200).json({
-    username:req.user.name,
-    email:req.user.email
+    
+    
   })
    
 })

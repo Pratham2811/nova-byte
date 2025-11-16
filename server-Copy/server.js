@@ -8,8 +8,22 @@ import { error } from "console";
 import userRoutes from "./routes/userRoutes.js"
 import cookieParser from "cookie-parser"
 import checkAuth from "./middlewares/authMiddleware.js";
+import { connectDB } from "./config/db.js";
 const app = express();
 
+try{
+  console.log("Hiii");
+  const db=await connectDB();
+
+
+
+//to make available sb for every roite we are sticke db to request 
+app.use((req,res,next)=>{
+  console.log("hii");
+  
+  req.db=db;
+  next();
+})
 
 //parsing request
 app.use(express.json());
@@ -42,4 +56,8 @@ app.use((error,req,res,next)=>{
 
 app.listen(port, () => {
   console.log(`server is listening on ${port}`);
-});
+})}catch(error){
+  
+  console.log("Error while connecting to DB: ",error);
+
+}

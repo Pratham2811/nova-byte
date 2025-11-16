@@ -9,7 +9,7 @@ import filesData from "../filesDB.json" with {type:'json'}
 import directoriesDB from "../directoriesDB.json" with {type:'json'}
 import usersData from "../usersDB.json" with {type:'json'}
 import { writeFile,rm } from "fs/promises";
-
+import { validateIdMiddleware } from "../middlewares/validateIdMiddleware.js";
 const router=express.Router()
 
  const PathJoiner = (req) => {
@@ -26,7 +26,19 @@ const router=express.Router()
 
 
 
+router.param("id",validateIdMiddleware)
+
+router.param("/rename/id",validateIdMiddleware)
 router.get("/{:id}", async (req, res) => {
+  console.log("Hiiccfncddddddddddddddd");
+  
+  
+  console.log(req.db.namespace);
+  const db=req.db
+  const dircollection=db.collection("dirs")
+  const data =await dircollection.find().limit(4).toArray()
+  
+  
   const { id } = req.params;
   const {uid}=req.cookies
   try {
@@ -50,8 +62,7 @@ if(req.user.id!==directoryData.userId){
 
 
     const files = directoryData.files.map((fileId) => {
-      console.log("fileId from file:",fileId);
-      
+    
       
       return filesData.find((file) => file.id === fileId);
     });
