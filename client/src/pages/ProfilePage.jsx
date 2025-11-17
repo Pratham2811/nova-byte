@@ -40,8 +40,8 @@ export const ProfilePage = () => {
             credentials:"include"
           });
           const data = await response.json();
-          console.log("Fetched user:", data);
-          setUserData({name:data.username || "User",email:data.email||"abcd@123"});
+          console.log("Fetched user:", data.data);
+          setUserData({name: data.data.username|| "dfrf",email: data.data.useremail||"trgrthr@123"});
     
         } catch (error) {
           console.error("Error fetching user:", error);

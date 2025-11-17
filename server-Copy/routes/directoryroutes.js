@@ -30,10 +30,10 @@ router.param("id",validateIdMiddleware)
 
 router.param("/rename/id",validateIdMiddleware)
 router.get("/{:id}", async (req, res) => {
-  console.log("Hiiccfncddddddddddddddd");
   
   
-  console.log(req.db.namespace);
+  
+  
   const db=req.db
   const dircollection=db.collection("dirs")
   const data =await dircollection.find().limit(4).toArray()
@@ -55,7 +55,7 @@ const uidData=directoriesDB.find((folder)=>folder.id===req.user.rootDirId)
     
     
 if(req.user.id!==directoryData.userId){
-  console.log("Hiiihfirfirifrifriftivgrvbgrjlg;jbng;jn;");
+ 
   
       return res.status(401).json({message:"Unaouthorized access "})
 }

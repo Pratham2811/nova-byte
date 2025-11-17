@@ -1,95 +1,106 @@
 import express from "express"
-import directoriesData from "../directoriesDB.json" with {type:"json"}
-import usersData from "../usersDB.json" with {type:"json"}
-import {writeFile} from "fs/promises"
 import checkAuth from "../middlewares/authMiddleware.js";
+import { getUsersCollection } from "../config/userCollection.js";
+import { getDirsCollection } from "../config/dirCollection.js";
 const router=express.Router();
 
 
 
-
 router.post("/create-user", async(req,res)=>{
-  
-    const UserId=crypto.randomUUID();
-   
-    const {username,email,password}=req.body;
-    const dirId=crypto.randomUUID();
-   if(!username|| !email||!password){
+const body = req.body || {};
+const { username, email, password } = body;
+if(!username|| !email||!password){
     console.log("Error in UserData");
-    
-    // Correcting response structure for error during user creation
-    return res.status(500).json({message:"User not created. Error: Missing data."})
+    return res.status(400).json({message:"User not created. Error: Missing data."})
    }
-    const RedundantEmail=usersData.find((user)=> user.email===email)
-    if(RedundantEmail){
-        return res.status(409).json({message:"User Already Registered with Same email"})
+try{ 
+const userCollection=getUsersCollection(req)
+const dirsCollection=getDirsCollection(req)
+const UserId=crypto.randomUUID();
+const dirId=crypto.randomUUID();
+   
+   //find if email is exists in DB
+const RedundantEmail= await userCollection.findOne({email:email})
+   
+if(RedundantEmail){
+    return res.status(409).json({message:"User Already Registered with Same email"})
+   }
+    
+const dirData={
+    id:dirId,
+    name:`root-${email}`,
+    parentDir:null,
+    files:[],
+    directories:[],
+    userId:UserId,
+    deleted:false
+  }
+const dirInsertion= await dirsCollection.insertOne(dirData);
+const  userData={
+    id:UserId,
+    name:username,
+    email,
+    password,
+    rootDirId:dirId
     }
-      directoriesData.push({
-        id:dirId,
-        name:`root-${email}`,
-        parentDir:null,
-        files:[],
-        directories:[],
-        userId:UserId,
-        deleted:false
-      })
-    usersData.push({
-        id:UserId,
-        name:username,
-        email,
-        password,
-        rootDirId:dirId
-    })
-        
-   try{ await writeFile("./directoriesDB.json",JSON.stringify(directoriesData));
-    await writeFile("./usersDB.json",JSON.stringify(usersData));
-    res.status(201).json({message:"User created Sucessfully"})
+const userInsertion= await userCollection.insertOne(userData)
+res.status(201).json({message:"User created Sucessfully"})
    }catch(error){
     res.status(500).json({message:"Internal server Error"})
    }
 })
 
 
-router.post("/login-user",(req,res)=>{
-
-  console.log("hiiii");
-  
-    const{email,password}=req.body;
-
-    
-    const foundUser=usersData.find((user)=>{
-        return user.email===email
-    })
-    
-    if(!foundUser){
-
-        console.log("Login Failed: Email not found.");
-        return res.status(404).json({message:"Network ID not recognized. User not found."})
-    }
-    
-   
-    if(foundUser.password !== password){
-      
-        console.log("Login Failed: Password mismatch.");
-        return res.status(401).json({message:"Access Key Invalid. Authentication failed."})
-    }
-    
-
-    
-    console.log("User Found and Authenticated.");
-  
-    
-    res.cookie("uid",`${foundUser.id}`,{
-        httpOnly:true,
-        secure:true,
-        sameSite:"none"
-
-    })
-   
-    return res.status(200).json({message:`Access granted for user ${foundUser.name}. Welcome to the Drive.`,
-  
-    })
+router.post("/login-user", async (req,res)=>{
+const body = req.body || {};
+const { email, password } = body;
+try{
+const userCollection=getUsersCollection(req)
+const findUser=await userCollection.findOne({email:email},{
+  projection:
+  {
+    id:1,
+    email:1,
+    password:1,
+    _id:0
+  }
 })
+console.log("Data from Db:",findUser);
+
+if(!findUser){
+
+    console.log("Login Failed: Email not found.");
+    return res.status(404).json({message:"Network ID not recognized. User not found."})
+    }
+    
+   
+if(findUser.password !== password){  
+    console.log("Login Failed: Password mismatch.");
+    return res.status(401).json({message:"Access Key Invalid. Authentication failed."})
+    }
+
+console.log("User Found and Authenticated.");
+res.cookie("uid",`${findUser.id}`,{
+    httpOnly:true,
+    secure:true,
+    sameSite:"none"
+
+    })
+
+return res.status(200).json(
+  {
+  status:"success",
+  message:`Access granted for user. Welcome to the Drive.`,
+  }
+)
+}catch(error){
+  res.status(500).json({
+    status:"error",
+    message:"Internal server Error"
+  })
+}
+})
+
 router.post("/logout-user",(req,res)=>{
     // res.cookie("uid","",{
     //     maxAge:0,
@@ -97,16 +108,35 @@ router.post("/logout-user",(req,res)=>{
     res.clearCookie("uid")
     res.status(204).end();
 })
+
 router.get("/",checkAuth,async (req,res,next)=>{
-  const db=req.db
-  const userCollection=db.collection('users')
-  const userData=await userCollection.find({username:req.user.name,email:req.user.email}).toArray();
-  console.log(userData);
   
+   const userCollection=getUsersCollection(req,res)
+
+ 
+  
+ try{
+  const userData = await userCollection.findOne(
+  { name: req.user.name },
+  { projection: { name: 1, email: 1, _id: 0 } }
+);
+
+
+
+ if(!userData){
+  return res.status(404).json({ status: "error", message: "User not found" });
+ }
   res.status(200).json({
-    
+    status:"success",
+      data: {
+    username: userData.name,
+    useremail: userData.email,
+  },
     
   })
+}catch(error){
+  return res.status(500).json({ status: "error", message: "Internal server error" });
+}
    
 })
 export default router

@@ -13,4 +13,4 @@ const client=new MongoClient("mongodb://localhost:27017/")
  const insertFiles=await filesCollection.insertMany(filesData)
 
  console.log(insertUsers,insertFiles,insertDir);
-  
+  client.close()

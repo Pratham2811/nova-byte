@@ -176,14 +176,17 @@ export const LoginForm = () => {
         <div className="mt-8 pt-6 border-t border-gray-800 text-center">
           <p className="text-sm text-gray-500">
             Need an account? 
-            <a 
-              href="#" 
+            <button
+              
               className={`font-semibold ml-2 transition-colors duration-200 
                           text-${NEON_CYAN} hover:text-white`}
-              onClick={(e) => { e.preventDefault(); console.log('Navigate to Registration'); }}
+              onClick={(e) => { 
+                e.preventDefault();
+                navigate("/register")
+                }}
             >
               REGISTER ACCOUNT
-            </a>
+            </button>
           </p>
         </div>
       </div>
