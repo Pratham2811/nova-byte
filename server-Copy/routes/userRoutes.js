@@ -76,7 +76,10 @@ if(!findUser){
    
 if(findUser.password !== password){  
     console.log("Login Failed: Password mismatch.");
-    return res.status(401).json({message:"Access Key Invalid. Authentication failed."})
+    return res.status(401).json
+      ({
+        status:"error",message:"Access Key Invalid. Authentication failed."
+      })
     }
 
 console.log("User Found and Authenticated.");
