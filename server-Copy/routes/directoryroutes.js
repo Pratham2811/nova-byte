@@ -10,6 +10,10 @@ import directoriesDB from "../directoriesDB.json" with {type:'json'}
 import usersData from "../usersDB.json" with {type:'json'}
 import { writeFile,rm } from "fs/promises";
 import { validateIdMiddleware } from "../middlewares/validateIdMiddleware.js";
+import { getDirsCollection } from "../config/dirCollection.js";
+import { Long } from "mongodb";
+import { getUsersCollection } from "../config/userCollection.js";
+import { getFilesCollection } from "../config/filesCollection.js";
 const router=express.Router()
 
  const PathJoiner = (req) => {
@@ -27,132 +31,150 @@ const router=express.Router()
 
 
 router.param("id",validateIdMiddleware)
+router.param("/rename/id",validateIdMiddleware) 
 
-router.param("/rename/id",validateIdMiddleware)
 router.get("/{:id}", async (req, res) => {
-  
-  
-  
-  
-  const db=req.db
-  const dircollection=db.collection("dirs")
-  const data =await dircollection.find().limit(4).toArray()
-  
-  
-  const { id } = req.params;
-  const {uid}=req.cookies
-  try {
-    const directoryData = id
-      ? directoriesDB.find((folder) => folder.id ===id)
-      : directoriesDB.find((folder)=>folder.userId===req.user.id)
-const uidData=directoriesDB.find((folder)=>folder.id===req.user.rootDirId)
-
-
-    if (!directoryData) {
-      return res.status(404).json({ message: "Directory not found" });
-    }
-
-    
-    
-if(req.user.id!==directoryData.userId){
- 
-  
-      return res.status(401).json({message:"Unaouthorized access "})
-}
-
-
-    const files = directoryData.files.map((fileId) => {
-    
-      
-      return filesData.find((file) => file.id === fileId);
-    });
- 
-
-    const directories = directoryData.directories.map((folderId) => {
-      return directoriesDB.find((dir) => dir.id === folderId);
-    });
-
-
-
- if(uid!==req.user.id){
+const { id } = req.params;
+const {uid}=req.cookies
+if(uid!==req.user.id){
   return res.status(401).json({message:"Unauthorized access"})
  }
- 
-    return res.status(200).json({ ...directoryData, files, directories });
+
+try {
+//call to dirs collection
+const dirsCollection=getDirsCollection(req);
+let dirsData=await dirsCollection.findOne({id:id})
+if(!id &&dirsData===null){
+const {id}=req.user
+
+
+  dirsData=await dirsCollection.findOne({userId:id})
+  
+
+}
+if(!dirsData){
+     return res.status(404).json(
+      { 
+       status:"error",
+        message: "Directory not found" 
+      }
+    );
+  }
+if (dirsData.userId !== req.user.id) {
+  return res.status(403).json({message:"Forbidden"})
+}
+
+//call to file collection 
+
+const filesCollection=getFilesCollection(req);
+const files= await Promise.all( dirsData.files.map(async (fileId)=>{
+  // console.log(fileId);
+  return  filesCollection.findOne({id:fileId})
+}))
+
+//call to dir here
+const directories= await Promise.all( dirsData.directories.map(async (dirId)=>{
+  return  dirsCollection.findOne({id:dirId})
+}))
+return res.status(200).json({ ...dirsData, files, directories });
   } catch (error) {
-    console.error("Server Error", error);
-    res.status(500).json({ message: "Error reading nested folders" });
+    console.log("Server Error", error);
+    res.status(500).json(
+      {
+         status:"error",
+         message: "Error reading nested folders" 
+      }
+      );
   }
 });
+
+
 router.post("/create-directory", async (req, res, next) => {
- 
-const{foldername}=req.body||"New Folder";
-const {uid}=req.cookies
- const user=usersData.find((user)=>user.id===uid)
-     const directoriesData=directoriesDB;
+ const {uid}=req.cookies;
+
+const{foldername}=req.body||{};
 const parentdirId=req.body.parentDirId||req.user.rootDirId;
-    
-    let parentDirectory=directoriesData.find((directory)=>directory.id===parentdirId)
+console.log(parentdirId);
+
+//call to directory collection
+
+
  
   try {
+const dirsCollection=getDirsCollection(req);
+const parentDir= await dirsCollection.findOne(
+  {
+    id:parentdirId,
+  }
+)
 
-    
-    if(parentDirectory.userId!==req.user.id){
-          return res.status(401).json({message:"Unaouthorized access "})
-    }
-    const id=crypto.randomUUID();
-    
-    
-    directoriesData.push({
+if(!parentDir) return res.status(404).json(
+  {
+    status:"error",
+    message:"Parent directory does not Exist"
+  }
+)  
+
+
+if(parentDir.userId!==req.user.id){
+      return res.status(401).json(
+        {
+          status:"error",
+          message:"Unaouthorized access "
+        }
+      );
+}
+
+const id=crypto.randomUUID();
+//insert in db --db call
+const directoryData={
+  
       id:id,
-      name:foldername,
+      name:foldername||"New Folder",
       parentDir:parentdirId,
       userId:uid,
       files:[],
       directories:[]
 
-    })
-
-
-    if(!parentDirectory && !parentdirId){
-      parentDirectory=directoriesDB.find((folder)=> folder.id===req.user.rootDirId);
-
-    }
-    if(!parentDirectory) return res.status(404).json({message:"Parent directory does not Exist"})
     
-    parentDirectory.directories.push(id);
-    
-    await writeFile("./directoriesDB.json",JSON.stringify(directoriesData))
-   return res.status(200).send("File Created sucessFully");
+}
+const isDirectoryPushed= await dirsCollection.insertOne(directoryData);
+const addDirToParentDir= await dirsCollection.updateOne({id:parentdirId},{$push:{directories:id}})
+
+return res.status(200).send("File Created sucessFully");
   } catch (err) {
     console.log("Error Creating directory", err);
     res.status(500).send(err.message);
   }
 });
+
+
 router.patch("/rename/:id", async(req,res)=>{
   const{id}=req.params
+
   const newFilename=req.body.newName
 
   if(!newFilename)  return res.status(404).json({message:"Enter New Folder name"})
-
-  const directory=directoriesDB.find((folder)=>{
-   return  folder.id===id;
-  })
- if(!directory) return res.status(404).json({message:"No directory Founded  "})
-  if(directory.userId!=req.user.id){
-        return res.status(401).json({message:"Unaouthorized access "})
-  }
-  directory.name=newFilename;
-
 try{
- await writeFile("./directoriesDB.json",JSON.stringify(directoriesDB))
-  res.status(200).json({message:"Folder renamed succuscessfully"})
+    //db call
+    const dirsCollection=getDirsCollection(req);
+    const directory=dirsCollection.updateOne({id:id},{$set:{name:newFilename}});
+
+ 
+ if(!directory) return res.status(500).json(
+  {
+    status:"error",
+    message:"Internal server error "
+  }
+)
+res.status(200).json({message:"Folder renamed succuscessfully"})
 }catch(error){
   error.status=500;
   next(error);
 }
-  
-})
+});
+
+
 router.delete("/:id",async(req,res,next)=>{
      const { id } = req.params;
  

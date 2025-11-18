@@ -54,6 +54,8 @@ res.status(201).json({message:"User created Sucessfully"})
 router.post("/login-user", async (req,res)=>{
 const body = req.body || {};
 const { email, password } = body;
+console.log(email,password);
+
 try{
 const userCollection=getUsersCollection(req)
 const findUser=await userCollection.findOne({email:email},{

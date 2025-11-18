@@ -6,7 +6,7 @@ const {uid}=req.cookies;
 console.log(uid);
 const userCollection=getUsersCollection(req)
 const user=await  userCollection.findOne({id:uid})
-console.log("Check Auth users Data:",user);
+
 
 
 if(!uid || !user){

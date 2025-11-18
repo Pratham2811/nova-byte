@@ -8,7 +8,7 @@ export function getFilesCollection(req,res){
         message:"Internal Server Error"
       })
      }
-     const userCollection=db.collection('users');
+     const userCollection=db.collection('files');
      
      
      return userCollection

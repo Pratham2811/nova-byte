@@ -9,6 +9,7 @@ export function getUsersCollection(req,res){
       })
      }
      const userCollection=db.collection('users');
+ 
      
      
      return userCollection
