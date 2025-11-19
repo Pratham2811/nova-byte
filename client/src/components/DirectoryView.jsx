@@ -70,6 +70,9 @@ export const FileList = () => {
         }
       }
       const data = await response.json();
+      console.log(data);
+      console.log(data.files);
+      
       setDirectoriesList(data.directories || []);
       setFilesList(data.files || []);
     } catch (err) {
