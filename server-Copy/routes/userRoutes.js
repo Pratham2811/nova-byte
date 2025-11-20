@@ -30,8 +30,6 @@ const dirData={
     id:dirId,
     name:`root-${email}`,
     parentDir:null,
-    files:[],
-    directories:[],
     userId:UserId,
     deleted:false
   }

@@ -1,6 +1,4 @@
 import { getUsersCollection } from "../config/userCollection.js";
-import usersData from "../usersDB.json" with {type:"json"}
-
 export default async function checkAuth(req,res,next){
 const {uid}=req.cookies;
 console.log(uid);

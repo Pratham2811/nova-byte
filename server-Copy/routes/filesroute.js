@@ -2,15 +2,14 @@ import express from "express";
 import path from "node:path";
 import crypto from "node:crypto"
 import { TempStoragePath } from "../path.js";
-import filesData from "../filesDB.json" with { type: 'json' }
+
 import { rm, writeFile } from "node:fs/promises";
-import directoriesData from "../directoriesDB.json" with { type: 'json' }
-import usersData from "../usersDB.json" with { type: 'json' }
+
 import multer from "multer";
 import { validateIdMiddleware } from "../middlewares/validateIdMiddleware.js";
 import { getFilesCollection } from "../config/filesCollection.js";
 import { getDirsCollection } from "../config/dirCollection.js";
-import { log } from "node:console";
+
 
 
 
@@ -96,12 +95,8 @@ const filesCollection=getFilesCollection(req)
 
     const insertResults = await Promise.all(insertPromises);
 
-    // Bulk update directory once using $push:$each
-    const updateResult = await dirsCollection.updateOne(
-      { id: parentDirId },
-      { $push: { files: { $each: fileIdsToPush } } }
-    );
-
+   
+   
 res.status(201).json(
   {
  
@@ -163,7 +158,7 @@ res.sendFile(FinalPath);
 //move file to trash
 router.delete("/:id", async (req, res) => {
 const {id}=req.params;
-const {uid}=req.cookies  
+ 
 try {
   //db call  
 const filesCollection=getFilesCollection(req);
@@ -196,17 +191,8 @@ const deleteMetaResult=await filesCollection.deleteOne({id:id});
 if (deleteMetaResult.deletedCount !== 1) {
    console.warn("filesCollection.deleteOne did not delete a document:", deleteMetaResult);   
 }
-const parentDirId = fileData.parentDir;
-  let updateDirResult = { matchedCount: 0, modifiedCount: 0 };
-if (parentDirId) {
-      updateDirResult = await dirsCollection.updateOne(
-        { id: parentDirId },
-        { $pull: { files: id } }
-      );
-    } else {
-      console.warn("No parentDir on fileData — cannot $pull from directory");
-    }
 
+ 
 res.status(200).json({
      status:"sucess",
       message: "File deleted sucessfully",

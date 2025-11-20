@@ -5,13 +5,10 @@ import fs from "fs/promises";
 import path from "path";
 import { STORAGE_PATH } from "../path.js";
 import { TempStoragePath } from "../path.js";
-import filesData from "../filesDB.json" with {type:'json'}
-import directoriesDB from "../directoriesDB.json" with {type:'json'}
-import usersData from "../usersDB.json" with {type:'json'}
 import { writeFile,rm } from "fs/promises";
 import { validateIdMiddleware } from "../middlewares/validateIdMiddleware.js";
 import { getDirsCollection } from "../config/dirCollection.js";
-import { Long } from "mongodb";
+
 import { getUsersCollection } from "../config/userCollection.js";
 import { getFilesCollection } from "../config/filesCollection.js";
 const router=express.Router()
@@ -34,7 +31,7 @@ router.param("id",validateIdMiddleware)
 router.param("/rename/id",validateIdMiddleware) 
 
 router.get("/{:id}", async (req, res) => {
-const { id } = req.params;
+let { id } = req.params;
 const {uid}=req.cookies
 if(uid!==req.user.id){
   return res.status(401).json({message:"Unauthorized access"})
@@ -45,11 +42,11 @@ try {
 const dirsCollection=getDirsCollection(req);
 let dirsData=await dirsCollection.findOne({id:id})
 if(!id &&dirsData===null){
-const {id}=req.user
+const userId=req.user.id;
 
 
-  dirsData=await dirsCollection.findOne({userId:id})
-  
+  dirsData=await dirsCollection.findOne({userId})
+  id=dirsData.id;
 
 }
 
@@ -70,15 +67,15 @@ if (dirsData.userId !== req.user.id) {
 //call to file collection 
 
 const filesCollection=getFilesCollection(req);
-const files= await Promise.all( dirsData.files.map(async (fileId)=>{
-  // console.log(fileId);
-  return  filesCollection.findOne({id:fileId})
-}))
+const files=await filesCollection.find({parentDir:id}).toArray();
+
+
 
 //call to dir here
-const directories= await Promise.all( dirsData.directories.map(async (dirId)=>{
-  return  dirsCollection.findOne({id:dirId})
-}))
+// const directories= await Promise.all( dirsData.directories.map(async (dirId)=>{
+//   return  dirsCollection.findOne({id:dirId})
+// }))
+const directories=await dirsCollection.find({parentDir:id}).toArray();
 return res.status(200).json({ ...dirsData, files, directories });
   } catch (error) {
     console.log("Server Error", error);
@@ -136,13 +133,12 @@ const directoryData={
       name:foldername||"New Folder",
       parentDir:parentdirId,
       userId:uid,
-      files:[],
-      directories:[]
+      deleted:false,
 
     
 }
 const isDirectoryPushed= await dirsCollection.insertOne(directoryData);
-const addDirToParentDir= await dirsCollection.updateOne({id:parentdirId},{$push:{directories:id}})
+
 
 return res.status(200).send("File Created sucessFully");
   } catch (err) {
@@ -180,80 +176,42 @@ res.status(200).json({message:"Folder renamed succuscessfully"})
 
 router.delete("/:id",async(req,res,next)=>{
      const { id } = req.params;
- 
+    const dirsCollection=getDirsCollection(req);
+
 
   try {
-    // Find the directory to delete
-    const directoryIndex = directoriesDB.findIndex((folder) => folder.id == id);
-    if (directoryIndex === -1) {
-      return res.status(404).json({ message: "Directory not found" });
+
+
+  async function recursiveDeleteDirs(id) {
+  try {
+    const children = await dirsCollection
+      .find({ parentDir: id }, { projection: { id: 1, _id: 0 } })
+      .toArray();
+
+    if (!children || children.length === 0) {
+      const res = await dirsCollection.deleteOne({ id });
+      console.log('Deleted leaf:', id, 'deletedCount=', res.deletedCount);
+      return;
     }
 
-    const directoryData = directoriesDB[directoryIndex];
-  if(!directoryData) return res.status.json({message:"Directory Not found"})
-
-
-    async function recursive(filesId, directoriesId) {
- 
-      if (filesId && filesId.length) {
-        for await (const fileId of filesId) {
-          const fileIndex = filesData.findIndex((file) => file.id == fileId);
-          if (fileIndex !== -1) {
-            const fileData = filesData[fileIndex];
-               // Delete file from storage
-           
-            const filePath=path.join(TempStoragePath,fileId+fileData.extension);
-         
-            
-            await rm(filePath).catch((err) => {console.log("broyhjer look svdfbfbebrbbefvbfbtrbrbr");
-            });
-            filesData.splice(fileIndex, 1);
-          }
-        }
-      }
-
-   
-      if (directoriesId && directoriesId.length) {
-        for await (const dirId of directoriesId) {
-          const subDirIndex = directoriesDB.findIndex((folder) => folder.id === dirId);
-          if (subDirIndex !== -1) {
-            const subDirData = directoriesDB[subDirIndex];
-            await recursive(subDirData.files, subDirData.directories);
-        
-            directoriesDB.splice(subDirIndex, 1);
-         
-            await rm(`./storage/${dirId}`, { recursive: true, force: true }).catch(() => {});
-          }
-        }
-      }
+    for (const child of children) {
+      await recursiveDeleteDirs(child.id);
     }
 
-
-    await recursive(directoryData.files, directoryData.directories);
-  let parentDir=directoriesDB.find((folder)=>{
-    return folder.id===directoryData.parentDir;
-  })
-  if(!parentDir){
-      parentDir=req.user.rootDirId;
+    const res = await dirsCollection.deleteOne({ id });
+    console.log('Deleted:', id, 'deletedCount=', res.deletedCount);
+  } catch (err) {
+    console.error('Error deleting dir', id, err);
+    throw err;
   }
-  if(req.user.id!==parentDir.userId){
-         return res.status(401).json({message:"Unaouthorized access "})
-  }
-  if (parentDir) {
-  parentDir.directories = parentDir.directories.filter(did => did !== id);
 }
 
-    directoriesDB.splice(directoryIndex, 1);
-   
- try{
-    await writeFile("./directoriesDB.json", JSON.stringify(directoriesDB));
-    await writeFile("./filesDB.json", JSON.stringify(filesData));
+    const result=recursiveDeleteDirs(id);
+    
+    
 
-    res.status(200).json({ message: "Folder deleted successfully" });
- }catch(error){
-  error.status=500;
-  next(error);
- }
+
+   return  res.status(200).json({ message: "Folder deleted successfully" });
       } catch (err) {
     console.error("Error deleting directory:", err);
     res.status(500).json({ message: "Internal server error" });
