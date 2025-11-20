@@ -174,48 +174,65 @@ res.status(200).json({message:"Folder renamed succuscessfully"})
 });
 
 
-router.delete("/:id",async(req,res,next)=>{
-     const { id } = req.params;
-    const dirsCollection=getDirsCollection(req);
+router.delete('/:id', async (req, res, next) => {
+  const { id } = req.params;
+  const dirsCollection = getDirsCollection(req);
+  const filesCollection = getFilesCollection(req);
 
+  // make sure id type matches stored id (string vs ObjectId); convert if needed here
+
+  async function recursiveDeleteDirs(dirId) {
+    try {
+      // get immediate children
+      const children = await dirsCollection
+        .find({ parentDir: dirId }, { projection: { id: 1, _id: 0 } })
+        .toArray();
+
+      // first, recurse into children (delete subtrees)
+      for (const child of children) {
+        await recursiveDeleteDirs(child.id);
+      }
+
+      // after children deleted, delete files in this directory (if any)
+      const files = await filesCollection
+        .find({ parentDir: dirId }, { projection: { id: 1, extension: 1, _id: 0 } })
+        .toArray();
+
+      if (files && files.length > 0) {
+        // remove files from disk in parallel but wait for all
+        const rmPromises = files.map(file => {
+          // use path.join to avoid path issues
+          const filePath = path.join(process.cwd(), 'storage2', `${file.id}${file.extension || ''}`);
+          // force: true avoids throwing if file already absent
+          return fs.rm(filePath, { force: true }).catch(err => {
+            // log file-level errors but do not stop whole flow; rethrow if you want to fail hard
+            console.warn(`Failed to remove file ${filePath}:`, err);
+          });
+        });
+        await Promise.all(rmPromises);
+
+        // remove file records from DB
+        const fileDelRes = await filesCollection.deleteMany({ parentDir: dirId });
+        console.log(`Deleted ${fileDelRes.deletedCount} file records for dir ${dirId}`);
+      }
+
+      // finally, delete the directory document itself
+      const dirDelRes = await dirsCollection.deleteOne({ id: dirId });
+      console.log(`Deleted dir ${dirId} (deletedCount=${dirDelRes.deletedCount})`);
+    } catch (err) {
+      console.error(`Error deleting dir ${dirId}:`, err);
+      throw err; // bubble up so caller can handle
+    }
+  } // end recursiveDeleteDirs
 
   try {
+    // await the full recursive deletion BEFORE responding
+    await recursiveDeleteDirs(id);
 
-
-  async function recursiveDeleteDirs(id) {
-  try {
-    const children = await dirsCollection
-      .find({ parentDir: id }, { projection: { id: 1, _id: 0 } })
-      .toArray();
-
-    if (!children || children.length === 0) {
-      const res = await dirsCollection.deleteOne({ id });
-      console.log('Deleted leaf:', id, 'deletedCount=', res.deletedCount);
-      return;
-    }
-
-    for (const child of children) {
-      await recursiveDeleteDirs(child.id);
-    }
-
-    const res = await dirsCollection.deleteOne({ id });
-    console.log('Deleted:', id, 'deletedCount=', res.deletedCount);
+    return res.status(200).json({ message: 'Folder deleted successfully' });
   } catch (err) {
-    console.error('Error deleting dir', id, err);
-    throw err;
+    console.error('Error deleting directory:', err);
+    return res.status(500).json({ message: 'Internal server error' });
   }
-}
-
-    const result=recursiveDeleteDirs(id);
-    
-    
-
-
-   return  res.status(200).json({ message: "Folder deleted successfully" });
-      } catch (err) {
-    console.error("Error deleting directory:", err);
-    res.status(500).json({ message: "Internal server error" });
-  }
-
-})
+});
 export default router;
