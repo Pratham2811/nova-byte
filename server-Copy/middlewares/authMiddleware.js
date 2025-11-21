@@ -1,9 +1,13 @@
+import { ObjectId } from "mongodb";
 import { getUsersCollection } from "../config/userCollection.js";
+import { normalizeDoc } from "../utils/apiDataFormat.js";
 export default async function checkAuth(req,res,next){
 const {uid}=req.cookies;
-console.log(uid);
+
 const userCollection=getUsersCollection(req)
-const user=await  userCollection.findOne({id:uid})
+const user=normalizeDoc(await  userCollection.findOne({_id:new ObjectId(uid)}))
+
+
 
 
 

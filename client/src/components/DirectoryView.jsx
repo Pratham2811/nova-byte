@@ -71,9 +71,9 @@ export const FileList = () => {
       }
       const data = await response.json();
       console.log(data);
-      console.log(data.files);
+      console.log(data.apiFiles);
       
-      setDirectoriesList(data.directories || []);
+      setDirectoriesList(data.apiDirectories|| []);
       setFilesList(data.files || []);
     } catch (err) {
       setError(err.message);

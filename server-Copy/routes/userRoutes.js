@@ -2,6 +2,7 @@ import express from "express"
 import checkAuth from "../middlewares/authMiddleware.js";
 import { getUsersCollection } from "../config/userCollection.js";
 import { getDirsCollection } from "../config/dirCollection.js";
+import { normalizeDoc } from "../utils/apiDataFormat.js";
 const router=express.Router();
 
 
@@ -9,6 +10,8 @@ const router=express.Router();
 router.post("/create-user", async(req,res)=>{
 const body = req.body || {};
 const { username, email, password } = body;
+console.log();
+
 if(!username|| !email||!password){
     console.log("Error in UserData");
     return res.status(400).json({message:"User not created. Error: Missing data."})
@@ -16,8 +19,7 @@ if(!username|| !email||!password){
 try{ 
 const userCollection=getUsersCollection(req)
 const dirsCollection=getDirsCollection(req)
-const UserId=crypto.randomUUID();
-const dirId=crypto.randomUUID();
+
    
    //find if email is exists in DB
 const RedundantEmail= await userCollection.findOne({email:email})
@@ -25,23 +27,28 @@ const RedundantEmail= await userCollection.findOne({email:email})
 if(RedundantEmail){
     return res.status(409).json({message:"User Already Registered with Same email"})
    }
+
+   const  userData={
     
-const dirData={
-    id:dirId,
-    name:`root-${email}`,
-    parentDir:null,
-    userId:UserId,
-    deleted:false
-  }
-const dirInsertion= await dirsCollection.insertOne(dirData);
-const  userData={
-    id:UserId,
     name:username,
     email,
     password,
-    rootDirId:dirId
+    createdAt: new Date()
     }
-const userInsertion= await userCollection.insertOne(userData)
+    const userInsertion= await userCollection.insertOne(userData)
+    const userId=userInsertion.insertedId;
+const dirData={
+    
+    name:`root-${email}`,
+    parentDir:null,
+    userId:userId,
+    deleted:false,
+    createdAt: new Date()
+  }
+const dirInsertion= await dirsCollection.insertOne(dirData);
+const user=userCollection.updateOne({_id:userId},{$set:{rootDirId:dirInsertion.insertedId}})
+
+
 res.status(201).json({message:"User created Sucessfully"})
    }catch(error){
     res.status(500).json({message:"Internal server Error"})
@@ -59,10 +66,10 @@ const userCollection=getUsersCollection(req)
 const findUser=await userCollection.findOne({email:email},{
   projection:
   {
-    id:1,
+    
     email:1,
     password:1,
-    _id:0
+    
   }
 })
 console.log("Data from Db:",findUser);
@@ -82,8 +89,10 @@ if(findUser.password !== password){
       })
     }
 
-console.log("User Found and Authenticated.");
-res.cookie("uid",`${findUser.id}`,{
+const user=normalizeDoc(findUser);
+console.log(user);
+
+res.cookie("uid",`${user.id}`,{
     httpOnly:true,
     secure:true,
     sameSite:"none"

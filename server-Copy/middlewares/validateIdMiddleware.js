@@ -1,12 +1,18 @@
 import express from "express"
+import { ObjectId } from "mongodb";
 
-export function validateIdMiddleware(req,res,next,id){
-    
-  const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  if(! regex.test(id)){
-    console.log("dkcdhchdsbcihdsids");
-    
-    return res.status(400).json({message:" Invalid Id"})
+export function validateIdMiddleware(req, res, next, value,name) {
+ 
+  console.log(value);
+  
+  
+  
+  
+  if (!ObjectId.isValid(value)) {
+    return res.status(400).json({ message: "Invalid ID" });
   }
- next();
+
+ 
+
+  next();
 }

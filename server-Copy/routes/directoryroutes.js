@@ -11,6 +11,8 @@ import { getDirsCollection } from "../config/dirCollection.js";
 
 import { getUsersCollection } from "../config/userCollection.js";
 import { getFilesCollection } from "../config/filesCollection.js";
+import { ObjectId } from "mongodb";
+import { normalizeDoc } from "../utils/apiDataFormat.js";
 const router=express.Router()
 
  const PathJoiner = (req) => {
@@ -28,28 +30,36 @@ const router=express.Router()
 
 
 router.param("id",validateIdMiddleware)
-router.param("/rename/id",validateIdMiddleware) 
 
 router.get("/{:id}", async (req, res) => {
+  console.log(req.params);
+  
 let { id } = req.params;
 const {uid}=req.cookies
+
+
+
+
 if(uid!==req.user.id){
-  return res.status(401).json({message:"Unauthorized access"})
+  console.log(req.user.id);
+  return res.status(401).json({message:"Unauthorized access "})
  }
 
 try {
 //call to dirs collection
 const dirsCollection=getDirsCollection(req);
-let dirsData=await dirsCollection.findOne({id:id})
+let dirsData=normalizeDoc(await dirsCollection.findOne({_id:new ObjectId(id)},{projection:{deleted:0}}))
 if(!id &&dirsData===null){
 const userId=req.user.id;
+console.log(new  ObjectId(userId));
 
-
-  dirsData=await dirsCollection.findOne({userId})
+  dirsData=normalizeDoc(await dirsCollection.findOne({userId:new ObjectId(userId)},{projection:{deleted:0}}))
+  console.log(dirsData);
+  
+  
   id=dirsData.id;
 
 }
-
 
 
 if(!dirsData){
@@ -60,23 +70,27 @@ if(!dirsData){
       }
     );
   }
-if (dirsData.userId !== req.user.id) {
+
+
+if (dirsData.userId!== req.user.id) {
   return res.status(403).json({message:"Forbidden"})
 }
 
 //call to file collection 
 
 const filesCollection=getFilesCollection(req);
-const files=await filesCollection.find({parentDir:id}).toArray();
+const files=await filesCollection.find({parentDir:new ObjectId(id)}).toArray();
+
+const apiFiles=files.map(normalizeDoc);
+console.log("File data from directoryt: ",files);
 
 
 
-//call to dir here
-// const directories= await Promise.all( dirsData.directories.map(async (dirId)=>{
-//   return  dirsCollection.findOne({id:dirId})
-// }))
-const directories=await dirsCollection.find({parentDir:id}).toArray();
-return res.status(200).json({ ...dirsData, files, directories });
+const directories=await dirsCollection.find({parentDir:new ObjectId(id)}).toArray();
+const apiDirectories=directories.map(normalizeDoc);
+console.log("Directories data normalized ",apiDirectories);
+
+return res.status(200).json({ ...dirsData, apiFiles, apiDirectories });
   } catch (error) {
     console.log("Server Error", error);
     res.status(500).json(
@@ -94,7 +108,7 @@ router.post("/create-directory", async (req, res, next) => {
 
 const{foldername}=req.body||{};
 const parentdirId=req.body.parentDirId||req.user.rootDirId;
-console.log(parentdirId);
+console.log("log parent dir id",parentdirId);
 
 //call to directory collection
 
@@ -104,9 +118,11 @@ console.log(parentdirId);
 const dirsCollection=getDirsCollection(req);
 const parentDir= await dirsCollection.findOne(
   {
-    id:parentdirId,
+    _id: new ObjectId( parentdirId),
   }
 )
+console.log(parentDir);
+
 
 if(!parentDir) return res.status(404).json(
   {
@@ -116,7 +132,7 @@ if(!parentDir) return res.status(404).json(
 )  
 
 
-if(parentDir.userId!==req.user.id){
+if(parentDir.userId.toString()!==req.user.id){
       return res.status(401).json(
         {
           status:"error",
@@ -125,15 +141,15 @@ if(parentDir.userId!==req.user.id){
       );
 }
 
-const id=crypto.randomUUID();
 //insert in db --db call
 const directoryData={
   
-      id:id,
+    
       name:foldername||"New Folder",
-      parentDir:parentdirId,
-      userId:uid,
+      parentDir:new ObjectId(parentdirId),
+      userId:new ObjectId(req.user.id),
       deleted:false,
+      createdAt: new Date()
 
     
 }
@@ -157,7 +173,7 @@ router.patch("/rename/:id", async(req,res)=>{
 try{
     //db call
     const dirsCollection=getDirsCollection(req);
-    const directory=dirsCollection.updateOne({id:id},{$set:{name:newFilename}});
+    const directory=dirsCollection.updateOne({_id:new ObjectId(id)},{$set:{name:newFilename}});
 
  
  if(!directory) return res.status(500).json(
@@ -185,46 +201,46 @@ router.delete('/:id', async (req, res, next) => {
     try {
       // get immediate children
       const children = await dirsCollection
-        .find({ parentDir: dirId }, { projection: { id: 1, _id: 0 } })
+        .find({ parentDir: new ObjectId(dirId) }, { projection: { id: 1, _id: 0 } })
         .toArray();
 
-      // first, recurse into children (delete subtrees)
+    console.log(children);
+    
       for (const child of children) {
         await recursiveDeleteDirs(child.id);
       }
 
-      // after children deleted, delete files in this directory (if any)
+  
       const files = await filesCollection
-        .find({ parentDir: dirId }, { projection: { id: 1, extension: 1, _id: 0 } })
+        .find({ parentDir: new ObjectId(dirId) }, { projection: { id: 1, extension: 1, _id: 0 } })
         .toArray();
 
       if (files && files.length > 0) {
-        // remove files from disk in parallel but wait for all
+      
         const rmPromises = files.map(file => {
-          // use path.join to avoid path issues
+         
           const filePath = path.join(process.cwd(), 'storage2', `${file.id}${file.extension || ''}`);
-          // force: true avoids throwing if file already absent
+   
           return fs.rm(filePath, { force: true }).catch(err => {
-            // log file-level errors but do not stop whole flow; rethrow if you want to fail hard
+          
             console.warn(`Failed to remove file ${filePath}:`, err);
           });
         });
         await Promise.all(rmPromises);
 
         // remove file records from DB
-        const fileDelRes = await filesCollection.deleteMany({ parentDir: dirId });
+        const fileDelRes = await filesCollection.deleteMany({ parentDir: new ObjectId(dirId) });
         console.log(`Deleted ${fileDelRes.deletedCount} file records for dir ${dirId}`);
       }
 
       // finally, delete the directory document itself
-      const dirDelRes = await dirsCollection.deleteOne({ id: dirId });
+      const dirDelRes = await dirsCollection.deleteOne({ _id: new ObjectId(dirId) });
       console.log(`Deleted dir ${dirId} (deletedCount=${dirDelRes.deletedCount})`);
     } catch (err) {
       console.error(`Error deleting dir ${dirId}:`, err);
-      throw err; // bubble up so caller can handle
+      throw err;
     }
-  } // end recursiveDeleteDirs
-
+  } 
   try {
     // await the full recursive deletion BEFORE responding
     await recursiveDeleteDirs(id);
