@@ -3,6 +3,7 @@ import checkAuth from "../middlewares/authMiddleware.js";
 import { getUsersCollection } from "../config/userCollection.js";
 import { getDirsCollection } from "../config/dirCollection.js";
 import { normalizeDoc } from "../utils/apiDataFormat.js";
+import { ObjectId } from "mongodb";
 const router=express.Router();
 
 
@@ -27,26 +28,29 @@ const RedundantEmail= await userCollection.findOne({email:email})
 if(RedundantEmail){
     return res.status(409).json({message:"User Already Registered with Same email"})
    }
-
+const userId=new ObjectId();
+const rootDirId=new ObjectId();
    const  userData={
-    
+    _id:userId,
     name:username,
     email,
     password,
+    rootDirId:rootDirId,
     createdAt: new Date()
     }
     const userInsertion= await userCollection.insertOne(userData)
-    const userId=userInsertion.insertedId;
+   
 const dirData={
-    
+    _id:userId,
     name:`root-${email}`,
     parentDir:null,
     userId:userId,
     deleted:false,
+    userId,
     createdAt: new Date()
   }
 const dirInsertion= await dirsCollection.insertOne(dirData);
-const user=userCollection.updateOne({_id:userId},{$set:{rootDirId:dirInsertion.insertedId}})
+
 
 
 res.status(201).json({message:"User created Sucessfully"})

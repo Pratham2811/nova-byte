@@ -271,9 +271,9 @@ try{
   }
 });
 
-router.param("id",validateIdMiddleware)
-router.param("/rename/id",validateIdMiddleware,()=>{
+router.param("id",validateIdMiddleware,()=>{
   console.log("rename was running");
   
 })
+
 export default router
