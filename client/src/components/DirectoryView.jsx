@@ -74,7 +74,7 @@ export const FileList = () => {
       console.log(data.apiFiles);
       
       setDirectoriesList(data.apiDirectories|| []);
-      setFilesList(data.files || []);
+      setFilesList(data.apiFiles || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -315,12 +315,13 @@ export const FileList = () => {
               {/* File Info & Primary Actions (Mobile-friendly stacking) */}
               <div className="flex items-center gap-4 mb-3 sm:mb-0 flex-grow">
                 <FileText className={`${NEON_CYAN} w-5 h-5 flex-shrink-0`} />
-                <span
+                <button
+                 onClick={() => handleOpenFile(file)}
                   title={file.name}
-                  className="text-sm sm:text-base font-semibold text-gray-200 truncate block max-w-xs sm:max-w-md md:max-w-lg"
+                  className="text-sm sm:text-base font-semibold text-gray-200 truncate block max-w-xs sm:max-w-md md:max-w-lg cursor-pointer"
                 >
                   {file.name}
-                </span>
+                </button>
               </div>
 
               {/* Action Buttons (Grouped) */}

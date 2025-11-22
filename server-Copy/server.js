@@ -19,7 +19,7 @@ try{
 
 //to make available sb for every roite we are sticke db to request 
 app.use((req,res,next)=>{
-  console.log("hii");
+
   
   req.db=db;
   next();

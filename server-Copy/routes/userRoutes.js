@@ -90,7 +90,7 @@ if(findUser.password !== password){
     }
 
 const user=normalizeDoc(findUser);
-console.log(user);
+
 
 res.cookie("uid",`${user.id}`,{
     httpOnly:true,

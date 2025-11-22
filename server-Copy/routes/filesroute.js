@@ -9,6 +9,8 @@ import multer from "multer";
 import { validateIdMiddleware } from "../middlewares/validateIdMiddleware.js";
 import { getFilesCollection } from "../config/filesCollection.js";
 import { getDirsCollection } from "../config/dirCollection.js";
+import { normalizeDoc } from "../utils/apiDataFormat.js";
+import { ObjectId } from "mongodb";
 
 
 
@@ -32,11 +34,13 @@ const storage = multer.diskStorage({
     cb(null, './storage2')
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    const id=crypto.randomUUID();
+ 
+    const id=new ObjectId();
+    console.log("ID from the multer bro",id);
+    
     const extension=path.extname(file.originalname)
-    file.id=id;
-    cb(null, `${id}${extension}`);
+    file.id=id.toString();
+    cb(null, `${id.toString()}${extension}`);
 
   }
 })
@@ -52,43 +56,60 @@ let { parentDirId } = req.body|| {};
 const dirsCollection=getDirsCollection(req); 
 
 if (!parentDirId || parentDirId === "undefined" || parentDirId === "null") {
-const rootDirectory=await dirsCollection.findOne({id:req.user.rootDirId});
+const rootDirectory=normalizeDoc(await dirsCollection.findOne({_id:new ObjectId(req.user.rootDirId)}));
 
+
+if(!rootDirectory){
+  return res.status(404).json({
+    message:"No root directory found",
+  })
+}
 parentDirId=rootDirectory.id;
 }
 
-
+if (!ObjectId.isValid(parentDirId)) {
+  return res.status(400).json({
+    status: "error",
+    message: "Invalid parent directory ID",
+  });
+}
 const uploadedFiles = req.files;
 if (!uploadedFiles || uploadedFiles.length === 0) {
   return res.status(400).json({ message: "No files uploaded" });
 }
+for (const file of uploadedFiles) {
+  if (!file.id || !file.originalname) {
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+}
 
 const filesCollection=getFilesCollection(req)
- const fileIdsToPush = [];
+
     const insertPromises = uploadedFiles.map((file) => {
       // multer may not provide `id`; generate one
+    
+      
       const fileId = file.id;
-      const originalname = file.originalname || file.filename || fileId;
+      
+      
+      const originalname = file.originalname || file.filename;
       const extension = path.extname(originalname);
-      if(!fileId || !originalname|| !extension){
-        return res.status(500).json({
-          status:"error",
-          message:"Internal server error",
-
-        })
-      }
+     
       const fileEntry = {
-        id: fileId,
+        _id: new ObjectId(fileId),
         name: originalname.trim(),
         extension,
         mimeType: file.mimetype || null,
         size: file.size ?? null,
-        userId: req.user.id,     // use authenticated user id (NOT raw cookie)
+        userId: new ObjectId(req.user.id),     // use authenticated user id (NOT raw cookie)
         deleted: false,
-        parentDir: parentDirId,
+        parentDir: new ObjectId(parentDirId),
         createdAt: new Date(),
       };
-      fileIdsToPush.push(fileId);
+      
       return filesCollection.insertOne(fileEntry);
     });
 
@@ -111,50 +132,61 @@ res.status(500).json({ message: "Error while uploading files" });
 });
 
 //serving file
-router.get("/:id",async (req, res,next) => {
-const {id}=req.params;
-// validateIdMiddleware(req,res,next,id);
-const FilePath = PathJoinerTemp(req);
-const{uid}=req.cookies
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  const FilePath = PathJoinerTemp(req);
 
-try{
+  try {
+    const filesCollection = getFilesCollection(req);
 
-  //db call
-const filesCollection=getFilesCollection(req)
-const fileData= await filesCollection.findOne({id:id},{projection:{id:1,extension:1,_id:0,userId:1,name:1}})
-if(fileData.userId!=req.user.id){
-    return res.status(403).json(
-      {status:"error",
-      message:"Unaouthorized access "
-      }
-)
-}
-if(!fileData || fileData===null){
-    return res.status(404).json(
-      {status:"error",
-       message:"File not found"
+    const fileData = normalizeDoc(
+      await filesCollection.findOne(
+        { _id: new ObjectId(id) },
+        { projection: { extension: 1, userId: 1, name: 1 } }
+      )
+    );
 
-      }
-)
-}
-
-const filename=`${id}${fileData.extension}`
-const FinalPath=path.join(FilePath,filename)
-res.setHeader("content-Disposition", "inline");
   
-if (req.query.action === "download") {  
-return res.download(FinalPath,fileData.name)
-  }
-res.sendFile(FinalPath);
 
+    // 1) Check DB first (otherwise fileData.userId will crash)
+    if (!fileData) {
+      return res.status(404).json({
+        status: "error",
+        message: "File not found",
+      });
+    }
 
-}catch(error){
-        res.status(404).json({
-          status:"error",
-          message:"file Not Found"
-        });
+    // 2) Auth check
+    if (fileData.userId !== req.user.id) {
+      return res.status(403).json({
+        status: "error",
+        message: "Unaouthorized access ",
+      });
+    }
+
+    // 3) Build filename + path
+    const filename = `${id}${fileData.extension}`;
+    const FinalPath = path.join(FilePath, filename);
+
+    
+
+    // 5) Stream / download
+    res.setHeader("content-Disposition", "inline");
+
+    if (req.query.action === "download") {
+      return res.download(FinalPath, fileData.name);
+    }
+
+    return res.sendFile(FinalPath);
+  } catch (error) {
+    console.error("File serving error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Server error while fetching file",
+    });
   }
 });
+
 //move file to trash
 router.delete("/:id", async (req, res) => {
 const {id}=req.params;
@@ -163,7 +195,8 @@ try {
   //db call  
 const filesCollection=getFilesCollection(req);
 const dirsCollection=getDirsCollection(req);
-const fileData= await filesCollection.findOne({id:id},{projection:{id:1,extension:1,_id:0,userId:1,parentDir:1}});
+const fileData= normalizeDoc(await filesCollection.findOne({_id:new ObjectId(id)},{projection:{extension:1,userId:1,parentDir:1}}))
+console.log(fileData);
 
 if(!fileData){
   res.status(404).json(
@@ -177,17 +210,19 @@ if(!fileData){
 if(req.user.id!==fileData.userId){
  
    
-      return res.status(401).json({message:"Unaouthorized fdfdbgbgfb access "})
+      return res.status(401).json({message:"Unaouthorized  access "})
 }
 
 const filePath = `./storage2/${id}${fileData.extension || ""}`;
+console.log(filePath);
+
     try {
       await rm(filePath, { force: true });
     } catch (fsErr) {
       // Log but continue — we'll still remove metadata
       console.warn("Warning removing file from disk:", fsErr?.message || fsErr);
     }
-const deleteMetaResult=await filesCollection.deleteOne({id:id});
+const deleteMetaResult=await filesCollection.deleteOne({_id:new ObjectId(id)});
 if (deleteMetaResult.deletedCount !== 1) {
    console.warn("filesCollection.deleteOne did not delete a document:", deleteMetaResult);   
 }
@@ -207,7 +242,7 @@ res.status(200).json({
 router.patch("/rename/:id", async (req, res,next) => {
   
   const {id}=req.params;
-  const FilePath = PathJoinerTemp(req);
+
   const { oldFilename, newFilename } = req?.body;
   if(!newFilename){
     return res.status(404).json({message:"Please Enter the file name "})
@@ -215,7 +250,7 @@ router.patch("/rename/:id", async (req, res,next) => {
 try{
   //db call
   const filesCollection=getFilesCollection(req);
-  const fileUpdation=await filesCollection.updateOne({id},{$set:{name:newFilename}})
+  const fileUpdation=await filesCollection.updateOne({_id:new ObjectId(id)},{$set:{name:newFilename}})
   if(fileUpdation.modifiedCount!==1){
     return res.status(500).json({
       status:"error",
