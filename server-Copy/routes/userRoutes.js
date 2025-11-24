@@ -30,20 +30,11 @@ if(RedundantEmail){
    }
 const userId=new ObjectId();
 const rootDirId=new ObjectId();
-   const  userData={
-    _id:userId,
-    name:username,
-    email,
-    password,
-    rootDirId:rootDirId,
-    createdAt: new Date()
-    }
-    const userInsertion= await userCollection.insertOne(userData)
    
 const dirData={
-    _id:userId,
+    _id:rootDirId,
     name:`root-${email}`,
-    parentDir:null,
+    parentDirId:null,
     userId:userId,
     deleted:false,
     userId,
@@ -52,10 +43,33 @@ const dirData={
 const dirInsertion= await dirsCollection.insertOne(dirData);
 
 
+   const  userData={
+    _id:userId,
+    username,
+    email,
+    password,
+    rootDirId:rootDirId,
+    storageUsed:0,
+    createdAt: new Date()
+    }
+    const userInsertion= await userCollection.insertOne(userData)
+
 
 res.status(201).json({message:"User created Sucessfully"})
    }catch(error){
-    res.status(500).json({message:"Internal server Error"})
+    if(error.code==121){
+         res.status(400).json({
+      status: "error",
+      message: "Invalid input,Please Enter valid Detail ",
+    });
+    }else{
+      console.log(error);
+      
+      res.status(500).json({
+      status: "error",
+      message: "Error Creating User",
+    });
+    }
    }
 })
 

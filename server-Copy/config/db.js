@@ -1,12 +1,12 @@
 import { MongoClient } from "mongodb";
-
+ export const client = new MongoClient("mongodb://127.0.0.1:27017/StorageApp");
 
 
 // console.log(connectFlag);
 let db;
 export async function connectDB() {
 try{
-    const client = new MongoClient("mongodb://127.0.0.1:27017/StorageApp");
+   
     
     
   const connectFlag = await client.connect();

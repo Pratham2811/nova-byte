@@ -102,11 +102,12 @@ const filesCollection=getFilesCollection(req)
         _id: new ObjectId(fileId),
         name: originalname.trim(),
         extension,
-        mimeType: file.mimetype || null,
+        parentDirId: new ObjectId(parentDirId),
+         userId: new ObjectId(req.user.id),
         size: file.size ?? null,
-        userId: new ObjectId(req.user.id),     // use authenticated user id (NOT raw cookie)
+            
         deleted: false,
-        parentDir: new ObjectId(parentDirId),
+        
         createdAt: new Date(),
       };
       
@@ -126,8 +127,17 @@ res.status(201).json(
 }
 );
 } catch (error) {
-console.error("Upload error:", error);
-res.status(500).json({ message: "Error while uploading files" });
+ if(error.code==121){
+         res.status(400).json({
+      status: "error",
+      message: "Invalid input,Please Enter valid Detail ",
+    });
+    }else{
+      res.status(500).json({
+      status: "error",
+      message: "Error reading nested folders",
+    });
+    }
 }
 });
 
@@ -195,7 +205,7 @@ try {
   //db call  
 const filesCollection=getFilesCollection(req);
 const dirsCollection=getDirsCollection(req);
-const fileData= normalizeDoc(await filesCollection.findOne({_id:new ObjectId(id)},{projection:{extension:1,userId:1,parentDir:1}}))
+const fileData= normalizeDoc(await filesCollection.findOne({_id:new ObjectId(id)},{projection:{extension:1,userId:1,parentDirId:1}}))
 console.log(fileData);
 
 if(!fileData){

@@ -78,25 +78,28 @@ router.get("/{:id}", async (req, res) => {
 
     const filesCollection = getFilesCollection(req);
     const files = await filesCollection
-      .find({ parentDir: new ObjectId(id) })
+      .find({ parentDirId: new ObjectId(id) })
       .toArray();
 
     const apiFiles = files.map(normalizeDoc);
  
 
     const directories = await dirsCollection
-      .find({ parentDir: new ObjectId(id) })
+      .find({ parentDirId: new ObjectId(id) })
       .toArray();
     const apiDirectories = directories.map(normalizeDoc);
 
 
     return res.status(200).json({ ...dirsData, apiFiles, apiDirectories });
   } catch (error) {
-    console.log("Server Error", error);
-    res.status(500).json({
+   console.log("Error",error);
+   
+      res.status(500).json({
       status: "error",
       message: "Error reading nested folders",
     });
+    
+    
   }
 });
 
@@ -131,8 +134,9 @@ router.post("/create-directory", async (req, res, next) => {
 
     //insert in db --db call
     const directoryData = {
+
       name: foldername || "New Folder",
-      parentDir: new ObjectId(parentdirId),
+      parentDirId: new ObjectId(parentdirId),
       userId: new ObjectId(req.user.id),
       deleted: false,
       createdAt: new Date(),
@@ -140,8 +144,19 @@ router.post("/create-directory", async (req, res, next) => {
     const isDirectoryPushed = await dirsCollection.insertOne(directoryData);
 
     return res.status(200).send("File Created sucessFully");
-  } catch (err) {
+  } catch (error) {
     console.log("Error Creating directory", err);
+     if(error.code==121){
+         res.status(400).json({
+      status: "error",
+      message: "Invalid input,Please Enter valid Detail ",
+    });
+    }else{
+      res.status(500).json({
+      status: "error",
+      message: "Error reading nested folders",
+    });
+    }
     res.status(500).send(err.message);
   }
 });
@@ -185,7 +200,7 @@ router.delete("/:id", async (req, res, next) => {
       // get immediate children
       const children = await dirsCollection
         .find(
-          { parentDir: new ObjectId(dirId)}
+          { parentDirId: new ObjectId(dirId)}
         )
         .toArray();
 
@@ -197,7 +212,7 @@ router.delete("/:id", async (req, res, next) => {
 
       const files = await filesCollection
         .find(
-          { parentDir: new ObjectId(dirId) },
+          { parentDirId: new ObjectId(dirId) },
           { projection: { extension: 1} }
         )
         .toArray();
@@ -218,7 +233,7 @@ router.delete("/:id", async (req, res, next) => {
 
         // remove file records from DB
         const fileDelRes = await filesCollection.deleteMany({
-          parentDir: new ObjectId(dirId),
+          parentDirId: new ObjectId(dirId),
         });
         console.log(
           `Deleted ${fileDelRes.deletedCount} file records for dir ${dirId}`
