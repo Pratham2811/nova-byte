@@ -21,5 +21,9 @@ try{
      
 }
 }
+ export async function getClient() {
+  return client;
+  
+}
 
 

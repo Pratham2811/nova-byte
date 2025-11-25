@@ -4,6 +4,7 @@ import { getUsersCollection } from "../config/userCollection.js";
 import { getDirsCollection } from "../config/dirCollection.js";
 import { normalizeDoc } from "../utils/apiDataFormat.js";
 import { ObjectId } from "mongodb";
+import { transactionProvide } from "../utils/transaction.js";
 const router=express.Router();
 
 
@@ -18,6 +19,7 @@ if(!username|| !email||!password){
     return res.status(400).json({message:"User not created. Error: Missing data."})
    }
 try{ 
+  await transactionProvide(async (session)=>{
 const userCollection=getUsersCollection(req)
 const dirsCollection=getDirsCollection(req)
 
@@ -37,10 +39,10 @@ const dirData={
     parentDirId:null,
     userId:userId,
     deleted:false,
-    userId,
+   
     createdAt: new Date()
   }
-const dirInsertion= await dirsCollection.insertOne(dirData);
+
 
 
    const  userData={
@@ -52,10 +54,17 @@ const dirInsertion= await dirsCollection.insertOne(dirData);
     storageUsed:0,
     createdAt: new Date()
     }
-    const userInsertion= await userCollection.insertOne(userData)
+    
+  
+     const dirInsertion= await dirsCollection.insertOne(dirData,{session});
+    const userInsertion= await userCollection.insertOne(userData,{session})
+   
+  
+ 
 
 
 res.status(201).json({message:"User created Sucessfully"})
+  })
    }catch(error){
     if(error.code==121){
          res.status(400).json({
