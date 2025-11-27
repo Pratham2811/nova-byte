@@ -2,8 +2,11 @@
 import { getClient } from "../config/db.js";
 
 export async function transactionProvide(workFunction, options = {}) {
-  const client = getClient();           // NO await here
+  const client = await getClient();       
+ 
+      // NO await here
   const session = client.startSession();
+  
 
   try {
     const result = await session.withTransaction(

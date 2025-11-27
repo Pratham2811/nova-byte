@@ -18,20 +18,23 @@ if(!username|| !email||!password){
     console.log("Error in UserData");
     return res.status(400).json({message:"User not created. Error: Missing data."})
    }
-try{ 
-  await transactionProvide(async (session)=>{
 const userCollection=getUsersCollection(req)
 const dirsCollection=getDirsCollection(req)
-
-   
-   //find if email is exists in DB
-const RedundantEmail= await userCollection.findOne({email:email})
+const RedundantEmail= await userCollection.findOne({email:email},{unique:true})
    
 if(RedundantEmail){
     return res.status(409).json({message:"User Already Registered with Same email"})
    }
+
+
+   
+   //find if email is exists in DB
+
 const userId=new ObjectId();
 const rootDirId=new ObjectId();
+try{ 
+  await transactionProvide(async (session)=>{
+
    
 const dirData={
     _id:rootDirId,
@@ -63,8 +66,9 @@ const dirData={
  
 
 
-res.status(201).json({message:"User created Sucessfully"})
+
   })
+  res.status(201).json({message:"User created Sucessfully"})
    }catch(error){
     if(error.code==121){
          res.status(400).json({
