@@ -10,7 +10,10 @@ import cookieParser from "cookie-parser"
 import checkAuth from "./middlewares/authMiddleware.js";
 import { connectDB } from "./config/db.js";
 const app = express();
+import dotenv from "dotenv";
 
+import path from "path";
+dotenv.config()
 try{
   console.log("Hiii");
   const db=await connectDB();

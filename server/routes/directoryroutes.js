@@ -145,7 +145,7 @@ router.post("/create-directory", async (req, res, next) => {
 
     return res.status(200).send("File Created sucessFully");
   } catch (error) {
-    console.log("Error Creating directory", err);
+    console.log("Error Creating directory", error);
      if(error.code==121){
          res.status(400).json({
       status: "error",
@@ -157,7 +157,7 @@ router.post("/create-directory", async (req, res, next) => {
       message: "Error reading nested folders",
     });
     }
-    res.status(500).send(err.message);
+    res.status(500).send(error.message);
   }
 });
 

@@ -92,8 +92,11 @@ const body = req.body || {};
 const { email, password } = body;
 console.log(email,password);
 
+
 try{
+
 const userCollection=getUsersCollection(req)
+ 
 const findUser=await userCollection.findOne({email:email},{
   projection:
   {
@@ -103,6 +106,9 @@ const findUser=await userCollection.findOne({email:email},{
     
   }
 })
+ console.log("Hiiii");
+console.log(findUser);
+
 console.log("Data from Db:",findUser);
 
 if(!findUser){
