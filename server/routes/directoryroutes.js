@@ -29,13 +29,11 @@ const PathJoiner = (req) => {
 router.param("id", validateIdMiddleware);
 
 router.get("/{:id}", async (req, res) => {
- 
-
   let { id } = req.params;
   const { uid } = req.cookies;
 
   if (uid !== req.user.id) {
-    console.log("User id not contains or un authrizer",req.user.id);
+    console.log("User id not contains or un authrizer", req.user.id);
     return res.status(401).json({ message: "Unauthorized access " });
   }
 
@@ -50,7 +48,6 @@ router.get("/{:id}", async (req, res) => {
     );
     if (!id && dirsData === null) {
       const userId = req.user.id;
-   
 
       dirsData = normalizeDoc(
         await dirsCollection.findOne(
@@ -58,7 +55,6 @@ router.get("/{:id}", async (req, res) => {
           { projection: { deleted: 0 } }
         )
       );
- 
 
       id = dirsData.id;
     }
@@ -82,24 +78,20 @@ router.get("/{:id}", async (req, res) => {
       .toArray();
 
     const apiFiles = files.map(normalizeDoc);
- 
 
     const directories = await dirsCollection
       .find({ parentDirId: new ObjectId(id) })
       .toArray();
     const apiDirectories = directories.map(normalizeDoc);
 
-
     return res.status(200).json({ ...dirsData, apiFiles, apiDirectories });
   } catch (error) {
-   console.log("Error",error);
-   
-      res.status(500).json({
+    console.log("Error", error);
+
+    res.status(500).json({
       status: "error",
       message: "Error reading nested folders",
     });
-    
-    
   }
 });
 
@@ -134,7 +126,6 @@ router.post("/create-directory", async (req, res, next) => {
 
     //insert in db --db call
     const directoryData = {
-
       name: foldername || "New Folder",
       parentDirId: new ObjectId(parentdirId),
       userId: new ObjectId(req.user.id),
@@ -146,16 +137,16 @@ router.post("/create-directory", async (req, res, next) => {
     return res.status(200).send("File Created sucessFully");
   } catch (error) {
     console.log("Error Creating directory", error);
-     if(error.code==121){
-         res.status(400).json({
-      status: "error",
-      message: "Invalid input,Please Enter valid Detail ",
-    });
-    }else{
+    if (error.code == 121) {
+      res.status(400).json({
+        status: "error",
+        message: "Invalid input,Please Enter valid Detail ",
+      });
+    } else {
       res.status(500).json({
-      status: "error",
-      message: "Error reading nested folders",
-    });
+        status: "error",
+        message: "Error reading nested folders",
+      });
     }
     res.status(500).send(error.message);
   }
@@ -199,9 +190,7 @@ router.delete("/:id", async (req, res, next) => {
     try {
       // get immediate children
       const children = await dirsCollection
-        .find(
-          { parentDirId: new ObjectId(dirId)}
-        )
+        .find({ parentDirId: new ObjectId(dirId) })
         .toArray();
 
       console.log(children);
@@ -213,7 +202,7 @@ router.delete("/:id", async (req, res, next) => {
       const files = await filesCollection
         .find(
           { parentDirId: new ObjectId(dirId) },
-          { projection: { extension: 1} }
+          { projection: { extension: 1 } }
         )
         .toArray();
 
