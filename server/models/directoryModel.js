@@ -4,20 +4,20 @@ const directorySchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, "Directory name is required"],
+      required: true,
       trim: true,
-      minlength: 2,
+      minlength: 1,
     },
 
     parentDirId: {
       type: Schema.Types.ObjectId,
-      ref: "dir",
-      default: null, // root directory
-      
+      ref: "Dir",
+      default: null, 
     },
 
     userId: {
       type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
       
     },
@@ -26,7 +26,7 @@ const directorySchema = new Schema(
       type: String,
       enum: ["ACTIVE", "TRASHED", "DELETED"],
       default: "ACTIVE",
-     
+      index: true,
     },
 
     trashedAt: {
@@ -45,4 +45,4 @@ const directorySchema = new Schema(
   }
 );
 
-export default model("dir", directorySchema);
+export const directoryModel=model("Dir",directorySchema)

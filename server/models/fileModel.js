@@ -2,38 +2,62 @@ import { Schema, model } from "mongoose";
 
 const fileSchema = new Schema(
   {
+    // Logical name shown to user
     name: {
       type: String,
-      required: [true, "file name is required"],
+      required: true,
       trim: true,
-      minlength: 2,
+      minlength: 1,
+    },
+
+    // Physical filename or storage key
+    storageKey: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+
+    // Disk path or bucket path
+    storagePath: {
+      type: String,
+      required: true,
+    },
+
+    extension: {
+      type: String,
+      required: true,
+      lowercase: true,
+    },
+
+    mimeType: {
+      type: String,
+      required: true,
+    },
+
+    size: {
+      type: Number,
+      required: true,
+      min: 0,
     },
 
     parentDirId: {
       type: Schema.Types.ObjectId,
-      required:[true],
-      ref: "dir",
-       // root directory
-      
+      ref: "Dir",
+      required: true,
     },
 
     userId: {
       type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
-      
+      index: true,
     },
 
     state: {
       type: String,
       enum: ["ACTIVE", "TRASHED", "DELETED"],
       default: "ACTIVE",
-     
-    },
-    isRoot:{
-        type:Boolean,
-        required:true,
-        immutable:true,
-        default:false
+      index: true,
     },
 
     trashedAt: {
@@ -47,9 +71,9 @@ const fileSchema = new Schema(
     },
   },
   {
-    strict: "throw",
     timestamps: true,
+    strict: "throw",
   }
 );
 
-export default model("file", fileSchema);
+export default model("File", fileSchema);

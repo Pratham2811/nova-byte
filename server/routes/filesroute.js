@@ -11,7 +11,9 @@ import { getFilesCollection } from "../config/filesCollection.js";
 import { getDirsCollection } from "../config/dirCollection.js";
 import { normalizeDoc } from "../utils/apiDataFormat.js";
 import { ObjectId } from "mongodb";
-
+import { getFileController } from "../controllers/file/getFile.controller.js";
+import { uploadFileController } from "../controllers/file/uploadFile.controller.js";
+import { upload } from "../middlewares/multer.middleware.js";
 const router = express.Router();
 
 const PathJoinerTemp = (req) => {
@@ -27,6 +29,8 @@ const storage = multer.diskStorage({
     cb(null, "./storage2");
   },
   filename: function (req, file, cb) {
+    console.log("frfrtrigkbjntrvkjgrvkjgrvbgrkjvbgrkjbvrgkj");
+
     const id = new ObjectId();
     console.log("ID from the multer bro", id);
 
@@ -36,7 +40,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
+// const upload = multer({ storage: storage });
 
 router.post(
   "/upload",
@@ -66,6 +70,7 @@ router.post(
         }
         parentDirId = rootDirectory.id;
       }
+      console.log(parentDirId);
 
       if (!ObjectId.isValid(parentDirId)) {
         return res.status(400).json({
@@ -73,7 +78,10 @@ router.post(
           message: "Invalid parent directory ID",
         });
       }
+
       const uploadedFiles = req.files;
+      console.log(req.files);
+
       if (!uploadedFiles || uploadedFiles.length === 0) {
         return res.status(400).json({ message: "No files uploaded" });
       }
@@ -125,6 +133,8 @@ router.post(
           message: "Invalid input,Please Enter valid Detail ",
         });
       } else {
+        console.log(error);
+
         res.status(500).json({
           status: "error",
           message: "Error reading nested folders",
@@ -135,56 +145,7 @@ router.post(
 );
 
 //serving file
-router.get("/:id", async (req, res) => {
-  const { id } = req.params;
-  const FilePath = PathJoinerTemp(req);
-
-  try {
-    const filesCollection = getFilesCollection(req);
-
-    const fileData = normalizeDoc(
-      await filesCollection.findOne(
-        { _id: new ObjectId(id) },
-        { projection: { extension: 1, userId: 1, name: 1 } }
-      )
-    );
-
-    // 1) Check DB first (otherwise fileData.userId will crash)
-    if (!fileData) {
-      return res.status(404).json({
-        status: "error",
-        message: "File not found",
-      });
-    }
-
-    // 2) Auth check
-    if (fileData.userId !== req.user.id) {
-      return res.status(403).json({
-        status: "error",
-        message: "Unaouthorized access ",
-      });
-    }
-
-    // 3) Build filename + path
-    const filename = `${id}${fileData.extension}`;
-    const FinalPath = path.join(FilePath, filename);
-
-    // 5) Stream / download
-    res.setHeader("content-Disposition", "inline");
-
-    if (req.query.action === "download") {
-      return res.download(FinalPath, fileData.name);
-    }
-
-    return res.sendFile(FinalPath);
-  } catch (error) {
-    console.error("File serving error:", error);
-    return res.status(500).json({
-      status: "error",
-      message: "Server error while fetching file",
-    });
-  }
-});
+router.get("/:id", getFileController);
 
 //move file to trash
 router.delete("/:id", async (req, res) => {
@@ -276,5 +237,11 @@ router.patch("/rename/:id", async (req, res, next) => {
 router.param("id", validateIdMiddleware, () => {
   console.log("rename was running");
 });
+
+router.post(
+  "/upload/test",
+  upload.array("uploadedFiles"),
+  uploadFileController
+);
 
 export default router;

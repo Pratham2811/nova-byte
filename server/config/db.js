@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
 dotenv.config();
-console.log(process.env.MONGO_URI);
+// // console.log(process.env.MONGO_URI);
 
  export const client = new MongoClient(process.env.MONGO_URI)
 let db;
@@ -31,3 +31,17 @@ try{
 }
 
 
+
+import mongoose from "mongoose";
+
+
+
+try{
+  const client=mongoose.connect(process.env.MONGO_URI);
+  console.log("MongoDB Connected 🪐🚀");
+  
+
+}catch(error){
+  console.log("Error Connecting to thr Database: ",error);
+  
+}

@@ -1,20 +1,34 @@
-import { ObjectId } from "mongodb";
-import { getUsersCollection } from "../config/userCollection.js";
+import mongoose from "mongoose";
+import User from "../models/UserModel.js";
 import { normalizeDoc } from "../utils/apiDataFormat.js";
-export default async function checkAuth(req,res,next){
-const {uid}=req.cookies;
 
-const userCollection=getUsersCollection(req)
-const user=normalizeDoc(await  userCollection.findOne({_id:new ObjectId(uid)}))
+export default async function checkAuth(req, res, next) {
+  try {
+    const { userId } = req.cookies;
+
+    // 1. Presence check
+    if (!userId) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    // 2. ObjectId validation
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(401).json({ error: "Invalid user session" });
+    }
+
+    // 3. DB lookup
+    const userDoc = await User.findById(userId).lean();
 
 
+    if (!userDoc) {
+      return res.status(401).json({ error: "User not found" });
+    }
 
+    // 4. Normalize AFTER existence check
+    req.user = normalizeDoc(userDoc);
 
-
-if(!uid || !user){
-   return res.status(401).json({error:"Not logged In / User not Found"})
-}else{
-   req.user=user
-    next()
-   } 
+    next();
+  } catch (err) {
+    next(err); // delegate to global error handler
+  }
 }

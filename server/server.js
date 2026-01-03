@@ -4,23 +4,21 @@ import cors from "cors";
 import directoryroutes from "./routes/directoryroutes.js";
 import filesroute from "./routes/filesroute.js";
 import trasroutes from "./routes/trashroutes.js";
-import { error } from "console";
 import userRoutes from "./routes/userRoutes.js"
 import cookieParser from "cookie-parser"
 import checkAuth from "./middlewares/authMiddleware.js";
-import { connectDB } from "./config/db.js";
-const app = express();
+import  "./config/db.js";
 import dotenv from "dotenv";
+import { connectDB, getClient } from "./config/db.js";
 
-import path from "path";
 dotenv.config()
+const app = express();
+
+const db=await connectDB()
+const client=getClient()
 try{
-  console.log("Hiii");
-  const db=await connectDB();
-
-
-
-//to make available sb for every roite we are sticke db to request 
+ 
+// //to make available sb for every roite we are sticke db to request 
 app.use((req,res,next)=>{
 
   
@@ -46,8 +44,8 @@ app.use("/file",checkAuth,filesroute);
 app.use("/user",userRoutes)
 
 
-//trash
-app.use("/trash",checkAuth,trasroutes);
+// //trash
+// app.use("/trash",checkAuth,trasroutes);
 
 app.use((error,req,res,next)=>{
   console.log("Error come");
