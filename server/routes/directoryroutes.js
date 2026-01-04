@@ -30,9 +30,9 @@ router.param("id", validateIdMiddleware);
 
 router.get("/{:id}", async (req, res) => {
   let { id } = req.params;
-  const { uid } = req.cookies;
+  const { userId } = req.cookies;
 
-  if (uid !== req.user.id) {
+  if (userId !== req.user.id) {
     console.log("User id not contains or un authrizer", req.user.id);
     return res.status(401).json({ message: "Unauthorized access " });
   }

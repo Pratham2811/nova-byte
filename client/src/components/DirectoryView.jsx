@@ -110,11 +110,8 @@ export const FileList = () => {
     setSelectedFile(null);
   };
   const handleDownloadFile = async (file) => {
-    const url = `http://localhost:80/file/${file.id}?action=download`;
-    const response=await fetch (url,{
-      method:"GET",
-      credentials:"include"
-    })
+    
+ window.location.href = `http://localhost:80/file/${file.id}?action=download`;
   };
 
   const handleDeleteFile = async (file) => {

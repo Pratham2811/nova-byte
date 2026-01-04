@@ -1,191 +1,179 @@
 import React, { useState } from "react";
-import { LogIn, User, Lock, Loader2, CheckCircle } from "lucide-react";
+import { LogIn, User, Lock, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-// Theme Constants (Keeping your established cyber aesthetic)
-const NEON_CYAN = "cyan-400";
-const NEON_FUCHSIA = "fuchsia-500";
-const MAIN_GRADIENT = "bg-gradient-to-r from-cyan-400 to-fuchsia-400";
-const BUTTON_GRADIENT = "bg-gradient-to-r from-cyan-500 to-fuchsia-600";
-const SHADOW_FUCHSIA = "shadow-[0_0_80px_rgba(236,72,153,0.3)]";
-const NEON_RED = "rose-400";
-const NEON_GREEN = "emerald-400";
+// --- INTERSTELLAR THEME CONSTANTS ---
+const THEME = {
+  GOLD: "text-[#E09F3E]",
+  GOLD_BORDER: "border-[#E09F3E]",
+  ICE: "text-[#A5C9CA]",
+  BG_VOID: "bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#111] via-black to-black",
+  GLASS_CARD: "bg-white/5 backdrop-blur-md border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)]",
+  INPUT_FIELD: "bg-black/50 border border-white/10 text-white focus:border-[#E09F3E] focus:ring-1 focus:ring-[#E09F3E] placeholder-gray-600 font-mono tracking-wide",
+  BTN_PRIMARY: "bg-[#E09F3E] text-black hover:bg-[#c78b32] shadow-[0_0_20px_rgba(224,159,62,0.3)] transition-all duration-300",
+  TEXT_GRADIENT: "text-transparent bg-clip-text bg-gradient-to-r from-[#E09F3E] via-[#FCEAbb] to-[#E09F3E]",
+};
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false); // State for successful login
-  const navigate =useNavigate()
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
 
     if (!email || !password) {
-      setError("Input stream incomplete. All fields required.");
+      setError("CREDENTIALS MISSING. INPUT REQUIRED.");
       return;
     }
 
     setLoading(true);
-
-    // Using HTTP protocol as determined earlier
     const url = `http://localhost:80/user/login-user`;
     
     try {
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: email, password: password }),
-        credentials:"include"
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "include"
       });
 
       let data = {};
       try {
         data = await response.json();
       } catch (e) {
-        // Handle cases where the server sends a non-JSON response (shouldn't happen with your backend, but good practice)
-        data.message = "Server response unreadable or empty.";
+        data.message = "UPLINK ERROR: INVALID RESPONSE";
       }
       
       if (response.ok) {
-        // HTTP 200: Successful Login
-        console.log("Login Successful! Server Response:", data.message);
+        console.log("ACCESS GRANTED");
         setSuccess(true);
         setError(null);
-        
-        // Clear inputs after successful login
         setEmail('');
         setPassword('');
- navigate('/')
+        
+        // Small delay for the user to see the success state before redirect
+        setTimeout(() => navigate('/'), 800); 
       } else {
-        // HTTP 401 or 404 from backend: Authentication Failure
-        console.error("Authentication Failure. Server Response:", data.message);
-        setError(data.message || "Authentication Failure. Invalid Network ID or Access Key.");
+        setError(data.message || "ACCESS DENIED: INVALID SIGNATURE");
         setSuccess(false);
       }
 
     } catch (networkError) {
-      // Critical network errors (e.g., server offline, CORS block)
       console.error("Network Error:", networkError);
-      setError("Critical network connection failure. Unable to reach access gate.");
+      setError("CONNECTION FAILURE: SERVER UNREACHABLE");
       setSuccess(false);
     }
-    
     setLoading(false);
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-gray-950 text-white overflow-hidden p-4">
-      {/* Background Glows: Stronger Fuchsia and Cyan (Matching Register Form) */}
-      <div className="absolute top-0 left-0 w-80 h-80 bg-fuchsia-500/30 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-500/30 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
+    <div className={`relative flex items-center justify-center min-h-screen ${THEME.BG_VOID} text-white overflow-hidden p-4`}>
+      
+      {/* Cinematic Background Elements (Subtle Stars/Glows) */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#E09F3E]/10 rounded-full blur-[100px] opacity-20 pointer-events-none"></div>
 
-      {/* Card: Intense Shadow/Glow (Matching Register Form) */}
-      <div 
-        className={`relative z-10 bg-gray-800/50 backdrop-blur-xl p-6 sm:p-10 rounded-3xl w-full max-w-md md:max-w-lg border border-gray-700/50 ${SHADOW_FUCHSIA} transition-all duration-300`}
-      >
+      {/* Main Card */}
+      <div className={`relative z-10 p-8 sm:p-12 rounded-2xl w-full max-w-md md:max-w-lg transition-all duration-500 ${THEME.GLASS_CARD}`}>
         
-        {/* Header/Title: Matching Register Form Gradient */}
-        <div className="flex flex-col items-center mb-8">
-          <LogIn 
-            className={`w-8 h-8 sm:w-10 sm:h-10 mb-3 text-transparent bg-clip-text`} 
-            style={{ backgroundImage: `linear-gradient(to right, #00ffff, #ff00ff)` }}
-          />
-          <h2 className={`text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text ${MAIN_GRADIENT} tracking-widest uppercase`}>
-            ACCESS GATE LOGIN
+        {/* Header */}
+        <div className="flex flex-col items-center mb-10">
+          <div className="mb-4 p-4 rounded-full bg-white/5 border border-white/10 shadow-[0_0_15px_rgba(224,159,62,0.1)]">
+             <LogIn className={`w-8 h-8 ${THEME.GOLD}`} />
+          </div>
+          <h2 className={`text-2xl sm:text-3xl font-light tracking-[0.2em] uppercase ${THEME.TEXT_GRADIENT}`}>
+            Identity Check
           </h2>
-          <p className="text-gray-400 text-sm mt-2">Enter credentials for network access.</p>
+          <p className="text-gray-500 text-xs tracking-widest mt-2 uppercase">
+            Secure Terminal Access
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           
           {/* Email Input */}
-          <div className="relative">
-            <User className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-${NEON_CYAN} z-10`} />
+          <div className="relative group">
+            <User className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 ${THEME.ICE} z-10 opacity-70 group-focus-within:opacity-100 transition-opacity`} />
             <input
               type="email"
-              placeholder="Email"
+              placeholder="OPERATOR_ID (EMAIL)"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              // Matching Input Style
-              className={`w-full p-3 pl-12 pr-4 bg-gray-700/70 text-white border border-gray-600/50 rounded-xl 
-                          focus:outline-none focus:ring-4 focus:ring-fuchsia-500/50 focus:border-cyan-400 hover:border-fuchsia-400 placeholder-gray-400 transition-all duration-300`}
-              disabled={loading || success} // Disable input on load or success
+              className={`w-full p-3 pl-12 pr-4 rounded-lg outline-none transition-all duration-300 text-sm ${THEME.INPUT_FIELD}`}
+              disabled={loading || success}
               required
             />
           </div>
 
           {/* Password Input */}
-          <div className="relative">
-            <Lock className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-${NEON_FUCHSIA} z-10`} />
+          <div className="relative group">
+            <Lock className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 ${THEME.GOLD} z-10 opacity-70 group-focus-within:opacity-100 transition-opacity`} />
             <input
-              type="text"
-              placeholder="Password"
+              type="password"
+              placeholder="ACCESS_KEY (PASSWORD)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              // Matching Input Style
-              className={`w-full p-3 pl-12 pr-4 bg-gray-700/70 text-white border border-gray-600/50 rounded-xl 
-                          focus:outline-none focus:ring-4 focus:ring-fuchsia-500/50 focus:border-cyan-400 hover:border-fuchsia-400 placeholder-gray-400 transition-all duration-300`}
-              disabled={loading || success} // Disable input on load or success
+              className={`w-full p-3 pl-12 pr-4 rounded-lg outline-none transition-all duration-300 text-sm ${THEME.INPUT_FIELD}`}
+              disabled={loading || success}
               required
             />
           </div>
 
           {/* Status Message Display */}
           {(error || success) && (
-            <div className={`p-4 rounded-xl text-sm text-center font-semibold 
-              ${error ? `bg-rose-600/20 border border-rose-500/50 text-${NEON_RED} shadow-[0_0_15px_rgba(244,63,94,0.5)]`
-                    : `bg-emerald-600/20 border border-emerald-500/50 text-${NEON_GREEN} shadow-[0_0_15px_rgba(52,211,153,0.5)]`
-              } flex items-center justify-center gap-3`}>
-                {success ? <CheckCircle className="w-5 h-5"/> : null}
-                {error || "Authentication successful. Redirecting..."}
+            <div className={`p-3 rounded border text-xs font-mono tracking-wide flex items-center justify-center gap-3 transition-all duration-300
+              ${error 
+                ? "bg-rose-950/30 border-rose-900/50 text-rose-400" 
+                : "bg-emerald-950/30 border-emerald-900/50 text-emerald-400"
+              }`}
+            >
+              {success ? <CheckCircle className="w-4 h-4"/> : <AlertCircle className="w-4 h-4" />}
+              {error || "AUTHENTICATION VERIFIED. REDIRECTING..."}
             </div>
           )}
 
-          {/* Login Button: Matching Register Form Style */}
+          {/* Login Button */}
           <button
             type="submit"
             disabled={loading || success}
-            className={`w-full mt-8 ${BUTTON_GRADIENT} text-base sm:text-lg py-3 rounded-xl font-bold uppercase tracking-widest text-white
-                        shadow-[0_10px_40px_rgba(0,255,255,0.4)] transition-all duration-300 transform hover:scale-[1.03] hover:shadow-[0_15px_60px_rgba(236,72,153,0.6)] disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`w-full mt-6 py-3 rounded-lg font-bold text-sm tracking-[0.15em] uppercase transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${THEME.BTN_PRIMARY}`}
           >
             {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                AUTHENTICATING...
+              <span className="flex items-center justify-center gap-3">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                CONNECTING...
               </span>
             ) : success ? (
-              <span className="flex items-center justify-center gap-2">
-                <CheckCircle size={20} />
-                ACCESS GRANTED
+              <span className="flex items-center justify-center gap-3">
+                <CheckCircle size={18} />
+                GRANTED
               </span>
             ) : (
-              <span className="flex items-center justify-center gap-2">
-                <LogIn size={20} />
-                LOG IN TO MATRIX
+              <span className="flex items-center justify-center gap-3">
+                ENTER SYSTEM
               </span>
             )}
           </button>
         </form>
 
-        {/* Footer/Navigation Link */}
-        <div className="mt-8 pt-6 border-t border-gray-800 text-center">
-          <p className="text-sm text-gray-500">
-            Need an account? 
-            <button
-              
-              className={`font-semibold ml-2 transition-colors duration-200 
-                          text-${NEON_CYAN} hover:text-white`}
+        {/* Footer */}
+        <div className="mt-8 pt-6 border-t border-white/5 text-center">
+          <p className="text-xs text-gray-500 font-mono">
+            NO CREDENTIALS FOUND? 
+            <button 
+              className={`ml-2 font-bold hover:text-white transition-colors duration-200 ${THEME.ICE} underline underline-offset-4 decoration-white/20 hover:decoration-white/50`}
               onClick={(e) => { 
                 e.preventDefault();
                 navigate("/register")
-                }}
+              }}
             >
-              REGISTER ACCOUNT
+              INITIALIZE REGISTRATION
             </button>
           </p>
         </div>
