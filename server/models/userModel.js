@@ -4,44 +4,50 @@ const UserSchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, "User  name is required"],
+      required: [true, "User name is required"],
       trim: true,
       minlength: 2,
-      maxlength:60,
+      maxlength: 60,
     },
-    email:{
-        type:String,
-        required: [true, "Email is required"],
-        lowercase: true,
-        trim:true,
-        match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format"],
-       
-        
-    },
-    password:{
-        type:String,
-        required:true,
-        minlength:8,
-        maxlength:16,
-        trim:true,
 
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      lowercase: true,
+      trim: true,
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format"],
+      unique: true,
     },
-    storage:{
-     type:Number,
-     required:true,
-     min:0,
-     default:0
 
+    password: {
+      type: String,
+      required: true,
+      minlength: 4,
+      maxlength: 16,
+      trim: true,
+    },
+
+    rootDirId: {
+      type: Schema.Types.ObjectId,
+      ref: "Directory",
+      required: true,
+      immutable: true,
+    },
+
+    storage: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
     },
 
     state: {
       type: String,
-      enum: ["ACTIVE", "DELETED", "DISABLED","SUSPENDED"],
+      enum: ["ACTIVE", "DELETED", "DISABLED", "SUSPENDED"],
       default: "ACTIVE",
-     
     },
 
- deletedAt: {
+    deletedAt: {
       type: Date,
       default: null,
     },
@@ -52,5 +58,5 @@ const UserSchema = new Schema(
   }
 );
 
-const User= model("User", UserSchema);
+const User = model("User", UserSchema);
 export default User;

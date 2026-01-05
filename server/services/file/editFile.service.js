@@ -10,13 +10,13 @@ export const editFileService = async ({ fileId, userId, newFilename }) => {
     {
       _id: fileId,
       userId,
-      state: "ACTIVE", // lifecycle enforcement
+      state: "ACTIVE", 
     },
     {
       name: newFilename,
     },
     {
-      new: false, // we don't need updated doc
+      new: false, 
     }
   );
 

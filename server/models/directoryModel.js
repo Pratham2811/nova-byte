@@ -12,14 +12,13 @@ const directorySchema = new Schema(
     parentDirId: {
       type: Schema.Types.ObjectId,
       ref: "Dir",
-      default: null, 
+      default: null,
     },
 
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      
     },
 
     state: {
@@ -45,4 +44,4 @@ const directorySchema = new Schema(
   }
 );
 
-export const directoryModel=model("Dir",directorySchema)
+export const directoryModel = model("Directory", directorySchema);

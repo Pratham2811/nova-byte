@@ -18,5 +18,5 @@ export const getFileService = async ({ fileId, userId }) => {
     throw new AppError("File not available", 403);
   }
 
-  return file; // INTERNAL OBJECT
+  return file;
 };

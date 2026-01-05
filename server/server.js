@@ -3,7 +3,6 @@ const port = 80;
 import cors from "cors";
 import directoryroutes from "./routes/directoryroutes.js";
 import filesroute from "./routes/filesroute.js";
-import trasroutes from "./routes/trashroutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import cookieParser from "cookie-parser";
 import checkAuth from "./middlewares/authMiddleware.js";
@@ -15,9 +14,7 @@ dotenv.config();
 const app = express();
 
 const db = await connectDB();
-const client = getClient();
 try {
-  // //to make available sb for every roite we are sticke db to request
   app.use((req, res, next) => {
     req.db = db;
     next();
@@ -31,18 +28,19 @@ try {
       credentials: true,
     })
   );
-  app.use(cookieParser());
 
+  app.use(cookieParser());
   app.use("/directory", checkAuth, directoryroutes);
-  //files route
   app.use("/file", checkAuth, filesroute);
   app.use("/user", userRoutes);
 
-  // //trash
-  // app.use("/trash",checkAuth,trasroutes);
+ 
 
   app.use((error, req, res, next) => {
-    console.log("Error come");
+
+   if (error.code === 121) {
+    // This will print the FULL validation error details
+    console.dir(error.errInfo, { depth: null, colors: true })}
     console.log(error);
 
     res.status(error.status || 500).json({

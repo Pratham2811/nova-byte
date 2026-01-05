@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import User from "../models/UserModel.js";
-import { normalizeDoc } from "../utils/apiDataFormat.js";
+import { mapMongoId } from "../utils/mapMongoId.js";
 
 export default async function checkAuth(req, res, next) {
   try {
@@ -25,7 +25,7 @@ export default async function checkAuth(req, res, next) {
     }
 
     // 4. Normalize AFTER existence check
-    req.user = normalizeDoc(userDoc);
+    req.user = mapMongoId(userDoc);
 
     next();
   } catch (err) {

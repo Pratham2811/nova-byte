@@ -28,7 +28,6 @@ export const deleteFileService = async ({ fileId, userId }) => {
     session.endSession();
   }
 
-  // 🔴 OUTSIDE TRANSACTION
   try {
     const filePath = path.resolve(file.storagePath);
     await fs.rm(filePath, { force: true });
@@ -38,6 +37,6 @@ export const deleteFileService = async ({ fileId, userId }) => {
       path: file.storagePath,
       error: cleanupErr.message,
     });
-    // DO NOT throw
+   
   }
 };
