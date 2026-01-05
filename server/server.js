@@ -12,14 +12,6 @@ import { connectDB, getClient } from "./config/db.js";
 
 dotenv.config();
 const app = express();
-
-const db = await connectDB();
-try {
-  app.use((req, res, next) => {
-    req.db = db;
-    next();
-  });
-
   //parsing request
   app.use(express.json());
   app.use(

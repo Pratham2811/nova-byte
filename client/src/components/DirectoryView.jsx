@@ -71,10 +71,10 @@ export const FileList = () => {
       }
       const data = await response.json();
       console.log(data);
-      console.log(data.apiFiles);
+      console.log(data.data.files);
       
-      setDirectoriesList(data.apiDirectories|| []);
-      setFilesList(data.apiFiles || []);
+      setDirectoriesList(data.data.directories|| []);
+      setFilesList(data.data.files || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -133,7 +133,7 @@ export const FileList = () => {
   };
 
   const handleFileSave = async (newFilename) => {
-    const url = `http://localhost:80/file/rename/${oldFilename.id}`;
+    const url = `http://localhost:80/file/${oldFilename.id}`;
     try {
       const response = await fetch(url, {
         method: "PATCH",
@@ -154,7 +154,7 @@ export const FileList = () => {
 
   // --- Folder rename logic ---
   const handleFolderRename = async (newName) => {
-    const url = `http://localhost:80/directory/rename/${selectedFolder.id}`;
+    const url = `http://localhost:80/directory/${selectedFolder.id}`;
     try {
       const response = await fetch(url, {
         method: "PATCH",

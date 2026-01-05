@@ -35,10 +35,10 @@ const CreateFolder = ({ directoryPath, fetchFiles }) => {
     }
 
     try {
-      const response = await fetch("http://localhost:80/directory/create-directory", {
+      const response = await fetch("http://localhost:80/directory/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ parentDirId: directoryPath, foldername: folderName.trim() }),
+        body: JSON.stringify({ parentDirId: directoryPath, directoryname: folderName.trim() }),
         credentials:"include"
       });
 
