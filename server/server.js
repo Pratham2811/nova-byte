@@ -8,10 +8,11 @@ import cookieParser from "cookie-parser";
 import checkAuth from "./middlewares/authMiddleware.js";
 import "./config/db.js";
 import dotenv from "dotenv";
-import { connectDB, getClient } from "./config/db.js";
+
 
 dotenv.config();
 const app = express();
+try{
   //parsing request
   app.use(express.json());
   app.use(
@@ -44,6 +45,6 @@ const app = express();
   app.listen(port, () => {
     console.log(`server is listening on ${port}`);
   });
-} catch (error) {
+}catch (error) {
   console.log("Error while connecting to DB: ", error);
 }
