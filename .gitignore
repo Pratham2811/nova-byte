@@ -51,6 +51,10 @@ Thumbs.db
 *.mov
 *.avi
 *.mkv
+*.pdf
+*.jpg
+*.jpeg
+*.png
 # Storage / uploads
 server-Copy/storage/
 # =========================
