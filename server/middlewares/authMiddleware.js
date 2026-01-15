@@ -7,17 +7,27 @@ export default async function checkAuth(req, res, next) {
     const { userId } = req.cookies;
 
     // 1. Presence check
-    if (!userId) {
-      return res.status(401).json({ error: "Not logged in" });
-    }
 
+
+    if (!userId) {
+      return res.status(401).json({ 
+        error: "Not logged in",
+        status:401
+
+       });
+    }
+ const id=userId.substr(0,24)
+ const expiryTime=parseInt(userId.substr(24,32));
+ const currentTime=Date.now()/1000
+ console.log(currentTime-expiryTime);
+ 
     // 2. ObjectId validation
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(401).json({ error: "Invalid user session" });
     }
 
     // 3. DB lookup
-    const userDoc = await User.findById(userId).lean();
+    const userDoc = await User.findById(id).lean();
 
 
     if (!userDoc) {

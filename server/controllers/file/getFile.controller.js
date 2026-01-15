@@ -13,6 +13,7 @@ export const getFileController = async (req, res, next) => {
     });
 
     const absolutePath = path.resolve(file.storagePath);
+console.log(absolutePath);
 
     if (!fs.existsSync(absolutePath)) {
       return res.status(404).json({ message: "File missing on disk" });

@@ -5,6 +5,8 @@ import { AppError } from "../../utils/AppError.js";
 import { mapMongoId } from "../../utils/mapMongoId.js";
 
 export const getDirectoryService = async (directoryId, userId) => {
+  console.log(userId);
+  
   if (!directoryId) {
     const user = await User.findById(userId).lean().select("rootDirId");
 
@@ -27,6 +29,7 @@ export const getDirectoryService = async (directoryId, userId) => {
     throw new AppError("Directory not found", 404);
   }
 
+
   const files = await FileModel.find({
     parentDirId: directory._id,
     userId,
@@ -34,6 +37,7 @@ export const getDirectoryService = async (directoryId, userId) => {
   })
     .lean()
     .select("name size mimeType createdAt extension");
+
 
   const directories = await directoryModel
     .find({
@@ -43,7 +47,8 @@ export const getDirectoryService = async (directoryId, userId) => {
     })
     .lean()
     .select("name createdAt");
-
+ 
+ 
   return {
     directory: mapMongoId(directory),
     files: files.map(mapMongoId),

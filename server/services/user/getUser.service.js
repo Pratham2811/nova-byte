@@ -6,7 +6,6 @@ export const getUserService = async (username) => {
   const userData = await User.findOne({ name: username })
     .lean()
     .select("name email storageUsed");
-  console.log(userData);
 
   if (!userData) {
     throw new AppError("User Not Found", 404);
