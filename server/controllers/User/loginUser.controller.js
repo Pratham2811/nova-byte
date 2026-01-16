@@ -7,11 +7,14 @@ export const loginUserController = async (req, res, next) => {
     const { email, password } = req.body;
 
     const user = await loginUserService(email, password);
-
+    const cookiePayload={
+      expiry: Math.round(Date.now() / 1000 + 40).toString(16),
+      userId:user.id,
+    }
     if (user) {
       res.cookie(
-        "userId",
-        `${user.id + Math.round(Date.now() / 1000 + 40).toString(16)}`,
+        "cookieuserId",
+        `${Buffer.from(JSON.stringify(cookiePayload)).toString("base64")}`,
         {
           httpOnly: true,
           secure: true,
