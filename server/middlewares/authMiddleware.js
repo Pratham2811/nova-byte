@@ -19,7 +19,6 @@ export default async function checkAuth(req, res, next) {
  const{expiry,userId}=JSON.parse(Buffer.from(cookieuserId,"base64").toString("utf-8"));
 const currentTime=Math.round((Date.now()/1000));
 const expireyTime=parseInt(expiry,16);
-console.log(currentTime,expireyTime);
 if(currentTime>expireyTime){
   return res.clearCookie("cookieuserId").status(401).json({ 
     error: "Session expired",

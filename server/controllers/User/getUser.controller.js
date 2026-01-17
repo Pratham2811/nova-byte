@@ -7,7 +7,7 @@ export const getUserController = async (req, res) => {
    
 
     const user = await getUserService(req.user.name);
-    console.log(user);
+   
     
     return res.status(200).json({
       status: "success",

@@ -8,7 +8,7 @@ export const loginUserController = async (req, res, next) => {
 
     const user = await loginUserService(email, password);
     const cookiePayload={
-      expiry: Math.round(Date.now() / 1000 + 40).toString(16),
+      expiry: Math.round(Date.now() / 1000 + 86400).toString(16),
       userId:user.id,
     }
     if (user) {

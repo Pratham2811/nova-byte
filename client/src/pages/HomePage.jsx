@@ -1,199 +1,142 @@
-import React, { useState, useEffect, useRef } from "react";
-import { FileList } from "@/components/DirectoryView";
-import TrashFiles from "@/components/TrashFiles";
-import { Folder, Trash2, Menu, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { ProfilePage } from "./ProfilePage";
-import { useNavigate } from "react-router-dom";
-import { UserMenu } from "@/components/UserMenu"; // ✅ NEW IMPORT
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Folder, Trash2, Menu, X, User } from 'lucide-react';
+import { DirectoryView } from '@/features/directory';
+import { TrashFiles } from '@/features/trash';
+import { useSidebar } from '@/shared/hooks';
 
-// Theme constants
-const NEON_CYAN = "cyan-400";
-const NEON_RED = "rose-500";
-const NEON_FUCHSIA = "fuchsia-400";
-const BG_DARK = "bg-gray-950";
-const ACTIVE_GRADIENT = "bg-gradient-to-r from-cyan-500 to-fuchsia-600";
-const USER_INITIAL = "AD";
-
+/**
+ * HomePage Component
+ * Main application page with sidebar navigation and content area
+ */
 export const HomePage = () => {
-  const [activePage, setActivePage] = useState("files");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const userMenuRef = useRef(null);
+  const [activeTab, setActiveTab] = useState('files');
+  const { isSidebarOpen, isMobile, setIsSidebarOpen } = useSidebar();
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        setIsUserMenuOpen(false);
-      }
-    };
-    const handleEscape = (event) => {
-      if (event.key === "Escape") setIsUserMenuOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsMobile(false);
-        setIsSidebarOpen(true);
-      } else {
-        setIsMobile(true);
-        setIsSidebarOpen(false);
-      }
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
+  };
 
   const renderContent = () => {
-    switch (activePage) {
-      case "files":
-        return <FileList />;
-      case "trash":
+    switch (activeTab) {
+      case 'files':
+        return <DirectoryView />;
+      case 'trash':
         return <TrashFiles />;
-      case "profile":
-        return <ProfilePage />;
       default:
-        return <FileList />;
+        return <DirectoryView />;
     }
   };
-
-  const getCurrentTitle = () => {
-    switch (activePage) {
-      case "files":
-        return "My Files";
-      case "trash":
-        return "Trash";
-      case "profile":
-        return "Profile";
-      default:
-        return "CYBER DRIVE";
-    }
-  };
-
-  const handleLinkClick = (page) => {
-    setActivePage(page);
-    if (isMobile) setIsSidebarOpen(false);
-  };
-
-  const handleViewProfile = () => {
-    navigate('/user-profile')
-    setIsUserMenuOpen(false);
-  };
-
-
 
   return (
-    <div className={`flex h-screen overflow-hidden ${BG_DARK} text-white font-sans`}>
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
+      {/* Mobile Overlay */}
       {isMobile && isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/80 z-40 transition-opacity duration-300 cursor-pointer"
+          className="fixed inset-0 bg-black/50 z-40"
           onClick={() => setIsSidebarOpen(false)}
-        ></div>
+        />
       )}
 
       {/* Sidebar */}
       <aside
-        className={cn(
-          `bg-gray-900/90 backdrop-blur-xl border-r border-${NEON_CYAN}/30 w-64 min-w-[200px] flex-shrink-0 shadow-2xl shadow-${NEON_CYAN}/20`,
-          "fixed top-0 left-0 h-full z-50 transform transition-transform duration-300 ease-in-out",
-          "md:static md:translate-x-0",
-          { "translate-x-0": isSidebarOpen, "-translate-x-full": !isSidebarOpen && isMobile }
-        )}
+        className={`
+          w-64 bg-white border-r border-gray-200 flex flex-col
+          fixed md:static inset-y-0 left-0 z-50
+          transform transition-transform duration-300
+          ${isSidebarOpen || !isMobile ? 'translate-x-0' : '-translate-x-full'}
+        `}
       >
-        <div className="p-5 text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400 border-b border-gray-800 tracking-wider">
-          CYBER DRIVE
-        </div>
-
-        {isMobile && isSidebarOpen && (
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="absolute top-4 right-4 p-2 text-gray-300 hover:text-white z-50 transition-colors cursor-pointer"
-            aria-label="Close menu"
-          >
-            <X size={24} />
-          </button>
-        )}
-
-        <nav className="flex flex-col p-4 space-y-3">
-          <button
-            className={`flex items-center gap-4 px-4 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md cursor-pointer ${
-              activePage === "files"
-                ? `${ACTIVE_GRADIENT} shadow-${NEON_CYAN}/40 scale-[1.03] border border-cyan-400`
-                : "hover:bg-gray-800/80 hover:shadow-lg hover:shadow-gray-700/20 border border-transparent text-gray-300"
-            }`}
-            onClick={() => handleLinkClick("files")}
-          >
-            <Folder size={22} className={activePage === "files" ? "text-white" : `text-${NEON_CYAN}`} />
-            <span className="tracking-wider">My Files</span>
-          </button>
-
-          <button
-            className={`flex items-center gap-4 px-4 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md cursor-pointer ${
-              activePage === "trash"
-                ? `bg-gradient-to-r from-rose-500 to-red-700 shadow-${NEON_RED}/40 scale-[1.03] border border-rose-400`
-                : "hover:bg-gray-800/80 hover:shadow-lg hover:shadow-gray-700/20 border border-transparent text-gray-300"
-            }`}
-            onClick={() => handleLinkClick("trash")}
-          >
-            <Trash2 size={22} className={activePage === "trash" ? "text-white" : `text-${NEON_RED}`} />
-            <span className="tracking-wider">Trash</span>
-          </button>
-        </nav>
-      </aside>
-
-      {/* Main */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center p-4 bg-gray-900/90 backdrop-blur-xl border-b border-gray-700 shadow-lg z-30">
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className={`p-1 text-${NEON_CYAN} hover:text-white transition-colors cursor-pointer`}
-              aria-label="Open menu"
-            >
-              <Menu size={24} />
-            </button>
-          </div>
-
-          <h1 className="flex-1 text-center text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400 md:text-left md:ml-4">
-            <span className="md:hidden">CYBER DRIVE</span>
-            <span className="hidden md:inline-block">{getCurrentTitle()}</span>
-          </h1>
-
-          <div className="relative" ref={userMenuRef}>
-            <button
-              onClick={() => setIsUserMenuOpen((prev) => !prev)}
-              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all duration-200 cursor-pointer ${
-                isUserMenuOpen
-                  ? `border-${NEON_FUCHSIA} ring-2 ring-${NEON_FUCHSIA}/50 ${ACTIVE_GRADIENT}`
-                  : `border-gray-600 hover:border-${NEON_CYAN} bg-gray-700/50 text-gray-300`
-              }`}
-              aria-label="User menu"
-              aria-expanded={isUserMenuOpen}
-            >
-              {USER_INITIAL}
-            </button>
-
-            {isUserMenuOpen && (
-              <UserMenu handleViewProfile={handleViewProfile} />
+        {/* Logo/Header */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold text-gray-900">CloudDrive</h1>
+            {isMobile && (
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X size={20} className="text-gray-600" />
+              </button>
             )}
           </div>
+          <p className="text-xs text-gray-500 mt-1">File Management System</p>
         </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-fuchsia-600/50 scrollbar-track-transparent">
-          {renderContent()}
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-1">
+          <button
+            onClick={() => handleTabChange('files')}
+            className={`
+              w-full flex items-center gap-3 px-4 py-3 rounded-lg
+              transition-colors duration-150 text-sm font-medium
+              ${activeTab === 'files'
+                ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                : 'text-gray-700 hover:bg-gray-100'
+              }
+            `}
+          >
+            <Folder size={20} />
+            <span>My Files</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange('trash')}
+            className={`
+              w-full flex items-center gap-3 px-4 py-3 rounded-lg
+              transition-colors duration-150 text-sm font-medium
+              ${activeTab === 'trash'
+                ? 'bg-red-50 text-red-700 border border-red-200'
+                : 'text-gray-700 hover:bg-gray-100'
+              }
+            `}
+          >
+            <Trash2 size={20} />
+            <span>Trash</span>
+          </button>
+        </nav>
+
+        {/* User Section */}
+        <div className="p-4 border-t border-gray-200">
+          <button
+            onClick={() => navigate('/user-profile')}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <User size={18} className="text-blue-600" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-medium text-gray-900">My Account</p>
+              <p className="text-xs text-gray-500">View profile</p>
+            </div>
+          </button>
         </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Bar (Mobile) */}
+        <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center gap-4">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 hover:bg-gray-100 rounded"
+          >
+            <Menu size={20} className="text-gray-600" />
+          </button>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {activeTab === 'files' ? 'My Files' : 'Trash'}
+          </h2>
+        </div>
+
+        {/* Content Area */}
+        {renderContent()}
       </main>
     </div>
   );
 };
+
+export default HomePage;
