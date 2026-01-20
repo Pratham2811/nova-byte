@@ -5,7 +5,7 @@ import { AppError } from "../../utils/AppError.js";
 import { mapMongoId } from "../../utils/mapMongoId.js";
 
 export const getDirectoryService = async (directoryId, userId) => {
-  console.log(userId);
+ 
   
   if (!directoryId) {
     const user = await User.findById(userId).lean().select("rootDirId");

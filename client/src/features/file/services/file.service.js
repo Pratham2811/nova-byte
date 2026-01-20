@@ -48,7 +48,6 @@ export const renameFile = async (fileId, oldName, newName) => {
     newFilename: newName 
   });
 };
-
 /**
  * Delete a file (move to trash)
  * @param {string} fileId - File ID

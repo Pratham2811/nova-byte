@@ -25,9 +25,6 @@ export const FileUpload = ({
   const [errors, setErrors] = useState([]);
 
   const validateFile = (file) => {
-    if (file.size > FILE_SIZE_LIMITS.MAX_SIZE) {
-      return `File size exceeds ${FILE_SIZE_LIMITS.MAX_SIZE_LABEL}`;
-    }
     return null;
   };
 

@@ -1,5 +1,7 @@
 import { loginUserService } from "../../services/user/loginUser.service.js";
-
+import crypto from "crypto"
+import dotenv from "dotenv"
+dotenv.config();
 export const loginUserController = async (req, res, next) => {
   try {
     const { userId } = req.cookies;
@@ -10,11 +12,16 @@ export const loginUserController = async (req, res, next) => {
     const cookiePayload={
       expiry: Math.round(Date.now() / 1000 + 86400).toString(16),
       userId:user.id,
-    }
+    };
+    const bufferCookiePayload=JSON.stringify(cookiePayload)
+    const signature=crypto.createHash("sha256").update(bufferCookiePayload).update(process.env.SECRET_KEY).digest("base64url");
+    const signedCookie=`${Buffer.from(bufferCookiePayload).toString("base64url")}.${signature}`;
+    
+    
     if (user) {
       res.cookie(
-        "cookieuserId",
-        `${Buffer.from(JSON.stringify(cookiePayload)).toString("base64")}`,
+        "token",
+        signedCookie,
         {
           httpOnly: true,
           secure: true,
