@@ -2,7 +2,9 @@ import mongoose from "mongoose";
 import { directoryModel } from "../../models/DirectoryModel.js";
 import User from "../../models/UserModel.js";
 import { AppError } from "../../utils/AppError.js";
-
+import crypto from "crypto";
+import dotenv from "dotenv";
+dotenv.config();
 export const registerUserService = async (username, email, password) => {
   const session = await mongoose.startSession();
 
@@ -19,6 +21,10 @@ export const registerUserService = async (username, email, password) => {
 
     const userId = new mongoose.Types.ObjectId();
     const rootDirId = new mongoose.Types.ObjectId();
+    const hashedPassword = crypto
+      .createHmac("sha256", process.env.SECRET_KEY)
+      .update(password)
+      .digest("base64url");
 
     await directoryModel.create(
       [
@@ -29,7 +35,7 @@ export const registerUserService = async (username, email, password) => {
           userId,
         },
       ],
-      { session }
+      { session },
     );
 
     await User.create(
@@ -38,12 +44,12 @@ export const registerUserService = async (username, email, password) => {
           _id: userId,
           name: username,
           email,
-          password,
+          password: hashedPassword,
           rootDirId,
           storage: 0,
         },
       ],
-      { session }
+      { session },
     );
 
     await session.commitTransaction();

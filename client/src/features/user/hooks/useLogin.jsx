@@ -11,8 +11,8 @@ export const useLogin = () => {
     
     // Form State
     const [formData, setFormData] = useState({
-        email: "pra@gmail.com",
-        password: "123456"
+        email: "prathameshmadane18@gmail.com",
+        password: "12345678"
     });
 
     // UI States
