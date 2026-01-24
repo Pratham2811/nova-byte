@@ -2,7 +2,7 @@ import { Schema, model } from "mongoose";
 
 const fileSchema = new Schema(
   {
-    // Logical name shown to user
+    
     name: {
       type: String,
       required: true,
@@ -10,14 +10,14 @@ const fileSchema = new Schema(
       minlength: 1,
     },
 
-    // Physical filename or storage key
+   
     storageKey: {
       type: String,
       required: true,
       unique: true,
     },
 
-    // Disk path or bucket path
+    
     storagePath: {
       type: String,
       required: true,

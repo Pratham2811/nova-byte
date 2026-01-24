@@ -3,6 +3,7 @@ import { directoryModel } from "../../models/DirectoryModel.js";
 import User from "../../models/UserModel.js";
 import { AppError } from "../../utils/AppError.js";
 import crypto from "crypto";
+import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
 export const registerUserService = async (username, email, password) => {
@@ -21,11 +22,8 @@ export const registerUserService = async (username, email, password) => {
 
     const userId = new mongoose.Types.ObjectId();
     const rootDirId = new mongoose.Types.ObjectId();
-    const hashedPassword = crypto
-      .createHmac("sha256", process.env.SECRET_KEY)
-      .update(password)
-      .digest("base64url");
-
+    const SALT_ROUNDS = 14;
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     await directoryModel.create(
       [
         {

@@ -20,7 +20,10 @@ const {expiry,userId}=JSON.parse(signedToken);
 const currentTIme=Math.round(Date.now()/1000).toString(16)
 
 if(currentTIme>expiry){
-  return res.clearCookies()
+   res.clearCookie();
+   return res.status(401).json({
+    message:"Logged Out"
+   })
 }
  
    
