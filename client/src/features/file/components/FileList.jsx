@@ -1,35 +1,26 @@
 import React from 'react';
 import { FileCard } from './FileCard.jsx';
-import { EmptyState, LoadingState } from '@/shared/components';
+import { LoadingState } from '@/shared/components';
+import { useDirectoryContext } from '@/features/directory/context/DirectoryContext.jsx';
 
 /**
  * File List Component
+ * Consumes context directly - NO PROPS NEEDED!
  * Renders a list of files using FileCard components
- * 
- * @param {Object} props
- * @param {Array} props.files - Array of file objects
- * @param {boolean} props.loading - Loading state
- * @param {'grid'|'list'} props.viewMode - Display mode
- * @param {Function} props.onView - View file handler
- * @param {Function} props.onDownload - Download file handler
- * @param {Function} props.onRename - Rename file handler
- * @param {Function} props.onDelete - Delete file handler
  */
-export const FileList = ({
-  files = [],
-  loading = false,
-  viewMode = 'grid',
-  onView,
-  onDownload,
-  onRename,
-  onDelete,
-}) => {
+export const FileList = () => {
+  const {
+    files,
+    loading,
+    viewMode,
+  } = useDirectoryContext();
+
   if (loading) {
     return <LoadingState type="skeleton" count={6} />;
   }
 
   if (!files || files.length === 0) {
-    return <EmptyState type="file" />;
+    return null;
   }
 
   if (viewMode === 'list') {
@@ -39,11 +30,6 @@ export const FileList = ({
           <FileCard
             key={file.id}
             file={file}
-            viewMode="list"
-            onView={onView}
-            onDownload={onDownload}
-            onRename={onRename}
-            onDelete={onDelete}
           />
         ))}
       </div>
@@ -57,11 +43,6 @@ export const FileList = ({
         <FileCard
           key={file.id}
           file={file}
-          viewMode="grid"
-          onView={onView}
-          onDownload={onDownload}
-          onRename={onRename}
-          onDelete={onDelete}
         />
       ))}
     </div>

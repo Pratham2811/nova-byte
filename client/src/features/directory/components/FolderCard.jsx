@@ -1,31 +1,38 @@
 import React from 'react';
-import { Folder, Edit, Trash, MoreVertical } from 'lucide-react';
+import { Folder, Edit, Trash } from 'lucide-react';
 import { Card, IconButton } from '@/shared/components';
+import { useDirectoryContext } from '../context/DirectoryContext.jsx';
 
 /**
  * Folder Card Component
- * Displays a single folder as a card with actions
+ * Consumes context directly for actions - NO PROP DRILLING!
+ * Only receives folder data as prop (necessary for mapping)
  * 
  * @param {Object} props
- * @param {Object} props.folder - Folder object
- * @param {Function} props.onClick - Click handler to open folder
- * @param {Function} props.onRename - Rename folder handler
- * @param {Function} props.onDelete - Delete folder handler
- * @param {'grid'|'list'} props.viewMode - Display mode
+ * @param {Object} props.folder - Folder object (required for rendering)
  */
-export const FolderCard = ({
-  folder,
-  onClick,
-  onRename,
-  onDelete,
-  viewMode = 'grid',
-}) => {
+export const FolderCard = ({ folder }) => {
+  const {
+    viewMode,
+    handleFolderClick,
+    openRename,
+    openDelete,
+  } = useDirectoryContext();
+
   const handleClick = (e) => {
     // Don't trigger folder open if clicking on action buttons
-    if (e.target.closest('button') && !e.currentTarget.contains(e.target.closest('button'))) {
-      return;
-    }
-    onClick(folder);
+  
+    handleFolderClick(folder);
+  };
+
+  const handleRename = (e) => {
+    e.stopPropagation();
+    openRename(folder, 'folder');
+  };
+
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    openDelete(folder, 'folder');
   };
 
   if (viewMode === 'list') {
@@ -55,19 +62,13 @@ export const FolderCard = ({
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <IconButton
             icon={<Edit size={16} />}
-            onClick={(e) => {
-              e.stopPropagation();
-              onRename(folder);
-            }}
+            onClick={handleRename}
             tooltip="Rename"
             size="small"
           />
           <IconButton
             icon={<Trash size={16} />}
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(folder);
-            }}
+            onClick={handleDelete}
             tooltip="Delete"
             size="small"
             className="hover:bg-red-50 hover:text-red-600"
@@ -108,20 +109,14 @@ export const FolderCard = ({
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
         <IconButton
           icon={<Edit size={14} />}
-          onClick={(e) => {
-            e.stopPropagation();
-            onRename(folder);
-          }}
+          onClick={handleRename}
           tooltip="Rename"
           size="small"
           className="bg-white shadow-sm"
         />
         <IconButton
           icon={<Trash size={14} />}
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(folder);
-          }}
+          onClick={handleDelete}
           tooltip="Delete"
           size="small"
           className="bg-white shadow-sm hover:bg-red-50 hover:text-red-600"

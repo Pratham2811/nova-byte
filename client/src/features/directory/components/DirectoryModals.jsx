@@ -2,73 +2,69 @@ import React from 'react';
 import { FolderCreate, RenameItem } from './';
 import { FileViewer, FileUpload } from '@/features/file/components';
 import { ConfirmDialog } from '@/shared/components';
+import { useDirectoryContext } from '../context/DirectoryContext.jsx';
 
 /**
  * DirectoryModals Component
- * centralized management of all directory-related modals
+ * Consumes context directly - NO PROPS NEEDED!
+ * Centralized management of all directory-related modals
  */
-export const DirectoryModals = ({
-  // State
-  showCreateFolder,
-  showUpload,
-  showFileViewer,
-  showRename,
-  showDelete,
-  selectedItem,
-  itemType,
-  directoryPath,
+export const DirectoryModals = () => {
+  const {
+    // Modal States
+    modals,
+    selectedItem,
+    itemType,
+    currentDirectoryId,
+    
+    // Modal Handlers
+    toggleModal,
+    onCreateFolder,
+    onUpload,
+    onRename,
+    onDelete,
+    onDownload,
+  } = useDirectoryContext();
 
-  // Handlers
-  onCloseCreate,
-  onCreateFolder,
-  onCloseUpload,
-  onUpload,
-  onCloseFileViewer,
-  onDownload,
-  onCloseRename,
-  onRename,
-  onCloseDelete,
-  onDelete,
-}) => {
   return (
     <>
-      {showCreateFolder && (
+      {modals.createFolder && (
         <FolderCreate
-          onClose={onCloseCreate}
+          onClose={() => toggleModal('createFolder', false)}
           onCreate={onCreateFolder}
-          directoryPath={directoryPath}
+          directoryPath={currentDirectoryId}
         />
       )}
 
-      {showUpload && (
+      {modals.upload && (
         <FileUpload
-          onClose={onCloseUpload}
+          onClose={() => toggleModal('upload', false)}
           onUpload={onUpload}
-          directoryPath={directoryPath}
+          directoryPath={currentDirectoryId}
         />
       )}
 
-      {showFileViewer && selectedItem && (
+      {modals.fileViewer && selectedItem && (
         <FileViewer
           file={selectedItem}
-          onClose={onCloseFileViewer}
+          onClose={() => toggleModal('fileViewer', false)}
           onDownload={onDownload}
         />
       )}
 
-      {showRename && selectedItem && (
+      {modals.rename && selectedItem && (
         <RenameItem
-          onClose={onCloseRename}
+          onClose={() => toggleModal('rename', false)}
           onRename={onRename}
           item={selectedItem}
           itemType={itemType}
         />
       )}
 
-      {showDelete && selectedItem && (
+      {modals.delete && selectedItem && (
         <ConfirmDialog
           isOpen={true}
-          onClose={onCloseDelete}
+          onClose={() => toggleModal('delete', false)}
           onConfirm={onDelete}
           title={`Delete ${itemType === 'folder' ? 'Folder' : 'File'}`}
           message={`Are you sure you want to delete "${selectedItem.name}"? This action cannot be undone.`}
@@ -79,3 +75,5 @@ export const DirectoryModals = ({
     </>
   );
 };
+
+export default DirectoryModals;

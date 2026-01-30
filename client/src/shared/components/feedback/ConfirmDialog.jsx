@@ -28,6 +28,7 @@ export const ConfirmDialog = ({
   variant = 'warning',
   loading = false,
 }) => {
+
   const handleConfirm = async () => {
     await onConfirm();
   };

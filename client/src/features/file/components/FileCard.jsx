@@ -1,32 +1,48 @@
 import React from 'react';
-import { Download, ExternalLink, Edit, Trash, MoreVertical } from 'lucide-react';
-import { Card } from '@/shared/components';
-import { IconButton } from '@/shared/components';
+import { Download, ExternalLink, Edit, Trash } from 'lucide-react';
+import { Card, IconButton } from '@/shared/components';
 import { getFileIcon, formatFileSize, formatFileDate } from '../constants/file.constants';
 import { getFileTypeColor } from '@/theme';
+import { useDirectoryContext } from '@/features/directory/context/DirectoryContext.jsx';
 
 /**
  * File Card Component
- * Displays a single file as a card with actions
+ * Consumes context directly for actions - NO PROP DRILLING!
+ * Only receives file data as prop (necessary for mapping)
  * 
  * @param {Object} props
- * @param {Object} props.file - File object
- * @param {Function} props.onView - View file handler
- * @param {Function} props.onDownload - Download file handler
- * @param {Function} props.onRename - Rename file handler
- * @param {Function} props.onDelete - Delete file handler
- * @param {'grid'|'list'} props.viewMode - Display mode
+ * @param {Object} props.file - File object (required for rendering)
  */
-export const FileCard = ({
-  file,
-  onView,
-  onDownload,
-  onRename,
-  onDelete,
-  viewMode = 'grid',
-}) => {
+export const FileCard = ({ file }) => {
+  const {
+    viewMode,
+    openFileViewer,
+    openRename,
+    openDelete,
+    onDownload,
+  } = useDirectoryContext();
+
   const FileIcon = getFileIcon(file.mimeType || file.type);
   const iconColor = getFileTypeColor(file.mimeType || file.type);
+
+  const handleView = () => {
+    openFileViewer(file);
+  };
+
+  const handleDownload = (e) => {
+    e?.stopPropagation();
+    onDownload(file);
+  };
+
+  const handleRename = (e) => {
+    e?.stopPropagation();
+    openRename(file, 'file');
+  };
+
+  const handleDelete = (e) => {
+    e?.stopPropagation();
+    openDelete(file, 'file');
+  };
 
   if (viewMode === 'list') {
     return (
@@ -38,7 +54,7 @@ export const FileCard = ({
 
         {/* File name - clickable */}
         <button
-          onClick={() => onView(file)}
+          onClick={handleView}
           className="flex-1 text-left truncate hover:text-blue-600 transition-colors"
         >
           <span className="text-sm font-medium text-gray-900">{file.name}</span>
@@ -58,25 +74,25 @@ export const FileCard = ({
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <IconButton
             icon={<ExternalLink size={16} />}
-            onClick={() => onView(file)}
+            onClick={handleView}
             tooltip="View"
             size="small"
           />
           <IconButton
             icon={<Download size={16} />}
-            onClick={() => onDownload(file)}
+            onClick={handleDownload}
             tooltip="Download"
             size="small"
           />
           <IconButton
             icon={<Edit size={16} />}
-            onClick={() => onRename(file)}
+            onClick={handleRename}
             tooltip="Rename"
             size="small"
           />
           <IconButton
             icon={<Trash size={16} />}
-            onClick={() => onDelete(file)}
+            onClick={handleDelete}
             tooltip="Delete"
             size="small"
             className="hover:bg-red-50 hover:text-red-600"
@@ -91,7 +107,7 @@ export const FileCard = ({
     <Card className="group relative">
       {/* File content area - clickable */}
       <button
-        onClick={() => onView(file)}
+        onClick={handleView}
         className="w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
       >
         {/* Icon */}
@@ -115,21 +131,21 @@ export const FileCard = ({
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
         <IconButton
           icon={<Download size={14} />}
-          onClick={() => onDownload(file)}
+          onClick={handleDownload}
           tooltip="Download"
           size="small"
           className="bg-white shadow-sm"
         />
         <IconButton
           icon={<Edit size={14} />}
-          onClick={() => onRename(file)}
+          onClick={handleRename}
           tooltip="Rename"
           size="small"
           className="bg-white shadow-sm"
         />
         <IconButton
           icon={<Trash size={14} />}
-          onClick={() => onDelete(file)}
+          onClick={handleDelete}
           tooltip="Delete"
           size="small"
           className="bg-white shadow-sm hover:bg-red-50 hover:text-red-600"

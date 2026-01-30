@@ -80,9 +80,7 @@ export const useDirectoryActions = (displayToast, fetchFiles, dirid) => {
         await baseDeleteFolder(selectedItem);
         displayToast('Folder deleted successfully');
       } else {
-        // File Delete Flow
-        // Use the base hook's delete which handles the UI updates, or the service directly
-        // The user manually imported deleteFile, but baseDeleteFile is better as it might handle state
+ 
         await baseDeleteFile(selectedItem); 
         displayToast('File deleted successfully');
       }

@@ -1,10 +1,15 @@
 import React, { createContext, useContext, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useDirectory, useDirectoryActions } from '../hooks';
 import { Toast } from '@/shared/components';
+import { VIEW_MODES } from '../constants/directory.constants.js';
 
 const DirectoryContext = createContext();
 
+/**
+ * Hook to access Directory Context
+ * @throws {Error} If used outside DirectoryProvider
+ */
 export const useDirectoryContext = () => {
   const context = useContext(DirectoryContext);
   if (!context) {
@@ -13,14 +18,20 @@ export const useDirectoryContext = () => {
   return context;
 };
 
+
 export const DirectoryProvider = ({ children }) => {
   const { dirid } = useParams();
+  const navigate = useNavigate();
   
   // Toast State
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
   };
+
+  // View State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState(VIEW_MODES.GRID);
 
   // Data Fetching
   const {
@@ -32,12 +43,8 @@ export const DirectoryProvider = ({ children }) => {
     fetchFiles,
   } = useDirectory(dirid);
 
-  // Actions
+  // Actions (modals, CRUD operations)
   const actions = useDirectoryActions(showToast, fetchFiles, dirid);
-
-  // Search State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // Default view mode
 
   // Derived State (filtering)
   const filteredFolders = searchQuery
@@ -52,23 +59,41 @@ export const DirectoryProvider = ({ children }) => {
       )
     : filesList;
 
+  // Navigation Handlers
+  const handleNavigate = (path) => {
+    navigate(path ? `/directory/${path}` : '/');
+  };
+
+  const handleFolderClick = (folder) => {
+    navigate(`/directory/${folder.id}`);
+  };
+
   const value = {
-    // State
+    // Core State
     currentDirectoryId: dirid,
     directories: filteredFolders,
     files: filteredFiles,
     loading,
     error,
     isEmpty,
-    searchQuery,
-    viewMode,
     
-    // Actions & Setters
+    // View State
+    searchQuery,
     setSearchQuery,
+    viewMode,
     setViewMode,
+    
+    // Navigation
+    handleNavigate,
+    handleFolderClick,
+    
+    // Refresh
     refresh: fetchFiles,
     
-    // Action Hooks Data (Modals & Handlers)
+    // Toast
+    showToast,
+    
+    // Action Hooks Data (Modals & Handlers from useDirectoryActions)
     ...actions,
   };
 
