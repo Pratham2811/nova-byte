@@ -7,21 +7,16 @@ import { EmptyState, LoadingState, ErrorState } from '@/shared/components';
 /**
  * Directory Content Component
  * Consumes context and renders the directory layout
- * No props needed - everything comes from context!
  */
 const DirectoryContent = () => {
   const {
-    // State
-    currentDirectoryId,
     directories,
     files,
     loading,
     error,
     isEmpty,
     searchQuery,
-    
-    // Actions
-    toggleModal,
+    openModal,
     refresh,
   } = useDirectoryContext();
 
@@ -35,7 +30,6 @@ const DirectoryContent = () => {
 
   return (
     <div className="flex-1 bg-gray-50 flex flex-col">
-      {/* Header - consumes context directly */}
       <DirectoryHeader />
 
       <div className="flex-1 overflow-y-auto p-6">
@@ -47,7 +41,7 @@ const DirectoryContent = () => {
             action={{
               label: 'Upload Files',
               icon: null,
-              onClick: () => toggleModal('upload', true),
+              onClick: () => openModal('upload'),
             }}
           />
         ) : (
@@ -55,7 +49,6 @@ const DirectoryContent = () => {
             {directories.length > 0 && (
               <div>
                 <h2 className="text-sm font-semibold text-gray-700 mb-3">Folders</h2>
-                {/* FolderList consumes context directly */}
                 <FolderList />
               </div>
             )}
@@ -63,7 +56,6 @@ const DirectoryContent = () => {
             {files.length > 0 && (
               <div>
                 <h2 className="text-sm font-semibold text-gray-700 mb-3">Files</h2>
-                {/* FileList consumes context directly */}
                 <FileList />
               </div>
             )}
@@ -75,7 +67,6 @@ const DirectoryContent = () => {
         )}
       </div>
 
-      {/* Modals - consumes context directly */}
       <DirectoryModals />
     </div>
   );
@@ -84,7 +75,6 @@ const DirectoryContent = () => {
 /**
  * Directory View Component
  * Wraps everything with DirectoryProvider
- * This is the entry point - no props drilling!
  */
 export const DirectoryView = () => {
   return (

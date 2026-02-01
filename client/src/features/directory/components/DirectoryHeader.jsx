@@ -7,46 +7,42 @@ import { useDirectoryContext } from '../context/DirectoryContext.jsx';
 
 /**
  * Directory Header Component
- * Consumes context directly - NO PROPS NEEDED!
  */
 export const DirectoryHeader = () => {
   const {
     currentDirectoryId,
-    handleNavigate,
     viewMode,
     setViewMode,
     setSearchQuery,
-    toggleModal,
+    openModal,
   } = useDirectoryContext();
 
   return (
     <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-10">
       {/* Top row: Breadcrumb and view toggle */}
       <div className="flex items-center justify-between mb-3">
-        <Breadcrumb path={currentDirectoryId} onNavigate={handleNavigate} />
-        
+        <Breadcrumb path={currentDirectoryId} />
+
         {/* View mode toggle */}
         <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
           <IconButton
             icon={<Grid size={16} />}
             onClick={() => setViewMode(VIEW_MODES.GRID)}
             size="small"
-            className={`${
-              viewMode === VIEW_MODES.GRID
+            className={`${viewMode === VIEW_MODES.GRID
                 ? 'bg-white shadow-sm'
                 : 'bg-transparent hover:bg-gray-200'
-            }`}
+              }`}
             tooltip="Grid view"
           />
           <IconButton
             icon={<List size={16} />}
             onClick={() => setViewMode(VIEW_MODES.LIST)}
             size="small"
-            className={`${
-              viewMode === VIEW_MODES.LIST
+            className={`${viewMode === VIEW_MODES.LIST
                 ? 'bg-white shadow-sm'
                 : 'bg-transparent hover:bg-gray-200'
-            }`}
+              }`}
             tooltip="List view"
           />
         </div>
@@ -56,16 +52,16 @@ export const DirectoryHeader = () => {
       <div className="flex items-center gap-2">
         <Button
           variant="primary"
-          onClick={() => toggleModal('createFolder', true)}
+          onClick={() => openModal('createFolder')}
           icon={<FolderPlus size={16} />}
           size="sm"
         >
           <span className="hidden sm:inline">New Folder</span>
         </Button>
-        
+
         <Button
           variant="secondary"
-          onClick={() => toggleModal('upload', true)}
+          onClick={() => openModal('upload')}
           icon={<Upload size={16} />}
           size="sm"
         >

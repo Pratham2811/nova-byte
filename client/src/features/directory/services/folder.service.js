@@ -1,58 +1,44 @@
 /**
  * Folder Service
- * Handles folder operations (create, rename, delete)
+ * Handles folder CRUD operations
  */
 
-import { get, post, patch, del } from "@/shared/services/api.service";
-
-/**
- * Fetch directory contents (files and folders)
- * @param {string} dirId - Directory ID (empty string for root)
- * @returns {Promise<Object>} - Directory contents with files and folders
- */
-export const fetchDirectoryContents = async (dirId = "") => {
-  return await get(`/directory/${dirId}`);
-};
+import axiosInstance from "@/shared/services/axios";
 
 /**
  * Create a new folder
- * @param {string} name - Folder name
- * @param {string} parentId - Parent directory ID
- * @returns {Promise<Object>} - Created folder data
  */
 export const createFolder = async (name, parentId = "") => {
-  return await post("/directory/create", {
+  const { data } = await axiosInstance.post("/directory/create", {
     directoryname: name,
     parentDirId: parentId,
   });
+  return data;
 };
 
 /**
  * Rename a folder
- * @param {string} folderId - Folder ID
- * @param {string} oldName - Old folder name
- * @param {string} newName - New folder name
- * @returns {Promise<Object>} - Rename response
  */
 export const renameFolder = async (folderId, oldName, newName) => {
-  return await patch(`/directory/${folderId}`, {
+  const { data } = await axiosInstance.patch(`/directory/${folderId}`, {
     oldName: oldName,
     newName: newName,
   });
+  return data;
 };
 
 /**
- * Delete a folder
- * @param {string} folderId - Folder ID
- * @returns {Promise<Object>} - Delete response
+ * Delete a folder (moves to trash)
  */
 export const deleteFolder = async (folderId) => {
-  return await del(`/directory/${folderId}`);
+  const { data } = await axiosInstance.delete(`/directory/${folderId}`);
+  return data;
 };
 
-export default {
-  fetchDirectoryContents,
-  createFolder,
-  renameFolder,
-  deleteFolder,
+/**
+ * Fetch directory contents
+ */
+export const fetchDirectoryContents = async (dirId = "") => {
+  const { data } = await axiosInstance.get(`/directory/${dirId}`);
+  return data;
 };

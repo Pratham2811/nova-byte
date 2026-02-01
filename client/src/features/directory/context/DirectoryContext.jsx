@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDirectory, useDirectoryActions } from '../hooks';
-import { Toast } from '@/shared/components';
+import { useDirectory } from '../hooks/useDirectory';
+import { useFolderActions } from '../hooks/useFolderActions';
+import { useModals } from '../hooks/useModals';
+import { useFileActions } from '@/features/file/hooks/useFileActions';
 import { VIEW_MODES } from '../constants/directory.constants.js';
 
 const DirectoryContext = createContext();
 
 /**
  * Hook to access Directory Context
- * @throws {Error} If used outside DirectoryProvider
  */
 export const useDirectoryContext = () => {
   const context = useContext(DirectoryContext);
@@ -18,94 +19,75 @@ export const useDirectoryContext = () => {
   return context;
 };
 
-
+/**
+ * DirectoryProvider - Provides directory data and actions to children
+ */
 export const DirectoryProvider = ({ children }) => {
   const { dirid } = useParams();
   const navigate = useNavigate();
-  
-  // Toast State
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type });
-  };
 
   // View State
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState(VIEW_MODES.GRID);
 
-  // Data Fetching
-  const {
-    directoriesList,
-    filesList,
-    loading,
-    error,
-    isEmpty,
-    fetchFiles,
-  } = useDirectory(dirid);
+  // Data from useDirectory
+  const { directories, files, loading, error, isEmpty, refresh } = useDirectory(dirid);
 
-  // Actions (modals, CRUD operations)
-  const actions = useDirectoryActions(showToast, fetchFiles, dirid);
+  // Folder actions (create, rename, delete)
+  const folderActions = useFolderActions(refresh);
 
-  // Derived State (filtering)
-  const filteredFolders = searchQuery
-    ? directoriesList.filter(folder => 
-        folder.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : directoriesList;
+  // File actions (rename, delete, download)
+  const fileActions = useFileActions(refresh);
+
+  // Modal state
+  const modalState = useModals();
+
+  // Filtering (derived state)
+  const filteredDirectories = searchQuery
+    ? directories.filter((d) => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : directories;
 
   const filteredFiles = searchQuery
-    ? filesList.filter(file => 
-        file.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : filesList;
+    ? files.filter((f) => f.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : files;
 
-  // Navigation Handlers
-  const handleNavigate = (path) => {
-    navigate(path ? `/directory/${path}` : '/');
-  };
-
+  // Navigation
   const handleFolderClick = (folder) => {
     navigate(`/directory/${folder.id}`);
   };
 
   const value = {
-    // Core State
+    // Core Data
     currentDirectoryId: dirid,
-    directories: filteredFolders,
+    directories: filteredDirectories,
     files: filteredFiles,
     loading,
     error,
-    isEmpty,
-    
+    isEmpty: isEmpty && !searchQuery,
+    refresh,
+
     // View State
     searchQuery,
     setSearchQuery,
     viewMode,
     setViewMode,
-    
+
     // Navigation
-    handleNavigate,
     handleFolderClick,
-    
-    // Refresh
-    refresh: fetchFiles,
-    
-    // Toast
-    showToast,
-    
-    // Action Hooks Data (Modals & Handlers from useDirectoryActions)
-    ...actions,
+
+    // Folder Actions
+    ...folderActions,
+
+    // File Actions
+    fileActions,
+
+    // Modal State
+    ...modalState,
   };
 
   return (
     <DirectoryContext.Provider value={value}>
       {children}
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        isOpen={toast.show}
-        onClose={() => setToast({ ...toast, show: false })}
-      />
     </DirectoryContext.Provider>
   );
 };

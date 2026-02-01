@@ -1,105 +1,54 @@
 /**
  * useFileActions Hook
- * Manages file and folder actions (rename, delete, open, download)
+ * Handles file-specific actions (rename, delete, download)
  */
 
 import { useState } from "react";
-import { getDownloadUrl, deleteFile, renameFile } from "../services/file.service";
-import { deleteFolder, renameFolder } from "../../directory/services/folder.service";
+import { toast } from "sonner";
+import { renameFile, deleteFile, getDownloadUrl } from "../services/file.service";
 
-export const useFileActions = (fetchFiles) => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [oldFilename, setOldFilename] = useState(null);
-  const [showRenameComp, setShowRenameComp] = useState(false);
-  const [showDeletePopup, setShowDeletePopup] = useState(false);
+export const useFileActions = (onSuccess) => {
+  const [loading, setLoading] = useState(false);
 
-  // Folder actions
-  const [selectedFolder, setSelectedFolder] = useState(null);
-  const [showFolderRename, setShowFolderRename] = useState(false);
-  const [showFolderDelete, setShowFolderDelete] = useState(false);
-
-  const handleOpenFile = (file) => {
-    setSelectedFile(file);
+  const handleRenameFile = async (fileId, oldName, newName) => {
+    setLoading(true);
+    try {
+      await renameFile(fileId, oldName, newName);
+      toast.success("File renamed");
+      onSuccess?.();
+      return { success: true };
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to rename file");
+      return { success: false, error };
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCloseViewer = () => {
-    setSelectedFile(null);
+  const handleDeleteFile = async (fileId) => {
+    setLoading(true);
+    try {
+      await deleteFile(fileId);
+      toast.success("File moved to trash");
+      onSuccess?.();
+      return { success: true };
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete file");
+      return { success: false, error };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDownloadFile = (file) => {
-    window.location.href = getDownloadUrl(file.id);
-  };
-
-  const handleDeleteFile = async (file) => {
-    try {
-      await deleteFile(file.id);
-      setShowDeletePopup(false);
-      if (fetchFiles) fetchFiles();
-    } catch (err) {
-      console.error("Error deleting file:", err);
-    }
-  };
-
-  const handleRenameFile = async (fileId, oldName, newName) => {
-    try {
-      await renameFile(fileId, oldName, newName);
-      setShowRenameComp(false);
-      if (fetchFiles) fetchFiles();
-    } catch (err) {
-      console.error("Error renaming file:", err);
-    }
-  };
-
-  const handleDeleteFolder = async (folder) => {
-    try {
-      await deleteFolder(folder.id);
-      setShowFolderDelete(false);
-      if (fetchFiles) fetchFiles();
-    } catch (err) {
-      console.error("Error deleting folder:", err);
-    }
-  };
-
-  const handleRenameFolder = async (folderId, oldName, newName) => {
-    try {
-      await renameFolder(folderId, oldName, newName);
-      setShowFolderRename(false);
-      if (fetchFiles) fetchFiles();
-    } catch (err) {
-      console.error("Error renaming folder:", err);
-    }
+    const url = getDownloadUrl(file.id);
+    window.open(url, "_blank");
   };
 
   return {
-    // File state
-    selectedFile,
-    oldFilename,
-    showRenameComp,
-    showDeletePopup,
-    
-    // Folder state
-    selectedFolder,
-    showFolderRename,
-    showFolderDelete,
-
-    // File actions
-    handleOpenFile,
-    handleCloseViewer,
-    handleDownloadFile,
-    handleDeleteFile,
-    handleRenameFile,
-
-    // Folder actions
-    handleDeleteFolder,
-    handleRenameFolder,
-
-    // State setters
-    setSelectedFile,
-    setOldFilename,
-    setShowRenameComp,
-    setShowDeletePopup,
-    setSelectedFolder,
-    setShowFolderRename,
-    setShowFolderDelete,
+    loading,
+    renameFile: handleRenameFile,
+    deleteFile: handleDeleteFile,
+    downloadFile: handleDownloadFile,
   };
 };

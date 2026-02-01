@@ -2,5 +2,6 @@
  * Directory Feature Hooks Barrel Export
  */
 
-export { useDirectoryActions } from './useDirectoryActions.jsx';
-export { useFileManager as useDirectory } from './useDirectory.jsx';
+export { useDirectory, useFileManager } from './useDirectory.jsx';
+export { useFolderActions } from './useFolderActions.jsx';
+export { useModals } from './useModals.jsx';

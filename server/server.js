@@ -12,28 +12,30 @@ import dotenv from "dotenv";
 
 dotenv.config();
 const app = express();
-try{
+try {
   //parsing request
   app.use(express.json());
+  app.use(cookieParser(process.env.SECRET_KEY));
   app.use(
     cors({
-      origin: ["http://localhost:5173","http://localhost:5174"],
+      origin: ["http://localhost:5173", "http://localhost:5174"],
       credentials: true,
     })
   );
 
-  app.use(cookieParser(process.env.SECRET_KEY));
+
   app.use("/directory", checkAuth, directoryroutes);
   app.use("/file", checkAuth, filesroute);
   app.use("/auth", userRoutes);
 
- 
+
 
   app.use((error, req, res, next) => {
 
-   if (error.code === 121) {
-    // This will print the FULL validation error details
-    console.dir(error.errInfo, { depth: null, colors: true })}
+    if (error.code === 121) {
+      // This will print the FULL validation error details
+      console.dir(error.errInfo, { depth: null, colors: true })
+    }
     console.log(error);
 
     res.status(error.status || 500).json({
@@ -45,6 +47,6 @@ try{
   app.listen(port, () => {
     console.log(`server is listening on ${port}`);
   });
-}catch (error) {
+} catch (error) {
   console.log("Error while connecting to DB: ", error);
 }

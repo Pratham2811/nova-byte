@@ -1,67 +1,53 @@
 /**
- * useFileManager Hook
- * Manages directory navigation and file/folder listing
+ * useDirectory Hook
+ * Fetches directory contents and manages loading/error state
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchDirectoryContents } from "../services/folder.service";
 
-export const useFileManager = (dirid) => {
-  const [directoriesList, setDirectoriesList] = useState([]);
-  const [filesList, setFilesList] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+export const useDirectory = (dirid) => {
+  const [directories, setDirectories] = useState([]);
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const fetchFiles = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
-    setError("");
-    
+    setError(null);
+
     try {
       const response = await fetchDirectoryContents(dirid || "");
-      setDirectoriesList(response.data.directories || []);
-      setFilesList(response.data.files || []);
-
+      // axios returns data directly, response structure: { data: { directories, files } }
+      setDirectories(response.data?.directories || response.directories || []);
+      setFiles(response.data?.files || response.files || []);
     } catch (err) {
-      
-      
-      if (err.status === 401) {
+      if (err.response?.status === 401 || err.status === 401) {
         navigate("/login");
+        return;
       }
-      setError(err.message);
+      setError(err.message || "Failed to load directory");
     } finally {
       setLoading(false);
     }
-  };
+  }, [dirid, navigate]);
 
   useEffect(() => {
-    fetchFiles();
-    // eslint-disable-next-line
-  }, [dirid]);
+    fetchData();
+  }, [fetchData]);
 
-  const handleGoBack = () => {
-    if (!dirid) return;
-    const parts = dirid.split("/");
-    parts.pop();
-    const newPath = parts.join("/");
-    navigate(newPath ? "/directory/" + newPath : "/directory/");
-  };
-
-  const handleFolderClick = (id) => {
-    navigate(`/directory/${id}`);
-  };
-
-  const isEmpty = directoriesList.length === 0 && filesList.length === 0;
+  const isEmpty = directories.length === 0 && files.length === 0;
 
   return {
-    directoriesList,
-    filesList,
+    directories,
+    files,
     loading,
     error,
     isEmpty,
-    fetchFiles,
-    handleGoBack,
-    handleFolderClick,
+    refresh: fetchData,
   };
 };
+
+export { useDirectory as useFileManager };

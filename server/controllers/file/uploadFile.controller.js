@@ -20,6 +20,8 @@ export const uploadFileController = async (req, res, next) => {
 
     const uploadedFiles = req.files;
 
+
+
     if (!uploadedFiles || uploadedFiles.length === 0) {
       return res.status(400).json({ message: "No files uploaded" });
     }
@@ -29,15 +31,15 @@ export const uploadFileController = async (req, res, next) => {
       req.user.id
     );
 
-     res.status(201).json({
-        status: "success",
-        message: `${uploadedFiles.length} file(s) uploaded successfully`,
-      });
+    res.status(201).json({
+      status: "success",
+      message: `${uploadedFiles.length} file(s) uploaded successfully`,
+    });
   } catch (error) {
     res.status(500).json({
-      status:"error",
-      message:error.message||"Intrnal server Error"
+      status: "error",
+      message: error.message || "Intrnal server Error"
     })
-    
+
   }
 };

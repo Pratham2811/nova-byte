@@ -17,6 +17,8 @@ const storage = multer.diskStorage({
   },
 
   filename(req, file, cb) {
+
+
     const id = new ObjectId().toHexString();
     const ext = path.extname(file.originalname).toLowerCase();
 
@@ -31,8 +33,8 @@ const storage = multer.diskStorage({
 export const upload = multer({
   storage,
   limits: {
-    
+
     files: 10,
   },
- 
+
 });

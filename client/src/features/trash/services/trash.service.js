@@ -3,7 +3,7 @@
  * Handles trash/recycle bin operations
  */
 
-import { get, patch, del } from "@/shared/services/api.service.js";
+// import { get, patch, del } from "@/shared/services/api.service.js";
 
 /**
  * Fetch all files in trash
