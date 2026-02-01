@@ -6,8 +6,8 @@ import { logoutUserController } from "../controllers/User/logoutUser.Controller.
 import { registerUserController } from "../controllers/User/registerUser.Controller.js";
 const router = express.Router();
 
-router.post("/create-user",registerUserController);
-router.post("/login-user", loginUserController);
+router.post("/register",registerUserController);
+router.post("/login", loginUserController);
 router.post("/logout-user",logoutUserController);
-router.get("/", checkAuth,getUserController);
+router.get("/me", checkAuth,getUserController);
 export default router;

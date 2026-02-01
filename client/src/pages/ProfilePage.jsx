@@ -1,61 +1,80 @@
-import React from 'react';
-import { X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { ProfileDetail, useUserProfile } from '@/features/user';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/features/auth/context/authContext";
+import {
+    ProfileAvatar,
+    ProfileInfo,
+    SecuritySection,
+    PasswordChangeModal,
+    AccountActions,
+    DeleteAccountModal,
+} from "@/features/user";
 
+/**
+ * ProfilePage - User profile management page
+ */
 export const ProfilePage = () => {
     const navigate = useNavigate();
-    const {
-        userData,
-        editingField,
-        tempValue,
-        handleEditClick,
-        handleSave,
-        handleCancel,
-        setTempValue
-    } = useUserProfile();
+    const { user, updateUser, logout, loading } = useAuth();
 
-    const handleClose = () => navigate("/");
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+            </div>
+        );
+    }
+
+    if (!user) {
+        navigate("/login");
+        return null;
+    }
+
+    const handleLogout = async () => {
+        await logout();
+        navigate("/login");
+    };
+
+    const handleDeleteConfirm = async () => {
+        await logout();
+        navigate("/login");
+    };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-start justify-center pt-20 p-4">
-            <div className="w-full max-w-2xl bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
-                
-                {/* Header Actions */}
-                <div className="absolute top-4 right-4 z-10">
-                    <button 
-                        onClick={handleClose}
-                        className="p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
-                        aria-label="Close profile"
-                    >
-                        <X size={20} />
+        <div className="min-h-screen bg-gray-50">
+            {/* Header */}
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+                <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
+                    <button onClick={() => navigate("/")} className="p-2 hover:bg-gray-100 rounded-lg">
+                        <ArrowLeft size={20} className="text-gray-600" />
                     </button>
+                    <h1 className="text-lg font-semibold text-gray-900">Profile Settings</h1>
                 </div>
+            </header>
 
-                <div className="p-8">
-                    <ProfileDetail
-                        user={userData}
-                        editingField={editingField}
-                        onEdit={handleEditClick}
-                        onSave={handleSave}
-                        onCancel={handleCancel}
-                        tempValue={tempValue}
-                        setTempValue={setTempValue}
-                    />
+            <main className="max-w-2xl mx-auto p-4 space-y-6">
+                {/* Avatar */}
+                <section className="bg-white rounded-xl border border-gray-200 p-6">
+                    <ProfileAvatar user={user} onAvatarUpdate={(url) => updateUser({ avatar: url })} />
+                </section>
 
-                    <div className="mt-10 pt-8 border-t border-gray-100">
-                        <h3 className="text-sm font-medium text-gray-900 mb-4">Account Actions</h3>
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                                Change Password
-                            </button>
-                            <button className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-gray-300 rounded hover:bg-red-50 hover:border-red-200 transition-colors">
-                                Delete Account
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                {/* Info */}
+                <ProfileInfo user={user} onUpdate={updateUser} />
+
+                {/* Security */}
+                <SecuritySection onOpenPasswordModal={() => setShowPasswordModal(true)} />
+
+                {/* Actions */}
+                <AccountActions onLogout={handleLogout} onOpenDeleteModal={() => setShowDeleteModal(true)} />
+            </main>
+
+            {/* Modals */}
+            <PasswordChangeModal isOpen={showPasswordModal} onClose={() => setShowPasswordModal(false)} />
+            <DeleteAccountModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} onConfirm={handleDeleteConfirm} />
         </div>
     );
 };

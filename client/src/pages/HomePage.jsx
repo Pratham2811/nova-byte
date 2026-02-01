@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Folder, Trash2, Menu, X, User } from 'lucide-react';
+import { Folder, Trash2, Menu, X } from 'lucide-react';
 import { DirectoryView } from '@/features/directory';
 import { TrashFiles } from '@/features/trash';
 import { useSidebar } from '@/shared/hooks';
+import { UserSidebarWidget } from '@/features/user';
 
 /**
  * HomePage Component
@@ -100,21 +101,8 @@ export const HomePage = () => {
           </button>
         </nav>
 
-        {/* User Section */}
-        <div className="p-4 border-t border-gray-200">
-          <button
-            onClick={() => navigate('/user-profile')}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <User size={18} className="text-blue-600" />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-sm font-medium text-gray-900">My Account</p>
-              <p className="text-xs text-gray-500">View profile</p>
-            </div>
-          </button>
-        </div>
+        {/* User Section - Now using the widget */}
+        <UserSidebarWidget />
       </aside>
 
       {/* Main Content */}

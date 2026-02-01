@@ -25,7 +25,7 @@ try{
   app.use(cookieParser(process.env.SECRET_KEY));
   app.use("/directory", checkAuth, directoryroutes);
   app.use("/file", checkAuth, filesroute);
-  app.use("/user", userRoutes);
+  app.use("/auth", userRoutes);
 
  
 

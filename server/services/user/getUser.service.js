@@ -1,17 +1,16 @@
 import User from "../../models/UserModel.js";
 import { AppError } from "../../utils/AppError.js";
-export const getUserService = async (username) => {
-  console.log(username);
+export const getUserService = async (userId) => {
+  
 
-  const userData = await User.findOne({ name: username })
+  const userData = await User.findById({ _id: userId })
     .lean()
-    .select("name email storageUsed");
+    
 
   if (!userData) {
     throw new AppError("User Not Found", 404);
   }
   return {
-    username: userData.name,
-    useremail: userData.email,
+    user:userData
   };
 };

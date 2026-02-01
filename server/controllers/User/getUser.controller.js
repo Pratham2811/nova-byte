@@ -5,13 +5,13 @@ export const getUserController = async (req, res) => {
 
   try {
    
-
-    const user = await getUserService(req.user.name);
+    const userId=req.user.id
+    const user = await getUserService(userId);
    
     
     return res.status(200).json({
       status: "success",
-      data: user,
+       user,
     });
   } catch (error) {
     res.status(error.statusCode || 500).json({

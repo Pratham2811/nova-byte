@@ -1,9 +1,8 @@
 /**
  * User Feature Components Barrel Export
  */
-
-export { Login} from './Login.jsx';
-export { UserRegistrationForm } from './Register.jsx';
-export { default as ProfileDetail } from './ProfileDetail.jsx';
-export { UserMenu } from './UserMenu.jsx';
-export { default as UserProfileField } from './UserProfileField.jsx';
+export { UserSidebarWidget } from './UserSidebarWidget.jsx';
+export { ProfileAvatar } from './ProfileAvatar.jsx';
+export { ProfileInfo } from './ProfileInfo.jsx';
+export { PasswordChangeModal, SecuritySection } from './PasswordChange.jsx';
+export { DeleteAccountModal, AccountActions } from './AccountActions.jsx';
