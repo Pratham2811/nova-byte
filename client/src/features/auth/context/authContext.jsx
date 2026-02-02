@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { loginApi, registerApi, logoutApi, getCurrentUserApi } from "../services/auth.service";
 import { redirect } from "react-router-dom";
+import { toast } from "sonner";
 
 const AuthContext = createContext(null);
 
@@ -19,6 +20,7 @@ export function AuthProvider({ children }) {
       setLoading(true);
       const response = await getCurrentUserApi();
       
+      console.log("this is response",response);
       
       if (response.user) {
         setUser(response.user);
@@ -77,7 +79,11 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      await logoutApi();
+     const response= await logoutApi();
+     return {
+      success:true,
+      data:response,
+     }
     } catch (error) {
       console.error("Logout error:", error);
     } finally {

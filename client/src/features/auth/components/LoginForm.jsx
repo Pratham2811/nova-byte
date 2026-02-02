@@ -18,25 +18,33 @@ import { Input } from "@/components/ui/input"
 import {  useState } from "react"
 import { toast } from "sonner"
 import { useAuth } from "../context/authContext"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import StreamBitsLoader from "@/shared/components/ui/StreamBitsLoader"
+
 
 export function LoginForm({ className, ...props }) {
+  
   const [email, setEmail] = useState("prathameshmadane18@gmail.com");
   const [password, setPassword] = useState("12345678");
   const [error, setError] = useState("");
   const navigate=useNavigate();
-  const{login}=useAuth()
+  const{login,loading}=useAuth()
 const handleSubmit=async(e)=>{
   e.preventDefault();
   const response=await login({email,password});
   if(response.success){
-    toast("User Logged in SuccessFully");
+    toast.success("user logged in")
     navigate("/")
   }else{
-     toast(response.error);
+     toast.error(response.error);
   }
 }
 
+  if (loading) {
+    console.log(loading);
+    
+    return <StreamBitsLoader />;
+  }
   return (
     <div
       className={cn(
@@ -57,7 +65,7 @@ const handleSubmit=async(e)=>{
           </CardHeader>
 
           <CardContent>
-            <form className="space-y-6"  onClick={handleSubmit}>
+            <form className="space-y-6"  onSubmit={handleSubmit}>
               <FieldGroup>
                 <Field className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Button
@@ -141,7 +149,7 @@ const handleSubmit=async(e)=>{
                     Login
                   </Button>
                   <FieldDescription className="text-center">
-                    Don&apos;t have an account? <a href="#">Sign up</a>
+                    Don&apos;t have an account?<Link to={"/register"}>Sign up</Link>
                   </FieldDescription>
                 </Field>
               </FieldGroup>

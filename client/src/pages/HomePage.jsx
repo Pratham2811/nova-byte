@@ -55,7 +55,7 @@ export const HomePage = () => {
         {/* Logo/Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-gray-900">CloudDrive</h1>
+            <h1 className="text-xl font-bold text-gray-900">streamly.bits</h1>
             {isMobile && (
               <button
                 onClick={() => setIsSidebarOpen(false)}

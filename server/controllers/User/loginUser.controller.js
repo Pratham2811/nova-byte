@@ -10,26 +10,31 @@ export const loginUserController = async (req, res, next) => {
     const { email, password } = req.body;
 
     const user = await loginUserService(email, password);
-    // const cookiePayload = {
-    //   expiry: Math.round(Date.now() / 1000 + 86400).toString(16),
-    //   userId: user.id,
-    // };
+    console.log(user.id);
+
+    
 
     if (!user) {
-    return res.status(404).json({
-      status:"error",
-      message:"user not found"
-    })
-    }
-    const session=await Session.create({
-      userId:user.id,
-    });
-  res.cookie("sessionId", user.id, {
-        httpOnly: true,
-        secure: true,
-        signed:true,
-        sameSite: "none",
+      return res.status(404).json({
+        status: "error",
+        message: "user not found",
       });
+    }
+    const exsistingSessionCount = await Session.countDocuments({ userId: user.id });
+    if(exsistingSessionCount>=2){
+        return res.status(400).json({
+          message:"Device limit reached, Logout from another device to continue"
+        })
+    }
+    const session = await Session.create({
+      userId: user.id,
+    });
+    res.cookie("sessionId", user.id, {
+      httpOnly: true,
+      secure: true,
+      signed: true,
+      sameSite: "none",
+    });
     return res.status(200).json({
       status: "success",
       user: user,

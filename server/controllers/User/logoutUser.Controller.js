@@ -1,8 +1,12 @@
-export const logoutUserController = (req, res, next) => {
+import Session from "../../models/Session.js";
+
+export const logoutUserController = async (req, res, next) => {
   try {
-  res.clearCookie('token', { path: '/' }); 
+    const { sessionId } = req.signedCookies;
+    const deleteSession=await Session.deleteOne({userId:sessionId});
+    res.clearCookie('sessionId'); 
     return res.status(200).json({ status: 'success', message: 'Logged out' }) 
   } catch (error) {
-    console.log("Error From the logout", error);
+    next(error)
   }
 };

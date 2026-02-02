@@ -1,0 +1,35 @@
+/* bitOcean.css */
+
+.bit-ocean-row {
+  position: absolute;
+  inset: 0;
+  left: -300%;
+  width: 600%;
+  height: 100%;
+
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(140, 220, 255, 0) 0px,
+    rgba(140, 220, 255, 0) 8px,
+    rgba(140, 220, 255, 0.75) 9px,
+    rgba(140, 220, 255, 0.75) 11px,
+    rgba(140, 220, 255, 0) 15px
+  );
+
+  filter:
+    drop-shadow(0 0 6px rgba(140, 220, 255, 0.35))
+    blur(0.2px);
+
+  animation: ocean-flow 4.5s linear infinite;
+  will-change: transform;
+}
+
+/* main flow */
+@keyframes ocean-flow {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(50%);
+  }
+}

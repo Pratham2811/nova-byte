@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User, ChevronDown, Settings } from "lucide-react";
 import { useAuth } from "@/features/auth/context/authContext";
+import { toast } from "sonner";
 
 /**
  * UserSidebarWidget - Shows user info in sidebar with dropdown menu
@@ -11,10 +12,17 @@ export const UserSidebarWidget = () => {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     const dropdownRef = useRef(null);
+console.log("user",user);
 
     const handleLogout = async () => {
-        await logout();
+        const response=await logout();
+        if(response.success){
+        toast.success("user logged out");
         navigate("/login");
+     }else{
+      toast.error("failed to logout")
+     }
+        
     };
 
     // Loading state
@@ -81,9 +89,9 @@ export const UserSidebarWidget = () => {
                 {/* User Info */}
                 <div className="flex-1 text-left min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">
-                        {user.name || "User"}
+                        {user.name || user.user.name}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.user.email}</p>
                 </div>
 
                 {/* Chevron */}

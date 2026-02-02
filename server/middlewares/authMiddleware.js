@@ -23,6 +23,9 @@ export default async function checkAuth(req, res, next) {
         status: 401,
       });
     }
+   
+
+
     // 2. ObjectId validation
     if (!mongoose.Types.ObjectId.isValid(sessionId)) {
       return res.status(401).json({ error: "Invalid user session" });
