@@ -3,7 +3,7 @@ const port = 80;
 import cors from "cors";
 import directoryroutes from "./routes/directoryroutes.js";
 import filesroute from "./routes/filesroute.js";
-import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import cookieParser from "cookie-parser";
 import checkAuth from "./middlewares/authMiddleware.js";
 import "./config/db.js";
@@ -26,7 +26,7 @@ try {
 
   app.use("/directory", checkAuth, directoryroutes);
   app.use("/file", checkAuth, filesroute);
-  app.use("/auth", userRoutes);
+  app.use("/auth", authRoutes);
 
 
 

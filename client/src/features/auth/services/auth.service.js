@@ -21,3 +21,16 @@ export const getCurrentUserApi = async () => {
   
   return data;
 };
+
+export const verifyOtpApi= async ({email,otp})=>{
+    const {data}=await axiosInstance.post("/auth/verify-otp",{email,otp});
+    return data;
+}
+export const sendOtpApi=async(email)=>{
+  console.log("sending otp to this email",email);
+  
+
+   const {data}=await axiosInstance.post("/auth/send-otp",{email:email});
+    return data;
+
+}

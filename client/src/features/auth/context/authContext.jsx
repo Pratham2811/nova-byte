@@ -1,7 +1,15 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { loginApi, registerApi, logoutApi, getCurrentUserApi } from "../services/auth.service";
+import {
+  loginApi,
+  registerApi,
+  logoutApi,
+  getCurrentUserApi,
+  sendOtpApi,
+  verifyOtpApi,
+} from "../services/auth.service";
 import { redirect } from "react-router-dom";
 import { toast } from "sonner";
+
 
 const AuthContext = createContext(null);
 
@@ -9,7 +17,12 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true); // Start true to check session
-
+ 
+  const[userEmail,setUserEmail]=useState("");
+  const[verifying,setVerifying]=useState(false);
+  const[isEmailVerified,setIsEmailVerified]=useState(false);
+  const[isOtpSent,setIsOtpSent]=useState(false);
+  
   // Check if user is already logged in on app load
   useEffect(() => {
     checkAuth();
@@ -19,9 +32,9 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
       const response = await getCurrentUserApi();
-      
-      console.log("this is response",response);
-      
+
+      console.log("this is response", response);
+
       if (response.user) {
         setUser(response.user);
         setIsAuthenticated(true);
@@ -30,7 +43,7 @@ export function AuthProvider({ children }) {
       // Not logged in - that's fine
       setUser(null);
       setIsAuthenticated(false);
-      redirect("/login")
+      redirect("/login");
     } finally {
       setLoading(false);
     }
@@ -79,11 +92,11 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-     const response= await logoutApi();
-     return {
-      success:true,
-      data:response,
-     }
+      const response = await logoutApi();
+      return {
+        success: true,
+        data: response,
+      };
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
@@ -97,6 +110,64 @@ export function AuthProvider({ children }) {
     setUser((prev) => ({ ...prev, ...userData }));
   };
 
+  const sendOtp = async (email) => {
+    try {
+      setUserEmail(email);
+      const response = await sendOtpApi(email);
+      const ok =
+        response?.success === true ||
+        response?.verified === true ||
+        (response?.success !== false && response?.verified !== false);
+      setIsOtpSent(true);
+      return {
+        success: ok,
+        data: response,
+        error: ok ? undefined : response?.message || "Failed to send OTP",
+      };
+    } catch (error) {
+      setIsOtpSent(false);
+      return {
+        success: false,
+        error:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to send OTP",
+      };
+    }
+  };
+
+  const verifyOtp = async (otp) => {
+    try {
+      setVerifying(true);
+      const response = await verifyOtpApi({ otp, email: userEmail });
+      const ok = response?.success === false ? false : true;
+      if (ok) {
+        setIsEmailVerified(true);
+      }
+      return {
+        success: ok,
+        data: response,
+        error: ok ? undefined : response?.message || "Invalid OTP",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error.response?.data?.message ||
+          error.message ||
+          "Invalid OTP",
+      };
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const resetEmailVerification=async()=>{
+    setIsEmailVerified(false);
+    setIsOtpSent(false);
+    setVerifying(false);
+    
+  }
   return (
     <AuthContext.Provider
       value={{
@@ -108,6 +179,15 @@ export function AuthProvider({ children }) {
         register,
         updateUser,
         checkAuth,
+        userEmail,
+        isEmailVerified,
+        verifyOtp,
+        sendOtp,
+        verifying,
+        setUserEmail,
+       isOtpSent,
+       resetEmailVerification
+       
       }}
     >
       {children}
@@ -124,4 +204,3 @@ export function useAuth() {
 
   return context;
 }
-

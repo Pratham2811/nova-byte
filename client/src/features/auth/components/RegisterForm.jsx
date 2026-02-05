@@ -1,64 +1,50 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { useState } from "react"
-import { toast } from "sonner"
-import { useAuth } from "../context/authContext"
-import { Navigate, useNavigate } from "react-router-dom"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { useRegisterations } from "../hooks/useRegisteration";
+import { OTPVerificationDialog } from "./OtpFrom";
 
 export function SignupForm({ className, ...props }) {
-  const { register, loading } = useAuth()
+ 
 
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-   const navigate=useNavigate();
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters")
-      return
-    }
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match")
-      return
-    }
-
-    const response = await register({
-      name,
-      email,
-      password,
-    })
-
-    if (response.success) {
-      toast.success("Account created successfully");
-      navigate("/login")
-    } else {
-      toast.error(response.error)
-    }
-  }
+  const {
+    email,
+    password,
+    error,
+    name,
+    handleSubmit,
+    setName,
+    setEmail,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    loading,
+    isEmailVerified,
+    handleOptSending,
+    resetEmailVerification,
+    otpDialogOpen,     
+    setOtpDialogOpen
+  } = useRegisterations();
 
   return (
     <div
       className={cn(
         "flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8",
-        className
+        className,
       )}
       {...props}
     >
@@ -90,14 +76,35 @@ export function SignupForm({ className, ...props }) {
 
                 <Field>
                   <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="m@example.com"
-                    required
-                  />
+
+                  <div className="relative">
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) =>{
+                         setEmail(e.target.value);
+                         resetEmailVerification();
+
+                      }}
+                      placeholder="m@example.com"
+                      required
+                      className="pr-24"
+                    />
+
+                    <button
+                      type="button"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-muted px-3 py-1 text-xs font-medium hover:bg-muted/80"
+                      disabled={!email}
+                      onClick={() => {
+                        handleOptSending(email);
+
+                       
+                      }}
+                    >
+                      Verify
+                    </button>
+                  </div>
                 </Field>
 
                 <Field className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -120,9 +127,7 @@ export function SignupForm({ className, ...props }) {
                       id="confirm-password"
                       type="password"
                       value={confirmPassword}
-                      onChange={(e) =>
-                        setConfirmPassword(e.target.value)
-                      }
+                      onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                     />
                   </Field>
@@ -136,7 +141,7 @@ export function SignupForm({ className, ...props }) {
                   <Button
                     type="submit"
                     className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                    disabled={loading}
+                    disabled={!isEmailVerified || loading}
                   >
                     {loading ? "Creating account..." : "Create Account"}
                   </Button>
@@ -150,10 +155,15 @@ export function SignupForm({ className, ...props }) {
         </Card>
 
         <FieldDescription className="mt-6 text-center text-xs text-muted-foreground">
-          By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-          and <a href="#">Privacy Policy</a>.
+          By clicking continue, you agree to our{" "}
+          <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
         </FieldDescription>
       </div>
+
+      <OTPVerificationDialog
+        open={otpDialogOpen}
+        onOpenChange={setOtpDialogOpen}
+      />
     </div>
-  )
+  );
 }

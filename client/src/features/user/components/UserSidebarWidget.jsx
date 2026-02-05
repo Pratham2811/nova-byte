@@ -89,9 +89,9 @@ console.log("user",user);
                 {/* User Info */}
                 <div className="flex-1 text-left min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">
-                        {user.name || user.user.name}
+                        {user.name || user.user.name||"User"}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">{user.user.email}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email||user.user.email}</p>
                 </div>
 
                 {/* Chevron */}
