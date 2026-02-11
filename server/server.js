@@ -24,9 +24,9 @@ try {
   );
 
 
-  app.use("/directory", checkAuth, directoryroutes);
-  app.use("/file", checkAuth, filesroute);
-  app.use("/auth", authRoutes);
+  app.use("/api/directory", checkAuth, directoryroutes);
+  app.use("/api/file", checkAuth, filesroute);
+  app.use("/api/auth", authRoutes);
 
 
 

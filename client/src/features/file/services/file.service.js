@@ -3,7 +3,7 @@
  * Handles file operations (upload, rename, delete, download)
  */
 
-import axiosInstance from "@/shared/services/axios";
+import api from "@/shared/services/axios";
 
 /**
  * Upload files to a directory
@@ -15,7 +15,7 @@ export const uploadFiles = async (files, parentDirId = "") => {
   });
   formData.append("parentDirId", parentDirId);
 
-  const { data } = await axiosInstance.post("file/upload", formData);
+  const { data } = await api.post("file/upload", formData);
   return data;
 };
 
@@ -30,7 +30,7 @@ export const getDownloadUrl = (fileId) => {
  * Rename a file
  */
 export const renameFile = async (fileId, oldName, newName) => {
-  const { data } = await axiosInstance.patch(`/file/${fileId}`, {
+  const { data } = await api.patch(`/file/${fileId}`, {
     oldFilename: oldName,
     newFilename: newName,
   });
@@ -41,6 +41,6 @@ export const renameFile = async (fileId, oldName, newName) => {
  * Delete a file (move to trash)
  */
 export const deleteFile = async (fileId) => {
-  const { data } = await axiosInstance.delete(`/file/${fileId}`);
+  const { data } = await api.delete(`/file/${fileId}`);
   return data;
 };

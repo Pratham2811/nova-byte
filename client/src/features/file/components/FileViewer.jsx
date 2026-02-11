@@ -19,7 +19,7 @@ export const FileViewer = ({ file, onClose, onDownload }) => {
 
   if (!file) return null;
   
-  const fileUrl = `http://localhost:80/file/${file.id}`;
+  const fileUrl = `http://localhost:80/api/file/${file.id}`;
   const FileIcon = getFileIcon(file.mimeType || file.type);
   const isImage = file.mimeType?.startsWith('image/');
   const isPDF = file.mimeType === 'application/pdf';

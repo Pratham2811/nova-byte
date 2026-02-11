@@ -1,20 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Folder, Trash2, Menu, X } from "lucide-react";
 import { DirectoryView } from "@/features/directory";
 import { TrashFiles } from "@/features/trash";
 import { useSidebar } from "@/shared/hooks";
 import { UserSidebarWidget } from "@/features/user";
+import { useDispatch } from "react-redux";
+import { getUser } from "@/features/auth/thunks/sessionThunk";
+import { toast } from "sonner";
 
-/**
- * HomePage Component
- * Main application page with sidebar navigation and content area
- */
 export const HomePage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("files");
   const { isSidebarOpen, isMobile, setIsSidebarOpen } = useSidebar();
+  const dispatch = useDispatch();
 
+  const fetchUser = async () => {
+    try {
+      await dispatch(getUser()).unwrap();
+    } catch (error) {
+      toast.error(error);
+    }
+  };
+  useEffect(() => {
+    fetchUser();
+  }, []);
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     if (isMobile) {
@@ -52,12 +62,12 @@ export const HomePage = () => {
           ${isSidebarOpen || !isMobile ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-      <div className="h-24 min-h-[6rem] border-b border-gray-200 flex items-center justify-center relative">
+        <div className="h-24 min-h-[6rem] border-b border-gray-200 flex items-center justify-center relative">
           {/* Changes made:
               1. Removed 'px-2 py-2' from the parent div (removes container spacing).
               2. Increased 'h-20' to 'h-24' (gives it slightly more vertical room to expand).
           */}
-          
+
           <img
             src={"../assets/logo4.png"}
             alt="CloudMemories Logo"

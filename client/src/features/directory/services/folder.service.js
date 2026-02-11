@@ -3,13 +3,14 @@
  * Handles folder CRUD operations
  */
 
-import axiosInstance from "@/shared/services/axios";
+import api from "@/shared/services/axios";
+
 
 /**
  * Create a new folder
  */
 export const createFolder = async (name, parentId = "") => {
-  const { data } = await axiosInstance.post("/directory/create", {
+  const { data } = await api.post("/directory/create", {
     directoryname: name,
     parentDirId: parentId,
   });
@@ -20,7 +21,7 @@ export const createFolder = async (name, parentId = "") => {
  * Rename a folder
  */
 export const renameFolder = async (folderId, oldName, newName) => {
-  const { data } = await axiosInstance.patch(`/directory/${folderId}`, {
+  const { data } = await api.patch(`/directory/${folderId}`, {
     oldName: oldName,
     newName: newName,
   });
@@ -31,7 +32,7 @@ export const renameFolder = async (folderId, oldName, newName) => {
  * Delete a folder (moves to trash)
  */
 export const deleteFolder = async (folderId) => {
-  const { data } = await axiosInstance.delete(`/directory/${folderId}`);
+  const { data } = await api.delete(`/directory/${folderId}`);
   return data;
 };
 
@@ -39,6 +40,6 @@ export const deleteFolder = async (folderId) => {
  * Fetch directory contents
  */
 export const fetchDirectoryContents = async (dirId = "") => {
-  const { data } = await axiosInstance.get(`/directory/${dirId}`);
+  const { data } = await api.get(`/directory/${dirId}`);
   return data;
 };
