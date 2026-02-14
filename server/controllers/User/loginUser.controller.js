@@ -8,9 +8,10 @@ export const loginUserController = async (req, res, next) => {
     const { userId } = req.cookies;
 
     const { email, password } = req.body;
+console.log(email,password);
 
     const user = await loginUserService(email, password);
-    console.log(user.id);
+    
 
     
 

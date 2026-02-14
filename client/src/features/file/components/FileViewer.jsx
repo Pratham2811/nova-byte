@@ -1,26 +1,36 @@
-import React from 'react';
-import { X, Download, ExternalLink, ZoomIn, ZoomOut, Info, Printer, RotateCw, Link } from 'lucide-react';
-import { Modal, Button, IconButton } from '@/shared/components';
-import { getFileIcon } from '../constants/file.constants.js';
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  X, Download, ExternalLink, ZoomIn, ZoomOut, 
+  Info, Printer, RotateCw, Link, ChevronLeft, ChevronRight 
+} from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { getFileIcon } from '../constants/file.constants';
+import { formatFileSize } from '../constants/file.constants'; // Assuming this exists from previous step
+import { cn } from "@/lib/utils";
+
 /**
  * File Viewer Component
- * Modal to preview and interact with files
- * 
- * @param {Object} props
- * @param {Object} props.file - File object to view
- * @param {Function} props.onClose - Close handler
- * @param {Function} props.onDownload - Download handler (optional)
+ * Immersive modal for previewing files.
  */
 export const FileViewer = ({ file, onClose, onDownload }) => {
-  const [zoom, setZoom] = React.useState(100);
-  const [showInfo, setShowInfo] = React.useState(false);
-  const [rotation, setRotation] = React.useState(0);
-  const contentRef = React.useRef(null);
+  const [zoom, setZoom] = useState(100);
+  const [showInfo, setShowInfo] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   if (!file) return null;
   
-  const fileUrl = `http://localhost:80/api/file/${file.id}`;
+  // Reset state when file changes
+  useEffect(() => {
+    setZoom(100);
+    setRotation(0);
+    setIsLoading(true);
+  }, [file.id]);
+
+  const fileUrl = `http://localhost:80/api/file/${file.id}`; // Ensure this ENV var matches your setup
   const FileIcon = getFileIcon(file.mimeType || file.type);
+  
+  // Helpers
   const isImage = file.mimeType?.startsWith('image/');
   const isPDF = file.mimeType === 'application/pdf';
   const isVideo = file.mimeType?.startsWith('video/');
@@ -33,31 +43,33 @@ export const FileViewer = ({ file, onClose, onDownload }) => {
   const handlePrint = () => {
     const printWindow = window.open(fileUrl, '_blank');
     if (printWindow) {
-      printWindow.onload = () => {
-        printWindow.print();
-      };
+      printWindow.onload = () => printWindow.print();
     }
   };
 
-  const formatSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  const copyLink = () => {
+    navigator.clipboard.writeText(window.location.href); // Or specific file link
+    // Ideally trigger a toast here
   };
 
-  const renderPreview = () => {
+  // Render Logic
+  const renderContent = () => {
     if (isImage) {
       return (
         <div 
-          className="flex-1 overflow-auto flex items-center justify-center p-8 transition-all duration-200"
+          className="relative transition-all duration-300 ease-out"
           style={{ transform: `scale(${zoom / 100}) rotate(${rotation}deg)` }}
         >
+          {isLoading && (
+             <div className="absolute inset-0 flex items-center justify-center">
+               <div className="h-8 w-8 border-2 border-white/20 border-t-white animate-spin rounded-full" />
+             </div>
+          )}
           <img
             src={fileUrl}
             alt={file.name}
-            className="max-w-full max-h-[85vh] object-contain shadow-2xl"
+            onLoad={() => setIsLoading(false)}
+            className="max-w-full max-h-[80vh] object-contain shadow-2xl rounded-md"
           />
         </div>
       );
@@ -65,199 +77,181 @@ export const FileViewer = ({ file, onClose, onDownload }) => {
 
     if (isPDF) {
       return (
-        <div className="flex-1 w-full h-full p-4 bg-gray-900/50">
-          <iframe
-            src={fileUrl}
-            className="w-full h-full rounded bg-white"
-            title={file.name}
-          />
-        </div>
+        <iframe
+          src={fileUrl}
+          className="w-full h-full max-w-5xl rounded-lg bg-white shadow-2xl"
+          title={file.name}
+        />
       );
     }
 
     if (isVideo) {
       return (
-        <div className="flex-1 flex items-center justify-center bg-black">
-          <video
-            src={fileUrl}
-            controls
-            className="max-w-full max-h-[85vh]"
-          >
-            Your browser does not support the video tag.
-          </video>
-        </div>
+        <video
+          src={fileUrl}
+          controls
+          autoPlay
+          className="max-w-full max-h-[80vh] rounded-lg shadow-2xl outline-none"
+        >
+          Your browser does not support the video tag.
+        </video>
       );
     }
 
     if (isAudio) {
       return (
-        <div className="flex-1 flex items-center justify-center bg-gray-900">
-          <div className="bg-gray-800 p-8 rounded-xl shadow-2xl text-center">
-            <div className="w-32 h-32 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-6">
-              <FileIcon size={64} className="text-blue-400" />
-            </div>
-            <h3 className="text-white text-lg font-medium mb-6">{file.name}</h3>
-            <audio src={fileUrl} controls className="w-full min-w-[300px]" />
+        <div className="bg-slate-900 p-10 rounded-2xl shadow-2xl text-center border border-slate-800">
+          <div className="w-40 h-40 mx-auto bg-slate-800 rounded-full flex items-center justify-center mb-8 shadow-inner">
+            <FileIcon size={64} className="text-indigo-400" />
           </div>
+          <h3 className="text-white text-xl font-medium mb-2">{file.name}</h3>
+          <p className="text-slate-400 text-sm mb-6">{formatFileSize(file.size)}</p>
+          <audio src={fileUrl} controls className="w-full min-w-[300px]" />
         </div>
       );
     }
 
+    // Fallback
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-gray-900 text-gray-300">
-        <FileIcon size={96} className="text-gray-500 mb-6" />
-        <p className="text-lg">No preview available</p>
-        <Button
-          variant="secondary"
-          className="mt-4"
-          onClick={() => onDownload && onDownload(file)}
-          icon={<Download size={18} />}
-        >
-          Download File
+      <div className="text-center p-12 bg-slate-900 rounded-2xl border border-slate-800">
+        <FileIcon size={80} className="text-slate-600 mx-auto mb-6" />
+        <h3 className="text-white text-lg font-medium mb-2">No preview available</h3>
+        <p className="text-slate-400 mb-6">This file type cannot be viewed directly.</p>
+        <Button onClick={() => onDownload && onDownload(file)} variant="outline" className="text-slate-900 border-white/10 hover:bg-slate-100">
+          <Download className="mr-2 h-4 w-4" /> Download File
         </Button>
       </div>
     );
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      {/* Header Toolbar */}
-      <div className="h-16 flex items-center justify-between px-4 bg-gray-900/50 border-b border-white/10">
-        <div className="flex items-center gap-4">
-          <IconButton 
-            icon={<X size={20} />} 
-            onClick={onClose}
-            className="text-gray-400 hover:text-white hover:bg-gray-800"
-          />
-          <div className="flex items-center gap-3">
-            <FileIcon size={20} className="text-blue-400" />
-            <span className="text-white font-medium truncate max-w-xs">{file.name}</span>
+    <div className="fixed inset-0 z-[100] flex flex-col bg-slate-950/95 backdrop-blur-md animate-in fade-in duration-300 text-slate-200">
+      
+      {/* --- Top Toolbar --- */}
+      <div className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-slate-950/50">
+        
+        {/* Left: File Info */}
+        <div className="flex items-center gap-4 min-w-0">
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400 hover:text-white hover:bg-white/10 rounded-full">
+            <X size={20} />
+          </Button>
+          <div className="flex items-center gap-3 min-w-0">
+             <div className="p-1.5 bg-white/5 rounded-md hidden sm:block">
+                <FileIcon size={16} className="text-indigo-400" />
+             </div>
+             <div className="flex flex-col">
+                <span className="text-sm font-medium text-white truncate max-w-[200px] sm:max-w-md">{file.name}</span>
+                <span className="text-[10px] text-slate-500 font-mono hidden sm:inline-block">
+                    {formatFileSize(file.size)} • {new Date(file.updatedAt).toLocaleDateString()}
+                </span>
+             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Right: Actions */}
+        <div className="flex items-center gap-1 sm:gap-2">
+          
+          {/* Zoom Controls (Image Only) */}
           {isImage && (
-            <>
-              <div className="flex items-center bg-gray-800 rounded-lg mr-2 p-1">
-                <IconButton 
-                  icon={<div className="font-mono text-xs">{zoom}%</div>}
-                  className="text-gray-300 w-12 hover:bg-transparent cursor-default"
-                />
-                <IconButton 
-                  icon={<ZoomOut size={18} />} 
-                  onClick={handleZoomOut}
-                  className="text-gray-400 hover:text-white hover:bg-gray-700"
-                  disabled={zoom <= 25}
-                />
-                <IconButton 
-                  icon={<ZoomIn size={18} />} 
-                  onClick={handleZoomIn}
-                  className="text-gray-400 hover:text-white hover:bg-gray-700"
-                  disabled={zoom >= 300}
-                />
-              </div>
-              <IconButton 
-                icon={<RotateCw size={18} />} 
-                onClick={handleRotate}
-                title="Rotate"
-                className="text-gray-400 hover:text-white hover:bg-gray-800"
-              />
-            </>
+            <div className="hidden md:flex items-center bg-white/5 rounded-lg p-1 mr-2 border border-white/5">
+              <Button variant="ghost" size="icon" onClick={handleZoomOut} disabled={zoom <= 25} className="h-7 w-7 text-slate-400 hover:text-white">
+                <ZoomOut size={14} />
+              </Button>
+              <span className="text-xs font-mono w-10 text-center text-slate-400">{zoom}%</span>
+              <Button variant="ghost" size="icon" onClick={handleZoomIn} disabled={zoom >= 300} className="h-7 w-7 text-slate-400 hover:text-white">
+                <ZoomIn size={14} />
+              </Button>
+            </div>
           )}
 
-          <IconButton 
-            icon={<Link size={18} />} 
-            onClick={() => {
-              navigator.clipboard.writeText(fileUrl);
-              // You might want to show a toast here, but for now simple copy
-            }}
-            title="Copy Link"
-            className="text-gray-400 hover:text-white hover:bg-gray-800"
-          />
-          
-          <IconButton 
-            icon={<Printer size={18} />} 
-            onClick={handlePrint}
-            title="Print"
-            className="text-gray-400 hover:text-white hover:bg-gray-800"
-          />
-          
-          {onDownload && (
-            <IconButton 
-              icon={<Download size={18} />} 
-              onClick={() => onDownload(file)}
-              title="Download"
-              className="text-gray-400 hover:text-white hover:bg-gray-800"
-            />
-          )}
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1">
+             {isImage && (
+                <Button variant="ghost" size="icon" onClick={handleRotate} title="Rotate" className="text-slate-400 hover:text-white hover:bg-white/10">
+                    <RotateCw size={18} />
+                </Button>
+             )}
+             
+             <Button variant="ghost" size="icon" onClick={handlePrint} title="Print" className="hidden sm:inline-flex text-slate-400 hover:text-white hover:bg-white/10">
+                <Printer size={18} />
+             </Button>
 
-          <IconButton 
-            icon={<Info size={18} />} 
-            onClick={() => setShowInfo(!showInfo)}
-            title="File Details"
-            className={`text-gray-400 hover:text-white hover:bg-gray-800 ${showInfo ? 'bg-gray-800 text-white' : ''}`}
-          />
+             <Button variant="ghost" size="icon" onClick={() => onDownload(file)} title="Download" className="text-slate-400 hover:text-white hover:bg-white/10">
+                <Download size={18} />
+             </Button>
+
+             <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowInfo(!showInfo)} 
+                title="Info" 
+                className={cn(
+                    "transition-colors",
+                    showInfo ? "bg-indigo-600 text-white hover:bg-indigo-700" : "text-slate-400 hover:text-white hover:bg-white/10"
+                )}
+             >
+                <Info size={18} />
+             </Button>
+          </div>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Preview Canvas */}
-        <div className="flex-1 flex relative overflow-hidden bg-black/50">
-          {renderPreview()}
+      {/* --- Main Content Area --- */}
+      <div className="flex-1 flex overflow-hidden relative">
+        
+        {/* Canvas */}
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-8 overflow-auto bg-transparent" onClick={() => setShowInfo(false)}>
+          {renderContent()}
         </div>
 
-        {/* Info Sidebar */}
-        {showInfo && (
-          <div className="w-80 bg-white border-l border-gray-200 p-6 shadow-xl animate-in slide-in-from-right duration-300">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Details</h3>
-              <IconButton 
-                icon={<X size={18} />} 
-                onClick={() => setShowInfo(false)}
-                className="text-gray-500 hover:bg-gray-100"
-              />
+        {/* --- Info Sidebar --- */}
+        <div 
+            className={cn(
+                "absolute top-0 right-0 h-full w-80 bg-slate-900 border-l border-white/10 transform transition-transform duration-300 ease-in-out z-20 overflow-y-auto",
+                showInfo ? "translate-x-0" : "translate-x-full"
+            )}
+        >
+            <div className="p-6 space-y-8">
+                <div>
+                    <h3 className="text-lg font-medium text-white mb-1">Details</h3>
+                    <p className="text-sm text-slate-500">Metadata and properties</p>
+                </div>
+
+                <div className="space-y-6">
+                    <InfoRow label="File Name" value={file.name} />
+                    <InfoRow label="Type" value={file.mimeType || 'Unknown'} />
+                    <InfoRow label="Size" value={formatFileSize(file.size)} />
+                    <InfoRow label="Location" value={file.path || '/'} fontMono />
+                    <InfoRow 
+                        label="Created" 
+                        value={new Date(file.createdAt).toLocaleString()} 
+                    />
+                    <InfoRow 
+                        label="Modified" 
+                        value={new Date(file.updatedAt).toLocaleString()} 
+                    />
+                </div>
+
+                <div className="pt-6 border-t border-white/10">
+                    <Button className="w-full bg-white text-slate-950 hover:bg-slate-200" onClick={() => onDownload(file)}>
+                        <Download className="mr-2 h-4 w-4" /> Download File
+                    </Button>
+                </div>
             </div>
-
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-500 uppercase">Type</label>
-                <div className="flex items-center gap-2 text-gray-900">
-                  <FileIcon size={16} className="text-gray-500" />
-                  <span>{file.mimeType || 'Unknown Type'}</span>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-500 uppercase">Size</label>
-                <div className="text-gray-900">{formatSize(file.size)}</div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-500 uppercase">Location</label>
-                <div className="text-gray-900 break-all text-sm font-mono bg-gray-50 p-2 rounded">
-                  {file.path || '/'}
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-500 uppercase">Modified</label>
-                <div className="text-gray-900">
-                  {new Date(file.updatedAt || Date.now()).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
 };
+
+// Helper Subcomponent
+const InfoRow = ({ label, value, fontMono }) => (
+    <div className="space-y-1">
+        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</label>
+        <div className={cn("text-sm text-slate-300 break-words", fontMono && "font-mono text-xs bg-white/5 p-2 rounded")}>
+            {value}
+        </div>
+    </div>
+);
 
 export default FileViewer;

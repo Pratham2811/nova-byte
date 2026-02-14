@@ -1,27 +1,29 @@
 import React from 'react';
-import { Download, ExternalLink, Edit, Trash } from 'lucide-react';
-import { Card, IconButton } from '@/shared/components';
+import { Download, Pencil, Trash2, ExternalLink, FileText } from 'lucide-react';
 import { getFileIcon, formatFileSize, formatFileDate } from '../constants/file.constants';
-import { getFileTypeColor } from '@/theme';
-import { useDirectoryContext } from '@/features/directory/context/DirectoryContext.jsx';
+import { useDirectoryContext } from '@/features/directory/context/DirectoryContext';
 import { getDownloadUrl } from '../services/file.service';
+import { cn } from "@/lib/utils";
 
 /**
  * File Card Component
- * @param {Object} props.file - File object
+ * Renders an individual file in List or Grid view.
  */
-export const FileCard = ({ file }) => {
-  const { viewMode, openModal } = useDirectoryContext();
+export const FileCard = ({ file, viewMode }) => {
+  const { openModal } = useDirectoryContext();
 
-  const FileIcon = getFileIcon(file.mimeType || file.type);
-  const iconColor = getFileTypeColor(file.mimeType || file.type);
-
-  const handleView = () => {
+  // Get dynamic icon based on file type
+  const IconComponent = getFileIcon(file.mimeType || file.type) || FileText;
+  
+  // Handlers
+  const handleView = (e) => {
+    e?.preventDefault(); // Prevent bubbling if wrapped in link
     openModal('fileViewer', file, 'file');
   };
 
   const handleDownload = (e) => {
     e?.stopPropagation();
+    // Assuming getDownloadUrl returns a full URL
     window.open(getDownloadUrl(file.id), '_blank');
   };
 
@@ -35,63 +37,95 @@ export const FileCard = ({ file }) => {
     openModal('delete', file, 'file');
   };
 
+  // --- List View ---
   if (viewMode === 'list') {
     return (
-      <div className="flex items-center gap-4 p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md hover:border-gray-300 transition-all duration-200 group">
-        <div className="flex-shrink-0">
-          <FileIcon size={24} style={{ color: iconColor }} />
+      <div 
+        onClick={handleView}
+        className="group flex items-center gap-3 px-4 py-3 bg-white border border-transparent hover:border-slate-200 hover:bg-slate-50 rounded-lg transition-all duration-200 cursor-pointer"
+      >
+        {/* Icon & Name (Flex-1) */}
+        <div className="flex-1 flex items-center gap-3 min-w-0">
+          <div className="flex-shrink-0 p-2 bg-slate-100 rounded text-slate-500 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-colors">
+            <IconComponent size={20} />
+          </div>
+          <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 truncate">
+            {file.name}
+          </span>
         </div>
 
-        <button
-          onClick={handleView}
-          className="flex-1 text-left truncate hover:text-blue-600 transition-colors"
-        >
-          <span className="text-sm font-medium text-gray-900">{file.name}</span>
-        </button>
+        {/* Date (Fixed Width - matches FileList header) */}
+        <div className="w-32 hidden md:block text-left text-xs text-slate-400">
+           {formatFileDate(file.updatedAt || file.createdAt)}
+        </div>
 
-        <div className="hidden sm:block text-sm text-gray-500 w-20 text-right">
+        {/* Size (Fixed Width - matches FileList header) */}
+        <div className="w-24 hidden sm:block text-right text-xs text-slate-400 font-mono">
           {formatFileSize(file.size)}
         </div>
 
-        <div className="hidden md:block text-sm text-gray-500 w-32 text-right">
-          {formatFileDate(file.updatedAt || file.createdAt)}
-        </div>
-
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <IconButton icon={<ExternalLink size={16} />} onClick={handleView} tooltip="View" size="small" />
-          <IconButton icon={<Download size={16} />} onClick={handleDownload} tooltip="Download" size="small" />
-          <IconButton icon={<Edit size={16} />} onClick={handleRename} tooltip="Rename" size="small" />
-          <IconButton icon={<Trash size={16} />} onClick={handleDelete} tooltip="Delete" size="small" className="hover:bg-red-50 hover:text-red-600" />
+        {/* Actions (Fixed Width) */}
+        <div className="w-16 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <ActionBtn onClick={handleDownload} icon={Download} title="Download" />
+          <ActionBtn onClick={handleRename} icon={Pencil} title="Rename" />
+          <ActionBtn onClick={handleDelete} icon={Trash2} title="Delete" variant="danger" />
         </div>
       </div>
     );
   }
 
-  // Grid view
+  // --- Grid View ---
   return (
-    <Card className="group relative">
-      <button onClick={handleView} className="w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg">
-        <div className="flex justify-center items-center py-6 mb-3">
-          <FileIcon size={48} style={{ color: iconColor }} />
-        </div>
+    <div 
+      onClick={handleView}
+      className="group relative flex flex-col justify-between p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md hover:border-indigo-300 transition-all duration-300 cursor-pointer h-48"
+    >
+      {/* Top: Actions Overlay */}
+      <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-white/90 backdrop-blur-sm p-1 rounded-md shadow-sm border border-slate-100">
+         <ActionBtn onClick={handleDownload} icon={Download} title="Download" size="xs" />
+         <ActionBtn onClick={handleRename} icon={Pencil} title="Rename" size="xs" />
+         <ActionBtn onClick={handleDelete} icon={Trash2} title="Delete" variant="danger" size="xs" />
+      </div>
 
-        <h3 className="text-sm font-medium text-gray-900 truncate mb-1" title={file.name}>
+      {/* Center: Icon Preview */}
+      <div className="flex-1 flex items-center justify-center py-4">
+        <div className="text-slate-400 group-hover:scale-110 group-hover:text-indigo-500 transition-all duration-300">
+           <IconComponent size={48} strokeWidth={1.5} />
+        </div>
+      </div>
+
+      {/* Bottom: Info */}
+      <div className="w-full space-y-1">
+        <h3 className="text-sm font-medium text-slate-700 truncate group-hover:text-indigo-600 transition-colors" title={file.name}>
           {file.name}
         </h3>
-
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium uppercase tracking-wide">
           <span>{formatFileSize(file.size)}</span>
-          <span className="hidden sm:inline">{formatFileDate(file.updatedAt || file.createdAt)}</span>
+          {/* Only show extension/type if space permits, simplified for now */}
+          <span className="truncate max-w-[50px]">{file.mimeType?.split('/')[1] || 'FILE'}</span>
         </div>
-      </button>
-
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-        <IconButton icon={<Download size={14} />} onClick={handleDownload} tooltip="Download" size="small" className="bg-white shadow-sm" />
-        <IconButton icon={<Edit size={14} />} onClick={handleRename} tooltip="Rename" size="small" className="bg-white shadow-sm" />
-        <IconButton icon={<Trash size={14} />} onClick={handleDelete} tooltip="Delete" size="small" className="bg-white shadow-sm hover:bg-red-50 hover:text-red-600" />
       </div>
-    </Card>
+    </div>
   );
 };
+
+/**
+ * Helper: Tiny Action Button
+ */
+const ActionBtn = ({ onClick, icon: Icon, title, variant = "default", size = "sm" }) => (
+  <button
+    onClick={onClick}
+    title={title}
+    className={cn(
+      "flex items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/20",
+      size === "sm" ? "p-1.5" : "p-1",
+      variant === "danger" 
+        ? "text-slate-400 hover:text-red-600 hover:bg-red-50" 
+        : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
+    )}
+  >
+    <Icon size={size === "sm" ? 14 : 12} />
+  </button>
+);
 
 export default FileCard;

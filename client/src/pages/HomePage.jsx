@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Folder, Trash2, Menu, X } from "lucide-react";
+import { Folder, Trash2, Menu, X, Cloud } from "lucide-react";
 import { DirectoryView } from "@/features/directory";
 import { TrashFiles } from "@/features/trash";
 import { useSidebar } from "@/shared/hooks";
@@ -8,9 +7,9 @@ import { UserSidebarWidget } from "@/features/user";
 import { useDispatch } from "react-redux";
 import { getUser } from "@/features/auth/thunks/sessionThunk";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils"; // Assuming you have this utility
 
 export const HomePage = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("files");
   const { isSidebarOpen, isMobile, setIsSidebarOpen } = useSidebar();
   const dispatch = useDispatch();
@@ -19,12 +18,15 @@ export const HomePage = () => {
     try {
       await dispatch(getUser()).unwrap();
     } catch (error) {
-      toast.error(error);
+      // Silent fail or low priority toast
+      console.error(error);
     }
   };
+
   useEffect(() => {
     fetchUser();
   }, []);
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     if (isMobile) {
@@ -43,102 +45,97 @@ export const HomePage = () => {
     }
   };
 
+  // Helper for Nav Items
+  const NavItem = ({ id, label, icon: Icon }) => {
+    const isActive = activeTab === id;
+    return (
+      <button
+        onClick={() => handleTabChange(id)}
+        className={cn(
+          "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+          isActive
+            ? "bg-indigo-50 text-indigo-700" 
+            : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+        )}
+      >
+        <Icon size={18} className={cn(isActive ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600")} />
+        <span>{label}</span>
+      </button>
+    );
+  };
+
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-[#F5F7FA] overflow-hidden font-sans">
+      
       {/* Mobile Overlay */}
       {isMobile && isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 transition-opacity duration-300"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`
-          w-64 bg-white border-r border-gray-200 flex flex-col
-          fixed md:static inset-y-0 left-0 z-50
-          transform transition-transform duration-300
-          ${isSidebarOpen || !isMobile ? "translate-x-0" : "-translate-x-full"}
-        `}
+        className={cn(
+          "fixed md:static inset-y-0 left-0 z-50 flex flex-col w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out shadow-xl md:shadow-none",
+          isSidebarOpen || !isMobile ? "translate-x-0" : "-translate-x-full"
+        )}
       >
-        <div className="h-24 min-h-[6rem] border-b border-gray-200 flex items-center justify-center relative">
-          {/* Changes made:
-              1. Removed 'px-2 py-2' from the parent div (removes container spacing).
-              2. Increased 'h-20' to 'h-24' (gives it slightly more vertical room to expand).
-          */}
-
-          <img
-            src={"../assets/logo4.png"}
-            alt="CloudMemories Logo"
-            className="w-full h-full object-contain"
-          />
+        {/* Logo Area */}
+        <div className="h-16 flex items-center px-6 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <div className="bg-slate-900 text-white p-1.5 rounded-lg">
+                <Cloud size={18} fill="currentColor" />
+            </div>
+            <span className="font-bold text-slate-900 tracking-tight">CloudMemories</span>
+          </div>
 
           {isMobile && (
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white/80 hover:bg-gray-100 rounded-full transition-colors shadow-sm"
+              className="ml-auto p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md"
             >
-              <X size={20} className="text-gray-500" />
+              <X size={20} />
             </button>
           )}
         </div>
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1">
-          <button
-            onClick={() => handleTabChange("files")}
-            className={`
-              w-full flex items-center gap-3 px-4 py-3 rounded-lg
-              transition-colors duration-150 text-sm font-medium
-              ${
-                activeTab === "files"
-                  ? "bg-blue-50 text-blue-700 border border-blue-200"
-                  : "text-gray-700 hover:bg-gray-100"
-              }
-            `}
-          >
-            <Folder size={20} />
-            <span>My Files</span>
-          </button>
 
-          <button
-            onClick={() => handleTabChange("trash")}
-            className={`
-              w-full flex items-center gap-3 px-4 py-3 rounded-lg
-              transition-colors duration-150 text-sm font-medium
-              ${
-                activeTab === "trash"
-                  ? "bg-red-50 text-red-700 border border-red-200"
-                  : "text-gray-700 hover:bg-gray-100"
-              }
-            `}
-          >
-            <Trash2 size={20} />
-            <span>Trash</span>
-          </button>
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-6 space-y-1">
+          <div className="px-3 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Workspace
+          </div>
+          <NavItem id="files" label="My Files" icon={Folder} />
+          <NavItem id="trash" label="Trash" icon={Trash2} />
         </nav>
 
-        {/* User Section - Now using the widget */}
-        <UserSidebarWidget />
+        {/* User Widget (Pinned to bottom) */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+          <UserSidebarWidget />
+        </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Bar (Mobile) */}
-        <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center gap-4">
+      {/* Main Content Wrapper */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#F5F7FA]">
+        
+        {/* Mobile Header Toggle */}
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-slate-200">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="p-2 hover:bg-gray-100 rounded"
+            className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-md"
           >
-            <Menu size={20} className="text-gray-600" />
+            <Menu size={20} />
           </button>
-          <h2 className="text-lg font-semibold text-gray-900">
+          <span className="font-semibold text-slate-900">
             {activeTab === "files" ? "My Files" : "Trash"}
-          </h2>
+          </span>
         </div>
 
-        {/* Content Area */}
-        {renderContent()}
+        {/* Actual View Content */}
+        <div className="flex-1 overflow-hidden relative">
+          {renderContent()}
+        </div>
       </main>
     </div>
   );

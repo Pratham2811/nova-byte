@@ -11,7 +11,7 @@ export const getUser = createAsyncThunk(
       return res.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "failed to send Otp",
+        error.response?.data?.message || "User Not logged In Please Login",
       );
     }
   },

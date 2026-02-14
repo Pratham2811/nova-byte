@@ -1,12 +1,8 @@
 import React from 'react';
-import { Folder, Edit, Trash } from 'lucide-react';
-import { Card, IconButton } from '@/shared/components';
-import { useDirectoryContext } from '../context/DirectoryContext.jsx';
+import { Folder, Pencil, Trash2, MoreHorizontal } from 'lucide-react';
+import { useDirectoryContext } from '../context/DirectoryContext';
+import { cn } from '@/lib/utils'; // Assuming you have a class merger, or use template literals
 
-/**
- * Folder Card Component
- * @param {Object} props.folder - Folder object
- */
 export const FolderCard = ({ folder }) => {
   const {
     viewMode,
@@ -14,7 +10,8 @@ export const FolderCard = ({ folder }) => {
     openModal,
   } = useDirectoryContext();
 
-  const handleClick = () => {
+  const handleClick = (e) => {
+    e.preventDefault();
     handleFolderClick(folder);
   };
 
@@ -28,81 +25,94 @@ export const FolderCard = ({ folder }) => {
     openModal('delete', folder, 'folder');
   };
 
+  // --- List View ---
   if (viewMode === 'list') {
     return (
       <div
         onClick={handleClick}
-        className="flex items-center gap-4 p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer group"
+        className="group flex items-center gap-3 px-4 py-3 bg-white border border-transparent hover:border-slate-200 hover:bg-slate-50 rounded-lg transition-all duration-200 cursor-pointer"
       >
-        <div className="flex-shrink-0">
-          <Folder size={24} className="text-blue-500" />
+        {/* Icon */}
+        <div className="flex-shrink-0 text-indigo-500">
+          <Folder size={20} className="fill-indigo-100/50" />
         </div>
 
-        <div className="flex-1 truncate">
-          <span className="text-sm font-medium text-gray-900">{folder.name}</span>
+        {/* Name */}
+        <div className="flex-1 min-w-0">
+          <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 truncate block">
+            {folder.name}
+          </span>
         </div>
 
+        {/* Count */}
         {folder.itemCount !== undefined && (
-          <div className="hidden md:block text-sm text-gray-500 w-24 text-right">
-            {folder.itemCount} items
+          <div className="hidden sm:block w-24 text-right text-xs text-slate-400 group-hover:text-slate-500 font-mono">
+            {folder.itemCount}
           </div>
         )}
 
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <IconButton
-            icon={<Edit size={16} />}
+        {/* Actions (Only visible on hover) */}
+        <div className="w-16 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
             onClick={handleRename}
-            tooltip="Rename"
-            size="small"
-          />
-          <IconButton
-            icon={<Trash size={16} />}
+            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+            title="Rename"
+          >
+            <Pencil size={14} />
+          </button>
+          <button
             onClick={handleDelete}
-            tooltip="Delete"
-            size="small"
-            className="hover:bg-red-50 hover:text-red-600"
-          />
+            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+            title="Delete"
+          >
+            <Trash2 size={14} />
+          </button>
         </div>
       </div>
     );
   }
 
-  // Grid view
+  // --- Grid View ---
   return (
-    <Card onClick={handleClick} interactive className="group relative">
-      <div className="w-full">
-        <div className="flex justify-center items-center py-6 mb-3">
-          <Folder size={48} className="text-blue-500 group-hover:text-blue-600 transition-colors" />
+    <div
+      onClick={handleClick}
+      className="group relative flex flex-col items-start justify-between p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md hover:border-indigo-300 transition-all duration-300 cursor-pointer h-32"
+    >
+      {/* Top Row: Icon + Actions */}
+      <div className="w-full flex justify-between items-start">
+        <div className="text-indigo-500 transition-transform duration-300 group-hover:scale-110 origin-top-left">
+          <Folder size={32} className="fill-indigo-50" />
         </div>
+        
+        {/* Action Group (Simulating a menu) */}
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity -mr-2 -mt-2">
+           <button
+            onClick={handleRename}
+            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-md"
+          >
+            <Pencil size={14} />
+          </button>
+          <button
+            onClick={handleDelete}
+            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-slate-100 rounded-md"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </div>
 
-        <h3 className="text-sm font-medium text-gray-900 truncate mb-1" title={folder.name}>
+      {/* Bottom Row: Text Info */}
+      <div className="w-full mt-auto">
+        <h3 className="text-sm font-semibold text-slate-700 truncate group-hover:text-indigo-600 transition-colors" title={folder.name}>
           {folder.name}
         </h3>
-
         {folder.itemCount !== undefined && (
-          <p className="text-xs text-gray-500">
-            {folder.itemCount} item{folder.itemCount !== 1 ? 's' : ''}
+          <p className="text-[11px] text-slate-400 mt-0.5 font-medium">
+            {folder.itemCount} items
           </p>
         )}
       </div>
-
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-        <IconButton
-          icon={<Edit size={14} />}
-          onClick={handleRename}
-          tooltip="Rename"
-          size="small"
-          className="bg-white shadow-sm"
-        />
-        <IconButton
-          icon={<Trash size={14} />}
-          onClick={handleDelete}
-          tooltip="Delete"
-          size="small"
-          className="bg-white shadow-sm hover:bg-red-50 hover:text-red-600"
-        />
-      </div>
-    </Card>
+    </div>
   );
 };
 
