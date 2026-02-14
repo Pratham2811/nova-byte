@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { LogOut, User, ChevronDown, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
+import { logoutApi } from "@/features/auth/services/auth.service";
 
 
 /**
@@ -17,7 +18,7 @@ export const UserSidebarWidget = () => {
   });
 
   const handleLogout = async () => {
-    const response = await logout();
+    const response = await logoutApi();
     if (response.success) {
       toast.success("user logged out");
       navigate("/login");

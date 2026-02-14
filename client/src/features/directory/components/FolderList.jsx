@@ -22,7 +22,7 @@ export const FolderList = () => {
     return null;
   }
 
-  // List View Container
+  
   if (viewMode === 'list') {
     return (
       <div className="flex flex-col gap-1 w-full animate-in fade-in slide-in-from-bottom-2 duration-500">

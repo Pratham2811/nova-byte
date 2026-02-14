@@ -3,11 +3,10 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const getUser = createAsyncThunk(
   "auth/fetchUser",
-  async (_,{ rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const res = await api.get("/auth/me");
-      console.log(res.data);
-      
+
       return res.data;
     } catch (error) {
       return rejectWithValue(

@@ -28,7 +28,7 @@ export const DirectoryProvider = ({ children }) => {
 
   // View State
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState(VIEW_MODES.GRID);
+  const [viewMode, setViewMode] = useState(VIEW_MODES.LIST);
 
   // Data from useDirectory
   const { directories, files, loading, error, isEmpty, refresh } = useDirectory(dirid);

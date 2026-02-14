@@ -1,14 +1,6 @@
 import React from 'react';
 import { Home, ChevronRight } from 'lucide-react';
 
-/**
- * Breadcrumb Component
- * Shows directory path as clickable breadcrumbs
- * 
- * @param {Object} props
- * @param {string} props.path - Current directory path (e.g., "folder1/folder2")
- * @param {Function} props.onNavigate - Navigate handler (receives path segment)
- */
 export const Breadcrumb = ({ path, onNavigate }) => {
   const segments = path ? path.split('/').filter(Boolean) : [];
  
