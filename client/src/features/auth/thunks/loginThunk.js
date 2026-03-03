@@ -14,3 +14,16 @@ export const login = createAsyncThunk(
     }
   },
 );
+export const googleLogin = createAsyncThunk(
+  "auth/googleLogin",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await api.post("/auth/google");
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "failed to send Otp",
+      );
+    }
+  },
+);

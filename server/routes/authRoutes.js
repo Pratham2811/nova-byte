@@ -6,6 +6,7 @@ import { logoutUserController } from "../controllers/User/logoutUser.Controller.
 import { registerUserController } from "../controllers/User/registerUser.Controller.js";
 import { sendOtpController } from "../controllers/auth/send-otp.controller.js";
 import { verifyOtpController } from "../controllers/auth/verify-otp.controller.js";
+import { googleAuthCallbackController, googleAuthController } from "../controllers/auth/googleAuth.controller.js";
 
 const router = express.Router();
 router.post("/register", registerUserController);
@@ -14,4 +15,6 @@ router.post("/logout", logoutUserController);
 router.get("/me", checkAuth, getUserController);
 router.post("/send-otp", sendOtpController);
 router.post("/verify-otp", verifyOtpController);
+router.post("/google",googleAuthController);
+router.get("/google/callback",googleAuthCallbackController)
 export default router;

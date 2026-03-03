@@ -8,7 +8,6 @@ import { Check } from "lucide-react";
 export function RegisterForm() {
   const { step } = useSelector((state) => state.auth.registeration);
 
-  // Mapping steps to internal names
   const steps = [
     { id: "EMAIL", label: "Email" },
     { id: "OTP", label: "Verification" },
@@ -36,13 +35,21 @@ export function RegisterForm() {
     <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
       <div className="flex flex-col items-center py-12 px-6 sm:px-12 lg:px-24">
         
-        {/* Header Section */}
+        {/* Header Section with Logo */}
         <div className="text-center space-y-3 mb-10">
+          <div className="flex justify-center mb-6">
+             {/* Replace src with your actual saved image path */}
+            <img 
+              src="/assets/logo.png" 
+              alt="CloudMemories" 
+              className="h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" 
+            />
+          </div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
             Create your account
           </h1>
           <p className="text-slate-500 text-base max-w-sm mx-auto">
-            Join thousands of developers building the future of software with Acme Inc.
+            Join CloudMemories and start preserving your sweet moments today.
           </p>
         </div>
 
