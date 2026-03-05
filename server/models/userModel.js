@@ -18,15 +18,15 @@ const UserSchema = new Schema(
       match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format"],
       unique: true,
     },
-
-    password: {
-      type: String,
-      required: true,
-      minlength: 4,
-      // maxlength: 64,
-      trim: true,
+    email_verified: {
+      type: Boolean,
+      default: false,
     },
 
+    avatarUrl: {
+      type: String,
+      default: null,
+    },
     rootDirId: {
       type: Schema.Types.ObjectId,
       ref: "Directory",
@@ -55,7 +55,7 @@ const UserSchema = new Schema(
   {
     strict: "throw",
     timestamps: true,
-  }
+  },
 );
 
 const User = model("User", UserSchema);

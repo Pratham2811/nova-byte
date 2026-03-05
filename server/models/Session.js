@@ -8,6 +8,11 @@ const sessionSchema = new Schema(
       required: true,
       immutable: true,
     },
+    email:{
+      type:String,
+      required:true,
+      trim:true
+    },
 
     state: {
       type: String,

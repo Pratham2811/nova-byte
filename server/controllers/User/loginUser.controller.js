@@ -8,12 +8,7 @@ export const loginUserController = async (req, res, next) => {
     const { userId } = req.cookies;
 
     const { email, password } = req.body;
-console.log(email,password);
-
     const user = await loginUserService(email, password);
-    
-
-    
 
     if (!user) {
       return res.status(404).json({
@@ -21,14 +16,17 @@ console.log(email,password);
         message: "user not found",
       });
     }
-    const exsistingSessionCount = await Session.countDocuments({ userId: user.id });
-    if(exsistingSessionCount>=2){
-        return res.status(400).json({
-          message:"Device limit reached, Logout from another device to continue"
-        })
+    const exsistingSessionCount = await Session.countDocuments({
+      userId: user.id,
+    });
+    if (exsistingSessionCount >= 2) {
+      return res.status(400).json({
+        message: "Device limit reached, Logout from another device to continue",
+      });
     }
     const session = await Session.create({
       userId: user.id,
+      email:user.email,
     });
     res.cookie("sessionId", user.id, {
       httpOnly: true,
@@ -36,10 +34,15 @@ console.log(email,password);
       signed: true,
       sameSite: "none",
     });
-    return res.status(200).json({
-      status: "success",
-      user: user,
-    });
+   res.send(`
+  <script>
+    window.opener.postMessage(
+      { type: "GOOGLE_AUTH_SUCCESS" },
+      "http://localhost:5173"
+    );
+    window.close();
+  </script>
+`);
   } catch (error) {
     console.log(error.statusCode, error.message);
 

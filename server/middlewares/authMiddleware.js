@@ -15,6 +15,8 @@ export default async function checkAuth(req, res, next) {
         status: 401,
       });
     }
+    console.log(sessionId);
+    
     const session = await Session.findOne({ userId: sessionId });
     if (!session) {
       res.clearCookie("sessionId");

@@ -5,6 +5,7 @@ import { AppError } from "../../utils/AppError.js";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import { AuthProvider } from "../../models/AuthProvider.js";
 dotenv.config();
 export const registerUserService = async (username, email, password) => {
   const session = await mongoose.startSession();
@@ -42,14 +43,24 @@ export const registerUserService = async (username, email, password) => {
           _id: userId,
           name: username,
           email,
-          password: hashedPassword,
+          email_verified: true,
           rootDirId,
           storage: 0,
         },
       ],
       { session },
     );
-
+    await AuthProvider.create(
+      [
+        {
+          userId: userId,
+          provider: "password",
+          passwordHash: hashedPassword,
+          providerEmail: email,
+        },
+      ],
+      { session },
+    );
     await session.commitTransaction();
 
     return { userId, rootDirId };

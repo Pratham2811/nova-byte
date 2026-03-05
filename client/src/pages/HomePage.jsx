@@ -8,18 +8,19 @@ import { useDispatch } from "react-redux";
 import { getUser } from "@/features/auth/thunks/sessionThunk";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils"; // Assuming you have this utility
+import { useNavigate } from "react-router-dom";
 
 export const HomePage = () => {
   const [activeTab, setActiveTab] = useState("files");
   const { isSidebarOpen, isMobile, setIsSidebarOpen } = useSidebar();
   const dispatch = useDispatch();
-
+const navigate=useNavigate()
   const fetchUser = async () => {
     try {
       await dispatch(getUser()).unwrap();
     } catch (error) {
       // Silent fail or low priority toast
-      console.error(error);
+     navigate("/login")
     }
   };
 
