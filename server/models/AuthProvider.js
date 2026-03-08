@@ -12,7 +12,7 @@ const AuthProviderSchema = new Schema(
     provider: {
       type: String,
       required: true,
-      enum: ["password", "google"],
+      enum: ["password", "google","github"],
       index: true,
     },
 

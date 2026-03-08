@@ -43,7 +43,6 @@ export async function googleAuthCallbackController(req, res) {
       return res.redirect("http://localhost:5173/login");
     }
     const { tokens } = await client.getToken(code);
-
     const ticket = await client.verifyIdToken({
       idToken: tokens.id_token,
       audience: process.env.CLIENT_ID,

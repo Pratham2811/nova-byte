@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { logoutApi } from "@/features/auth/services/auth.service";
 
-
 /**
  * UserSidebarWidget - Shows user info in sidebar with dropdown menu
  */
@@ -20,19 +19,19 @@ export const UserSidebarWidget = () => {
   const handleLogout = async () => {
     const response = await logoutApi();
     if (response.success) {
-      toast.success("user logged out");
+      toast.success("User logged out");
       navigate("/login");
     } else {
       toast.error("failed to logout");
     }
   };
-if (isLoading) {
-  return <div>Loading...</div>;
-}
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-if (!user) {
-  return null;
-}
+  if (!user) {
+    return null;
+  }
   // Loading state
   if (isLoading) {
     return (
@@ -48,20 +47,19 @@ if (!user) {
     );
   }
 
-  // Not logged in
-  // if (!isAuthenticated || !user) {
-  //     return (
-  //         <div className="p-4 border-t border-gray-200">
-  //             <button
-  //                 onClick={() => navigate("/login")}
-  //                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-  //             >
-  //                 <User size={18} />
-  //                 Sign In
-  //             </button>
-  //         </div>
-  //     );
-  // }
+  if (!user) {
+    return (
+      <div className="p-4 border-t border-gray-200">
+        <button
+          onClick={() => navigate("/login")}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        >
+          <User size={18} />
+          Sign In
+        </button>
+      </div>
+    );
+  }
 
   // Get initials for avatar
   const getInitials = (name) => {
@@ -82,17 +80,18 @@ if (!user) {
         className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
       >
         {/* Avatar */}
-        {/* {user.avatar ? (
-                    <img
-                        src={user.avatar}
-                        alt={user.name}
-                        className="w-10 h-10 rounded-full object-cover"
-                    />
-                ) : (
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
-                        {getInitials(user.name)}
-                    </div>
-                )} */}
+
+        {user.user.avatarUrl ? (
+          <img
+            src={user.user.avatarUrl}
+            alt={user.name}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+            {getInitials(user.name)}
+          </div>
+        )}
 
         {/* User Info */}
         <div className="flex-1 text-left min-w-0">

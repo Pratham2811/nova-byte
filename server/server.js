@@ -18,7 +18,7 @@ try {
   app.use(cookieParser(process.env.SECRET_KEY));
   app.use(
     cors({
-      origin: ["http://localhost:5173", "http://localhost:5174",],
+      origin: ["http://localhost:5173", "http://localhost:5174","http://192.168.0.126:5173/"],
       credentials: true,
     })
   );

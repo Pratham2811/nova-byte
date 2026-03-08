@@ -8,8 +8,10 @@ export const login = createAsyncThunk(
       const res = await api.post("/auth/login", { email, password });
       return res.data;
     } catch (error) {
+      console.log(error);
+      
       return rejectWithValue(
-        error.response?.data?.message || "failed to send Otp",
+        error.response?.data?.message || "Something went Wrong",
       );
     }
   },
@@ -21,8 +23,10 @@ export const googleLogin = createAsyncThunk(
       const res = await api.post("/auth/google");
       return res.data;
     } catch (error) {
+      console.log(error);
       return rejectWithValue(
-        error.response?.data?.message || "failed to send Otp",
+        
+       error.response?.data?.message|| "Something went Wrong",
       );
     }
   },

@@ -6,7 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { GoogleLogin } from "@react-oauth/google";
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,15 +33,17 @@ const LoginForm = () => {
       const response = await dispatch(googleLogin()).unwrap();
 
       window.location.href = response.data;
-
-      toast.success("opening");
-      console.log(response);
     } catch (error) {
       toast.error(error);
       navigate("/");
     }
   };
-
+  const handleGithubLogin = async () => {
+    window.location.href = ` https://github.com/login/oauth/authorize
+?client_id=Ov23liuxkWhffOiyMlyB
+&scope=user:email
+&redirect_uri=http://localhost:80/api/auth/github/callback`;
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F5F7FA] p-4 font-sans text-slate-900">
       <div className="w-full max-w-[1000px] animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -125,7 +127,7 @@ const LoginForm = () => {
                 </div>
 
                 {/* Social Logins */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-12">
                   <Button
                     onClick={handleGoogleSignIn}
                     variant="outline"
@@ -152,10 +154,28 @@ const LoginForm = () => {
                     </svg>
                     Google
                   </Button>
+                  {/* <div className="flex h-11 items-center justify-center">
+                    <GoogleLogin
+                      onSuccess={(credentialResponse) => {
+                        console.log(credentialResponse);
+                      }}
+                      shape="pill"
+                      
+                      onError={() => {
+                        console.log("Login Failed");
+                      }}
+                      
+                      useOneTap
+                      width="100%" // Helps it fill the grid column
+                      
+                    />
+                  </div> */}
+
                   <Button
                     variant="outline"
                     type="button"
                     className="h-11 border-slate-200 hover:bg-slate-50 text-slate-700 font-medium"
+                    onClick={handleGithubLogin}
                   >
                     <svg
                       className="mr-2 h-4 w-4 fill-current"
