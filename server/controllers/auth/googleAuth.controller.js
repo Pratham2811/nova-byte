@@ -1,6 +1,5 @@
 import { OAuth2Client } from "google-auth-library";
 import dotenv from "dotenv";
-import { getToken } from "google-auth-library/build/src/gtoken/getToken.js";
 import Session from "../../models/Session.js";
 import User from "../../models/UserModel.js";
 import mongoose from "mongoose";

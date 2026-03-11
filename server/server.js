@@ -4,6 +4,7 @@ import cors from "cors";
 import directoryroutes from "./routes/directoryroutes.js";
 import filesroute from "./routes/filesroute.js";
 import authRoutes from "./routes/authRoutes.js";
+import integrationRoutes from "./routes/integrationRoutes.js";
 import cookieParser from "cookie-parser";
 import checkAuth from "./middlewares/authMiddleware.js";
 import "./config/db.js";
@@ -27,7 +28,7 @@ try {
   app.use("/api/directory", checkAuth, directoryroutes);
   app.use("/api/file", checkAuth, filesroute);
   app.use("/api/auth", authRoutes);
-
+  app.use("/api/integrations",integrationRoutes)
 
 
   app.use((error, req, res, next) => {

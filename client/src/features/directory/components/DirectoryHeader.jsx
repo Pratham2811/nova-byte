@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { VIEW_MODES } from '../constants/directory.constants';
 import { useDirectoryContext } from '../context/DirectoryContext';
 import { Separator } from '@/components/ui/separator';
+import ConnectToDrive from '@/features/appIntegrations/components/IntergrationManager';
 
 /**
  * Directory Header Component
@@ -23,12 +24,12 @@ export const DirectoryHeader = () => {
     <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between max-w-[1600px] mx-auto">
         
-        {/* Left: Breadcrumbs */}
+  
         <div className="flex-1 min-w-0">
            <Breadcrumb path={currentDirectoryId} />
         </div>
 
-        {/* Right: Actions Toolbar */}
+       
         <div className="flex items-center gap-3">
           
           {/* Search Input */}
@@ -40,7 +41,7 @@ export const DirectoryHeader = () => {
               className="pl-9 h-9 bg-slate-50 border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500/20 transition-all rounded-md text-sm"
             />
           </div>
-
+             
           <Separator orientation="vertical" className="h-6 hidden md:block" />
 
           {/* View Toggle (Segmented Control style) */}
